@@ -1,0 +1,9 @@
+[project]
+name = "thesis-v2"
+version = "0.1.0"
+description = "Literature processing and writing workspace"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "html2text>=2025.4.15",
+]

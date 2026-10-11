@@ -1,0 +1,533 @@
+[
+  {
+    "citation_key": "xin2022mtohelp",
+    "title": "Do Current Multi-Task Optimization Methods in Deep Learning Even Help?",
+    "year": 2022,
+    "doi": null,
+    "summary": "Demonstrates across language and vision benchmarks that multi-task optimization methods do not yield performance improvements beyond what is achievable via traditional optimization approaches.",
+    "arxiv_id": "2209.11379",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/hash/580c4ec4738ff61d5862a122cdf139b6-Abstract-Conference.html"
+  },
+  {
+    "citation_key": "kurin2022unitary",
+    "title": "In Defense of the Unitary Scalarization for Deep Multi-Task Learning",
+    "year": 2022,
+    "doi": null,
+    "summary": "Demonstrates that unitary scalarization summing task losses matches or improves upon complex multi-task optimizers when coupled with standard regularization and stabilization techniques from single-task learning.",
+    "arxiv_id": "2201.04122",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/hash/4f301ae934f396086bfefd1139039dbd-Abstract-Conference.html"
+  },
+  {
+    "citation_key": "gama2026uniform",
+    "title": "Uniform Loss vs. Specialized Optimization: A Comparative Analysis in Multi-Task Learning",
+    "year": 2026,
+    "doi": "10.1109/ACCESS.2026.3676354",
+    "summary": "Evaluates when specialized multi-task optimizers outperform uniform loss weighting, testing methods across progressively complex benchmark problems starting from Multi-MNIST.",
+    "arxiv_id": "2505.10347",
+    "url": "https://doi.org/10.1109/ACCESS.2026.3676354"
+  },
+  {
+    "citation_key": "elich2024paradigms",
+    "title": "Examining Common Paradigms in Multi-Task Learning",
+    "year": 2024,
+    "doi": "10.1007/978-3-031-85181-0_9",
+    "summary": "Investigates multi-task optimization dynamics, showing that adaptive optimizers provide partial loss scale invariance and that gradient conflicts alone do not explain performance gaps relative to single-task baselines.",
+    "arxiv_id": "2311.04698",
+    "url": "https://doi.org/10.1007/978-3-031-85181-0_9"
+  },
+  {
+    "citation_key": "ali2026humaidner",
+    "title": "HUMAID-NER: A Disaster Tweet Dataset for Joint Named Entity Recognition and Event Classification via Uncertainty-Weighted Multitask Learning",
+    "year": 2026,
+    "doi": "10.62019/zabvxd97",
+    "summary": "HUMAID-NER extends the HumAID benchmark with 60,000 English disaster tweets annotated in BIO format for named entity recognition (21 classes, 10 entity types, about 175,000 spans) via a three-stage hybrid pipeline, and trains a joint multitask system on one RoBERTa-large encoder that performs disaster NER and humanitarian event classification. Under fixed equal task weights, classification macro-F1 fell 1.2 to 1.4 points across epochs while NER improved, a pattern the authors attribute to the 2,688-to-1 gradient-signal imbalance between the two tasks. Homoscedastic uncertainty weighting with a two-stage layer-freezing schedule resolves the conflict, reaching 0.841 NER micro-F1 and 0.761 classification macro-F1. Future work requests combining PCGrad gradient surgery with uncertainty weighting, extending annotations to the full corpus, and multilingual coverage.",
+    "arxiv_id": "2609.16964",
+    "url": "https://doi.org/10.62019/zabvxd97"
+  },
+  {
+    "citation_key": "weld2023survey",
+    "title": "A Survey of Joint Intent Detection and Slot-Filling Models in Natural Language Understanding",
+    "year": 2023,
+    "doi": "10.1145/3547138",
+    "summary": "Comprehensive survey analyzing deep learning models that jointly optimize sentence-level intent classification and token-level slot filling.",
+    "arxiv_id": "2101.08091",
+    "url": "https://doi.org/10.1145/3547138"
+  },
+  {
+    "citation_key": "yu2020pcgrad",
+    "title": "Gradient Surgery for Multi-Task Learning",
+    "year": 2020,
+    "doi": null,
+    "summary": "Proposes PCGrad to project conflicting task gradients onto normal planes, mitigating destructive gradient interference during multi-task training.",
+    "arxiv_id": "2001.06782",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2020/hash/3fe78a8acf5fda99de95303940a2420c-Abstract.html"
+  },
+  {
+    "citation_key": "liu2021cagrad",
+    "title": "Conflict-Averse Gradient Descent for Multi-task Learning",
+    "year": 2021,
+    "doi": null,
+    "summary": "Introduces CAGrad to optimize a common descent direction that balances average task improvement with a worst-case performance guarantee, mitigating gradient conflict.",
+    "arxiv_id": "2110.14048",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/hash/9d27fdf2477ffbff837d73ef7ae23db9-Abstract.html"
+  },
+  {
+    "citation_key": "navon2022bargaining",
+    "title": "Multi-Task Learning as a Bargaining Game",
+    "year": 2022,
+    "doi": null,
+    "summary": "Proposes viewing multi-task gradient combinations as a cooperative bargaining game yielding the Nash bargaining solution to mitigate negative transfer.",
+    "arxiv_id": "2202.01017",
+    "url": "https://proceedings.mlr.press/v162/navon22a.html"
+  },
+  {
+    "citation_key": "liu2023famo",
+    "title": "FAMO: Fast Adaptive Multitask Optimization",
+    "year": 2023,
+    "doi": null,
+    "summary": "Proposes Fast Adaptive Multitask Optimization, dynamically adjusting task loss weights with negligible computational overhead to improve convergence across conflicting tasks.",
+    "arxiv_id": "2306.03792",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2023/hash/078a6ff619be958e92a2a0ff5ae29849-Abstract-Conference.html"
+  },
+  {
+    "citation_key": "chen2018gradnorm",
+    "title": "GradNorm: Gradient Normalization for Adaptive Loss Balancing in Deep Multitask Networks",
+    "year": 2018,
+    "doi": null,
+    "summary": "Introduces GradNorm, an adaptive loss weighting algorithm that balances multi-task training rates by dynamically scaling gradients according to relative inverse training progress.",
+    "arxiv_id": "1711.02257",
+    "url": "https://proceedings.mlr.press/v80/chen18a.html"
+  },
+  {
+    "citation_key": "sener2018mgda",
+    "title": "Multi-Task Learning as Multi-Objective Optimization",
+    "year": 2018,
+    "doi": null,
+    "summary": "Formulates multi-task learning as multi-objective optimization, adapting the Multiple-Gradient Descent Algorithm to identify Pareto stationary points across conflicting task objectives.",
+    "arxiv_id": "1810.04650",
+    "url": "https://proceedings.neurips.cc/paper/2018/hash/432aca3a1e345e339f35a30c8f65edce-Abstract.html"
+  },
+  {
+    "citation_key": "kendall2018uncertainty",
+    "title": "Multi-Task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics",
+    "year": 2018,
+    "doi": "10.1109/CVPR.2018.00781",
+    "summary": "Proposes Uncertainty Weighting (UW) using homoscedastic task uncertainty to dynamically balance multi-objective losses without manual weight tuning.",
+    "arxiv_id": "1705.07115",
+    "url": "https://doi.org/10.1109/CVPR.2018.00781"
+  },
+  {
+    "citation_key": "lin2023libmtl",
+    "title": "LibMTL: A Python Library for Deep Multi-Task Learning",
+    "year": 2023,
+    "doi": null,
+    "summary": "Presents LibMTL, an open-source PyTorch library providing standardized implementations and benchmarks for multi-task learning architectures and loss balancing strategies.",
+    "arxiv_id": null,
+    "url": "https://jmlr.org/papers/v24/22-0347.html"
+  },
+  {
+    "citation_key": "peitz2025multiobjective",
+    "title": "Multi-objective Deep Learning: Taxonomy and Survey of the State of the Art",
+    "year": 2025,
+    "doi": "10.1016/j.mlwa.2025.100700",
+    "summary": "Surveys multi-objective deep learning, providing a comprehensive taxonomy of Pareto optimization methods, gradient balancing algorithms, and scalarization techniques across multi-task domains.",
+    "arxiv_id": "2412.01566",
+    "url": "https://doi.org/10.1016/j.mlwa.2025.100700"
+  },
+  {
+    "citation_key": "chen2024mtlnlp",
+    "title": "Multi-Task Learning in Natural Language Processing: An Overview",
+    "year": 2024,
+    "doi": "10.1145/3638234",
+    "summary": "Surveys multi-task learning paradigms, parameter sharing strategies, auxiliary training setups, and optimization algorithms across NLP applications.",
+    "arxiv_id": "2109.09138",
+    "url": "https://doi.org/10.1145/3638234"
+  },
+  {
+    "citation_key": "chen2020graddrop",
+    "title": "Just Pick a Sign: Optimizing Deep Multitask Models with Gradient Sign Dropout",
+    "year": 2020,
+    "doi": null,
+    "summary": "Proposes GradDrop, a probabilistic gradient sampling method that drops conflicting gradient components at an activation layer, evaluated on CelebA multi-task learning, CIFAR-100 transfer, and Waymo Open Dataset 3D object detection.",
+    "arxiv_id": "2010.06808",
+    "url": "https://proceedings.neurips.cc/paper/2020/hash/16002f7a455a9d1fbdec97e3609a0650-Abstract.html"
+  },
+  {
+    "citation_key": "regalado2015filiet",
+    "title": "FILIET: An Information Extraction System for Filipino Disaster-Related Tweets",
+    "year": 2015,
+    "doi": null,
+    "summary": "Introduces FILIET, an information extraction tool for Filipino disaster tweets that evaluates category classification algorithms across caution, casualty, donation, and other message types.",
+    "arxiv_id": null,
+    "url": "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/HCT-010.pdf"
+  },
+  {
+    "citation_key": "yute2021satellite",
+    "title": "Supplementing Satellite Imagery with Social Media Data for Remote Reconnaissance: A Case Study of the 2020 Taal Volcano Eruption",
+    "year": 2021,
+    "doi": "10.5194/isprs-archives-XLVI-4-W6-2021-329-2021",
+    "summary": "Extracts location and ashfall entities from tweets using named entity recognition and combines them with classified satellite imagery to map the 2020 Taal volcano eruption.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.5194/isprs-archives-XLVI-4-W6-2021-329-2021"
+  },
+  {
+    "citation_key": "ermino2022urgency",
+    "title": "Evaluating Urgency of Typhoon-Related Tweets Through Sentiment Analysis Using Artificial Neural Networks",
+    "year": 2022,
+    "doi": "10.25147/ijcsr.2017.001.1.80",
+    "summary": "Evaluates typhoon-related tweet urgency using sentiment analysis with an artificial neural network trained on Philippine disaster data.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.25147/ijcsr.2017.001.1.80"
+  },
+  {
+    "citation_key": "caoile2025urdaneta",
+    "title": "Natural Language Processing On Facebook Data For Optimized Disaster Response Strategies In Urdaneta City",
+    "year": 2025,
+    "doi": "10.64252/m9nt3376",
+    "summary": "Implements an Extract-Transform-Load framework using GPT to extract community sentiment, urgent requests, and disaster locations from Facebook comments in Urdaneta City, Philippines.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.64252/m9nt3376"
+  },
+  {
+    "citation_key": "wang2021transformer",
+    "title": "Transformer-based Multi-task Learning for Disaster Tweet Categorisation",
+    "year": 2021,
+    "doi": "10.48550/arXiv.2110.08010",
+    "summary": "Evaluates transformer-based multi-task learning on disaster tweet categorization, training a shared encoder for information type classification and priority estimation on the TREC Incident Streams dataset.",
+    "arxiv_id": "2110.08010",
+    "url": "https://doi.org/10.48550/arXiv.2110.08010"
+  },
+  {
+    "citation_key": "schwartz2020green",
+    "title": "Green AI",
+    "year": 2020,
+    "doi": "10.1145/3381831",
+    "summary": "Advocates making computational efficiency and energy reporting evaluation criteria for AI research alongside accuracy to make deep learning greener and more accessible.",
+    "arxiv_id": "1907.10597",
+    "url": "https://doi.org/10.1145/3381831"
+  },
+  {
+    "citation_key": "caruana1997multitask",
+    "title": "Multitask Learning",
+    "year": 1997,
+    "doi": "10.1023/A:1007379606734",
+    "summary": "Introduces multitask learning, demonstrating that training related tasks concurrently using a shared representation improves generalization through mutual inductive transfer.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.1023/A:1007379606734"
+  },
+  {
+    "citation_key": "khanal2021location",
+    "title": "Multi-task Learning to Enable Location Mention Identification in the Early Hours of a Crisis Event",
+    "year": 2021,
+    "doi": "10.18653/v1/2021.findings-emnlp.340",
+    "summary": "Investigates a multi-task learning approach to identify location mentions in disaster tweets by concurrently leveraging annotated data from related crisis domain tasks.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.18653/v1/2021.findings-emnlp.340"
+  },
+  {
+    "citation_key": "lewis2025tapping",
+    "title": "Tapping into Social Media in Crisis: A Survey",
+    "year": 2025,
+    "doi": "10.18653/v1/2025.nlp4pi-1.27",
+    "summary": "Presents a systematic survey of 355 papers on language technologies applied to crisis social media content, reviewing crisis datasets, computational systems, and operational challenges.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.18653/v1/2025.nlp4pi-1.27"
+  },
+  {
+    "citation_key": "seeberger2025generalizing",
+    "title": "Generalizing to Unseen Disaster Events: A Causal View",
+    "year": 2025,
+    "doi": "10.18653/v1/2025.findings-ijcnlp.2",
+    "summary": "Proposes a causal debiasing method to reduce event and domain biases in social media disaster classification, improving model generalization across emerging disaster events.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.18653/v1/2025.findings-ijcnlp.2"
+  },
+  {
+    "citation_key": "alam2021crisisbench",
+    "title": "CrisisBench: Benchmarking Crisis-related Social Media Datasets for Humanitarian Information Processing",
+    "year": 2021,
+    "doi": "10.1609/icwsm.v15i1.18115",
+    "summary": "Consolidates eight human-annotated crisis datasets to provide 166.1k tweets for informativeness and 141.5k tweets for humanitarian classification, benchmarking deep learning models across binary and multiclass tasks.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.1609/icwsm.v15i1.18115"
+  },
+  {
+    "citation_key": "wang2025gptner",
+    "title": "GPT-NER: Named Entity Recognition via Large Language Models",
+    "year": 2025,
+    "doi": "10.18653/v1/2025.findings-naacl.239",
+    "summary": "Proposes GPT-NER, an approach that frames named entity recognition as a text generation task to bridge the gap between sequence labeling and large language models.",
+    "arxiv_id": "2304.10428",
+    "url": "https://doi.org/10.18653/v1/2025.findings-naacl.239"
+  },
+  {
+    "citation_key": "miranda2023calamancy",
+    "title": "calamanCy: A Tagalog Natural Language Processing Toolkit",
+    "year": 2023,
+    "doi": "10.18653/v1/2023.nlposs-1.1",
+    "summary": "Introduces calamanCy, an open-source spaCy toolkit for Tagalog natural language processing that provides pipelines and models for dependency parsing, part-of-speech tagging, and named entity recognition.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.18653/v1/2023.nlposs-1.1"
+  },
+  {
+    "citation_key": "ramos2023tfnerd",
+    "title": "TF-NERD: Tagalog Fine-grained Named Entity Recognition Dataset",
+    "year": 2023,
+    "doi": "10.1145/3639233.3639341",
+    "summary": "Presents TF-NERD, a fine-grained named entity recognition dataset for Tagalog containing 2,337 paragraphs annotated across 12 entity categories, establishing transformer benchmark baselines.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.1145/3639233.3639341"
+  },
+  {
+    "citation_key": "regacho2023disasternews",
+    "title": "Automated Identification of Disaster News For Crisis Management Using Machine Learning",
+    "year": 2023,
+    "doi": "10.5121/ijci.2023.120104",
+    "summary": "Evaluates machine learning models using Bag-of-Words and TF-IDF features to classify legitimate versus illegitimate news articles during Typhoon Odette in the Philippines.",
+    "arxiv_id": "2301.09896",
+    "url": "https://doi.org/10.5121/ijci.2023.120104"
+  },
+  {
+    "citation_key": "somido2023actionable",
+    "title": "Identification of Actionable Tweets During Philippine Disasters Using Machine Learning",
+    "year": 2023,
+    "doi": null,
+    "summary": "Evaluates logistic regression models using Bag-of-Words, TF-IDF, and Word2Vec features to classify the informativeness of Philippine disaster tweets from the CrisisLexT26 dataset.",
+    "arxiv_id": null,
+    "url": "https://proceedings.spp-online.org/article/view/SPP-2023-PB-41"
+  },
+  {
+    "citation_key": "inoferio2025socialmedia",
+    "title": "The Role of Social Media in Philippine Disaster Management: A Systematic Literature Review",
+    "year": 2025,
+    "doi": null,
+    "summary": "Conducts a systematic review of literature on social media use in Philippine disaster risk management across the four NDRRMC thematic areas.",
+    "arxiv_id": null,
+    "url": "https://animorepository.dlsu.edu.ph/cgi/viewcontent.cgi?article=2573&context=conf_shsrescon"
+  },
+  {
+    "citation_key": "montalan2025batayan",
+    "title": "Batayan: A Filipino NLP benchmark for evaluating Large Language Models",
+    "year": 2025,
+    "doi": "10.18653/v1/2025.acl-long.1509",
+    "summary": "Introduces Batayan, a benchmark consolidating eight tasks to evaluate large language models across understanding, reasoning, and generation competencies for Filipino and Taglish.",
+    "arxiv_id": "2502.14911",
+    "url": "https://doi.org/10.18653/v1/2025.acl-long.1509"
+  },
+  {
+    "citation_key": "alam2021humaid",
+    "title": "HumAID: Human-Annotated Disaster Incidents Data from Twitter with Deep Learning Benchmarks",
+    "year": 2021,
+    "doi": "10.1609/icwsm.v15i1.18116",
+    "summary": "Introduces HumAID, a dataset of approximately 77,000 human-labeled disaster tweets across 11 humanitarian categories from 19 disaster events, establishing classification benchmarks with transformer and classic models.",
+    "arxiv_id": "2104.03090",
+    "url": "https://doi.org/10.1609/icwsm.v15i1.18116"
+  },
+  {
+    "citation_key": "warner2025modernbert",
+    "title": "Smarter, Better, Faster, Longer: A Modern Bidirectional Encoder for Fast, Memory Efficient, and Long Context Finetuning and Inference",
+    "year": 2025,
+    "doi": "10.18653/v1/2025.acl-long.127",
+    "summary": "Redesigns the BERT encoder architecture using rotary position embeddings, unpadding, and FlashAttention-2, processing sequences of 8,192 tokens almost two times faster and designed for inference on common GPUs.",
+    "arxiv_id": "2412.13663",
+    "url": "https://doi.org/10.18653/v1/2025.acl-long.127"
+  },
+  {
+    "citation_key": "aisingapore2026sealion",
+    "title": "Model Card for SEA-LION-ModernBERT-300M",
+    "year": 2026,
+    "doi": null,
+    "summary": "Official Hugging Face model card for SEA-LION-ModernBERT-300M, detailing the 300M parameter encoder built on ModernBERT architecture with Gemma 3 tokenizer, pretrained on 13 languages including Filipino and English across 3 trillion tokens.",
+    "arxiv_id": null,
+    "url": "https://huggingface.co/aisingapore/SEA-LION-ModernBERT-300M"
+  },
+  {
+    "citation_key": "cruz2022tagalog",
+    "title": "Improving Large-scale Language Models and Resources for Filipino",
+    "year": 2022,
+    "doi": null,
+    "summary": "Introduces the TLUnified pretraining corpus and trains RoBERTa-based language models for Filipino, evaluating downstream performance across text classification benchmarks.",
+    "arxiv_id": "2111.06053",
+    "url": "https://aclanthology.org/2022.lrec-1.701"
+  },
+  {
+    "citation_key": "herrera2022tweettaglish",
+    "title": "TweetTaglish: A Dataset for Investigating Tagalog-English Code-Switching",
+    "year": 2022,
+    "doi": null,
+    "summary": "Introduces TweetTaglish, a dataset of over 20,000 tweets to facilitate research on Tagalog-English code-switching in Philippine social media.",
+    "arxiv_id": null,
+    "url": "https://aclanthology.org/2022.lrec-1.225/"
+  },
+  {
+    "citation_key": "miranda2023tlunifiedner",
+    "title": "Developing a Named Entity Recognition Dataset for Tagalog",
+    "year": 2023,
+    "doi": null,
+    "summary": "Presents the TLUnified-NER corpus for Tagalog, introducing a human-annotated dataset with three annotators that establishes benchmark token-level agreement of 0.81 kappa and entity-level agreement of 0.91 strict F1.",
+    "arxiv_id": "2311.07161",
+    "url": "https://aclanthology.org/2023.sealp-1.3/"
+  },
+  {
+    "citation_key": "yaneza2025calamba",
+    "title": "Online Emergency Response Management System for City Disaster Risk Reduction Management Office of Calamba City, Laguna",
+    "year": 2025,
+    "doi": "10.26483/ijarcs.v16i3.7254",
+    "summary": "Develops a web-based disaster emergency management system for Calamba City using NLP and TF-IDF to analyze incident reports for municipal resource coordination and evacuation planning.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.26483/ijarcs.v16i3.7254"
+  },
+  {
+    "citation_key": "besario2026barangay",
+    "title": "An AI-Enhanced Decision Support System for Barangay Incident Monitoring and Community Risk Assessment",
+    "year": 2026,
+    "doi": "10.47760/OAJMR.2026.v02i06.002",
+    "summary": "Designs and evaluates an AI-enhanced decision support system for local barangay incident monitoring in the Philippines, automating risk categorization across incident reports for community safety.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.47760/OAJMR.2026.v02i06.002"
+  },
+  {
+    "citation_key": "abisado2023legazpi",
+    "title": "Discovering Insights via Hybrid Thematic Analysis: A Case Study on Disaster Risk Reduction and Management for Legazpi City, Albay",
+    "year": 2023,
+    "doi": "10.3233/FAIA230763",
+    "summary": "Applies KeyBERT and thematic NLP to analyze community focus group discussions on disaster risk reduction and climate change adaptation in typhoon-prone Legazpi City, Albay.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.3233/FAIA230763"
+  },
+  {
+    "citation_key": "ramirez2026cultural",
+    "title": "Cultural values in disaster discourse: Behavioral propositions from the Philippines",
+    "year": 2026,
+    "doi": "10.1016/j.ijdrr.2026.106420",
+    "summary": "Conducts a discourse analysis of social media comments following four major Philippine typhoons from 2013 to 2021, proposing six behavioral propositions on cultural disaster response.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.1016/j.ijdrr.2026.106420"
+  },
+  {
+    "citation_key": "mueller2022taskconflict",
+    "title": "Do Text-to-Text Multi-Task Learners Suffer from Task Conflict?",
+    "year": 2022,
+    "doi": "10.18653/v1/2022.findings-emnlp.206",
+    "summary": "Investigates whether text-to-text language models avoid task conflict during multi-task learning. Shows that directional gradient conflicts and negative transfer occur at similar rates as in standard multi-task architectures.",
+    "arxiv_id": "2212.06645",
+    "url": "https://doi.org/10.18653/v1/2022.findings-emnlp.206"
+  },
+  {
+    "citation_key": "pagasa2026cyclone",
+    "title": "Tropical Cyclone Information",
+    "year": null,
+    "doi": null,
+    "summary": "Provides climatological records on tropical cyclones entering the Philippine Area of Responsibility. Reports that an average of twenty cyclones enter the region annually, with eight to nine crossing the country and seventy percent forming between July and October.",
+    "arxiv_id": null,
+    "url": "https://www.pagasa.dost.gov.ph/climate/tropical-cyclone-information"
+  },
+  {
+    "citation_key": "datareportal2026philippines",
+    "title": "Digital 2026: The Philippines",
+    "year": 2026,
+    "doi": null,
+    "summary": "Presents statistics on internet connectivity and digital media adoption in the Philippines for 2026. Records 98.0 million internet users representing an 83.8 percent penetration rate, alongside 95.8 million social media identities.",
+    "arxiv_id": null,
+    "url": "https://datareportal.com/reports/digital-2026-philippines"
+  },
+  {
+    "citation_key": "bundnis2025worldriskreport",
+    "title": "WorldRiskReport 2025",
+    "year": 2025,
+    "doi": null,
+    "summary": "Assesses global disaster risk and ranks the Philippines first among all countries with a WorldRiskIndex score of 46.56. Analyzes high national exposure to severe weather hazards and presents local flood vulnerability assessments.",
+    "arxiv_id": null,
+    "url": "https://weltrisikobericht.de/wp-content/uploads/2025/09/WorldRiskReport_2025.pdf"
+  },
+  {
+    "citation_key": "chai2023improving",
+    "title": "Improving Gradient Trade-offs between Tasks in Multi-task Text Classification",
+    "year": 2023,
+    "doi": "10.18653/v1/2023.acl-long.144",
+    "summary": "Proposes GetMTL, a multi-task learning method that balances task gradients near the average loss instead of searching for arbitrary Pareto solutions, improving overall performance across multi-task text classification benchmarks.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.18653/v1/2023.acl-long.144"
+  },
+  {
+    "citation_key": "seeberger2022enhancing",
+    "title": "Enhancing Crisis-Related Tweet Classification with Entity-Masked Language Modeling and Multi-Task Learning",
+    "year": 2022,
+    "doi": "10.18653/v1/2022.nlp4pi-1.9",
+    "summary": "Combines entity-masked language modeling with hierarchical multi-label classification to improve crisis tweet categorization on the TREC-IS benchmark, reducing event overfitting and supporting cross-event generalization.",
+    "arxiv_id": "2211.11468",
+    "url": "https://doi.org/10.18653/v1/2022.nlp4pi-1.9"
+  },
+  {
+    "citation_key": "tabuzo2026phmartiallawner",
+    "title": "PHMartialLawNER: A Tagalog Named Entity Recognition Corpus for the Philippine Martial Law Era",
+    "year": 2026,
+    "doi": "10.18653/v1/2026.nlp4dh-1.16",
+    "summary": "Presents PHMartialLawNER, a named entity recognition dataset for historical Tagalog created from newspapers and underground documents of the Philippine Martial Law period, providing thirteen thousand sentence segments and baseline evaluations.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.18653/v1/2026.nlp4dh-1.16"
+  },
+  {
+    "citation_key": "landis1977measurement",
+    "title": "The Measurement of Observer Agreement for Categorical Data",
+    "year": 1977,
+    "doi": "10.2307/2529310",
+    "summary": "Proposes a statistical framework for measuring observer agreement on categorical data, introducing widely cited kappa benchmark intervals including substantial and almost perfect agreement.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.2307/2529310"
+  },
+  {
+    "citation_key": "cohen1960coefficient",
+    "title": "A Coefficient of Agreement for Nominal Scales",
+    "year": 1960,
+    "doi": "10.1177/001316446002000104",
+    "summary": "Introduces the kappa coefficient to measure inter-annotator agreement on nominal scales while correcting for agreement occurring by chance.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.1177/001316446002000104"
+  },
+  {
+    "citation_key": "treviso2023efficient",
+    "title": "Efficient Methods for Natural Language Processing: A Survey",
+    "year": 2023,
+    "doi": "10.1162/tacl_a_00577",
+    "summary": "Provides a comprehensive survey of efficiency in natural language processing across data, training, and inference, organizing efficiency approaches across model architectures, compression techniques, and hardware considerations while connecting efficiency metrics to environmental impact.",
+    "arxiv_id": "2209.00099",
+    "url": "https://doi.org/10.1162/tacl_a_00577"
+  },
+  {
+    "citation_key": "philippines2012dataprivacy",
+    "title": "Data Privacy Act of 2012 (Republic Act No. 10173)",
+    "year": 2012,
+    "doi": null,
+    "summary": "Philippine law protecting personal information in government and private sector systems. Section 21 holds each personal information controller accountable for personal information under its control, including information transferred to a third party for processing, whether domestically or internationally.",
+    "arxiv_id": null,
+    "url": "https://lawphil.net/statutes/repacts/ra2012/ra_10173_2012.html"
+  },
+  {
+    "citation_key": "peffers2007design",
+    "title": "A Design Science Research Methodology for Information Systems Research",
+    "year": 2007,
+    "doi": "10.2753/mis0742-1222240302",
+    "summary": "Introduces the Design Science Research Methodology (DSRM) framework for information systems research, detailing a six-stage process model comprising problem identification, objective definition, design and development, demonstration, evaluation, and communication.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.2753/mis0742-1222240302"
+  },
+  {
+    "citation_key": "liu2021imtl",
+    "title": "Towards Impartial Multi-task Learning",
+    "year": 2021,
+    "doi": null,
+    "summary": "Proposes IMTL, which balances shared-parameter gradients so the combined gradient has equal projections onto each task and dynamically weights losses so task-specific losses stay at a comparable scale.",
+    "arxiv_id": null,
+    "url": "https://openreview.net/forum?id=IMPnRXEWpvr"
+  },
+  {
+    "citation_key": "lin2022rlw",
+    "title": "Reasonable Effectiveness of Random Weighting: A Litmus Test for Multi-Task Learning",
+    "year": 2022,
+    "doi": null,
+    "summary": "Proposes random loss weighting and random gradient weighting, which sample task weights from a distribution at each step, and finds they perform comparably to twelve specialized methods, recommending them as baselines.",
+    "arxiv_id": "2111.10603",
+    "url": "https://openreview.net/forum?id=jjtFD8A1Wx"
+  }
+]

@@ -1,0 +1,23 @@
+project:
+  type: book
+
+metadata-files:
+  - format.yml
+
+bibliography: bibliography.bib
+csl: apa.csl
+
+book:
+  # Benchmarking Dynamic Multi-Task Balancing in a Multilingual Encoder for Joint Triage of Taglish Disaster Tweets
+  title: "Benchmarking Multi-Task Optimizers for Humanitarian Classification and Named Entity Recognition of Taglish Typhoon Tweets"
+  author:
+    - Isaiah Raphael Almuena
+    - Prinz Edward Ducyogen
+    - Carlo Miguel Geronimo
+    - Kyle Uri Gabriel Lu
+    - Yngwie Sebastian Patricio
+  chapters:
+    - index.qmd
+    - 02-literature.qmd
+    - 03-methodology.qmd
+    - references.qmd

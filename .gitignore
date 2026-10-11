@@ -1,0 +1,12 @@
+.venv/
+.quarto/
+_book/
+__pycache__/
+papers/pdf/
+papers/markdown/*
+!papers/markdown/abisado2023legazpi.md
+!papers/markdown/ramirez2026cultural.md
+!papers/markdown/philippines2012dataprivacy.md
+!papers/markdown/pagasa2026cyclone.md
+*.aux
+*.log

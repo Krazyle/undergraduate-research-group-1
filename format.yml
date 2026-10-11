@@ -1,0 +1,21 @@
+# Department formatting rules live here, not in _quarto.yml.
+# When CEU changes a rule, edit this file only.
+format:
+  pdf:
+    documentclass: scrreprt
+    papersize: letter
+    fontsize: 12pt
+    mainfont: "Times New Roman"
+    sansfont: "Times New Roman"
+    geometry:
+      - left=1.5in
+      - right=1in
+      - top=1in
+      - bottom=1in
+    linestretch: 2.0
+    fig-pos: H
+    fig-cap-location: top
+    toc: false
+    include-in-header: style.tex
+    template-partials:
+      - before-body.tex
