@@ -5,3 +5,6 @@ __pycache__/
 papers/pdf/
 *.aux
 *.log
+.env
+.env.*
+!.env.example
