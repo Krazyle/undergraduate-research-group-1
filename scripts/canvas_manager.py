@@ -168,6 +168,14 @@ def get_announcements(course_id, base_url, token):
         print(f"Date: {posted}")
         print(f"Message:\n{body}\n")
 
+def slugify(text):
+    if not text:
+        return "untitled"
+    text = text.lower()
+    text = re.sub(r"[^\w\s-]", "", text)
+    text = re.sub(r"[-\s_]+", "-", text).strip("-")
+    return text[:60] if text else "untitled"
+
 def export_markdown(course_id, output_dir, base_url, token):
     os.makedirs(output_dir, exist_ok=True)
     modules = canvas_get(f"courses/{course_id}/modules?include[]=items&per_page=50", base_url, token)
@@ -176,26 +184,31 @@ def export_markdown(course_id, output_dir, base_url, token):
         return
 
     index_lines = ["# Course Modules Index\n\n"]
-    for module in modules:
+    for m_idx, module in enumerate(modules, start=1):
         mid = module.get("id")
         mname = module.get("name", "Unnamed Module")
-        safe_mname = re.sub(r"[^\w\- ]", "_", mname).strip()
-        module_dir = os.path.join(output_dir, f"{mid}_{safe_mname}")
+        folder_slug = f"{m_idx:02d}-{slugify(mname)}"
+        module_dir = os.path.join(output_dir, folder_slug)
         os.makedirs(module_dir, exist_ok=True)
 
-        index_lines.append(f"## Module {mid} - {mname}\n")
+        index_lines.append(f"## {mname} (ID: {mid})\n")
         items = module.get("items", [])
-        for item in items:
+        for i_idx, item in enumerate(items, start=1):
             iid = item.get("id")
             ititle = item.get("title", "Untitled")
             itype = item.get("type")
             api_url = item.get("url")
-            safe_ititle = re.sub(r"[^\w\- ]", "_", ititle).strip()
-            file_path = os.path.join(module_dir, f"{iid}_{safe_ititle}.md")
+            file_slug = f"{i_idx:02d}-{slugify(ititle)}.md"
+            file_path = os.path.join(module_dir, file_slug)
 
-            index_lines.append(f"- [{ititle}]({mid}_{safe_mname}/{iid}_{safe_ititle}.md) ({itype})\n")
+            index_lines.append(f"- [{ititle}]({folder_slug}/{file_slug}) ({itype})\n")
 
-            content_lines = [f"# {ititle}\n\n", f"- Type: {itype}\n", f"- Item ID: {iid}\n"]
+            content_lines = [
+                f"# {ititle}\n\n",
+                f"- Type: {itype}\n",
+                f"- Item ID: {iid}\n",
+                f"- Module ID: {mid}\n",
+            ]
             if api_url:
                 data = canvas_get(api_url, base_url, token)
                 if data:
@@ -216,7 +229,7 @@ def export_markdown(course_id, output_dir, base_url, token):
 
         index_lines.append("\n")
 
-    with open(os.path.join(output_dir, "INDEX.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(output_dir, "index.md"), "w", encoding="utf-8") as f:
         f.write("".join(index_lines))
     print(f"Export completed: {output_dir}/")
 
