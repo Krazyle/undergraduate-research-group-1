@@ -1,0 +1,93 @@
+\documentclass[tikz,border=6mm]{standalone}
+\usepackage{amsmath,amssymb}
+\usepackage{fontspec}
+
+\usetikzlibrary{positioning,arrows.meta,calc,shapes.geometric}
+\tikzset{
+    actorpic/.pic={
+        \draw[thick] (0,0.50) circle (0.20);
+        \draw[thick] (0,0.30) -- (0,-0.20);
+        \draw[thick] (-0.38,0.10) -- (0.38,0.10);
+        \draw[thick] (0,-0.20) -- (-0.26,-0.60);
+        \draw[thick] (0,-0.20) -- (0.26,-0.60);
+    }
+}
+
+\begin{document}
+\begin{tikzpicture}[
+    font=\small,
+    >=Stealth,
+    usecase/.style={
+        draw=black,
+        fill=black!4,
+        ellipse,
+        align=center,
+        inner sep=2pt,
+        font=\footnotesize,
+        line width=0.8pt,
+        text width=2.8cm,
+        minimum height=1.0cm
+    },
+    assoc/.style={draw=black, line width=0.8pt},
+    actornode/.style={align=center, font=\footnotesize\bfseries},
+    relarrow/.style={
+        draw=black,
+        dashed,
+        line width=0.7pt,
+        -{Stealth[open]}
+    },
+    rellabel/.style={
+        font=\scriptsize\itshape,
+        fill=black!2,
+        inner sep=1.5pt
+    }
+]
+    \draw[draw=black, fill=black!2, line width=1.0pt] (0,0.4) rectangle (13.8,-12.8);
+    \node[anchor=north, font=\bfseries\footnotesize] at (6.9,0.22) {Disaster Tweet Benchmarking System};
+
+    \coordinate (annotC) at (-1.8, -1.6);
+    \pic at (annotC) {actorpic};
+    \node[actornode] at ($(annotC)+(0,-1.05)$) {Annotators};
+
+    \coordinate (researchC) at (-1.8, -7.6);
+    \pic at (researchC) {actorpic};
+    \node[actornode] at ($(researchC)+(0,-1.05)$) {Researcher};
+
+    \coordinate (runnerC) at (15.6, -7.4);
+    \pic at (runnerC) {actorpic};
+    \node[actornode] at ($(runnerC)+(0,-1.20)$) {Experiment\\Runner};
+
+    \node[usecase] (uc_label)    at (2.4, -1.6) {Label tweets};
+    \node[usecase] (uc_collect)  at (2.4, -3.6) {Collect and clean\\tweets};
+    \node[usecase] (uc_agree)    at (2.4, -5.6) {Check annotation\\agreement};
+    \node[usecase] (uc_freeze)   at (2.4, -7.6) {Freeze corpus and\\create splits};
+    \node[usecase] (uc_config)   at (2.4, -9.6) {Configure\\experiment};
+    \node[usecase] (uc_analysis) at (2.4, -11.6) {Generate result\\tables};
+
+    \node[usecase] (uc_resolve) at (7.0, -1.6) {Resolve label\\disagreements};
+S
+    \node[usecase] (uc_search)  at (11.4, -2.4) {Search optimizer\\settings};
+    \node[usecase] (uc_train)   at (11.4, -4.8) {Train model};
+    \node[usecase] (uc_measure) at (11.4, -7.4) {Measure training\\time and peak\\GPU memory};
+    \node[usecase] (uc_eval)    at (11.4, -10.0) {Evaluate model};
+
+    \draw[relarrow] (uc_resolve) -- (uc_label) node[midway, above=2pt, rellabel] {«extend»};
+
+    \draw[relarrow] (uc_search) -- (uc_train) node[midway, right=2pt, rellabel] {«extend»};
+
+    \draw[relarrow] (uc_train) -- (uc_measure) node[midway, right=2pt, rellabel] {«include»};
+
+    \draw[assoc] ($(annotC)+(0.45,-0.1)$) -- (uc_label.west);
+    \draw[assoc] ($(annotC)+(0.45,0.2)$) |- (7.0,-0.7) -- (uc_resolve.north);
+
+    \draw[assoc] ($(researchC)+(0.45,0.6)$)  -- (uc_collect.west);
+    \draw[assoc] ($(researchC)+(0.45,0.3)$)  -- (uc_agree.west);
+    \draw[assoc] ($(researchC)+(0.45,0.0)$)  -- (uc_freeze.west);
+    \draw[assoc] ($(researchC)+(0.45,-0.3)$) -- (uc_config.west);
+    \draw[assoc] ($(researchC)+(0.45,-0.6)$) -- (uc_analysis.west);
+
+    \draw[assoc] ($(runnerC)+(-0.45,0.3)$)  -- (uc_train.east);
+    \draw[assoc] ($(runnerC)+(-0.45,-0.3)$) -- (uc_eval.east);
+
+\end{tikzpicture}
+\end{document}
