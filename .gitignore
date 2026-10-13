@@ -8,3 +8,6 @@ papers/pdf/
 .env
 .env.*
 !.env.example
+
+/.quarto/
+**/*.quarto_ipynb
