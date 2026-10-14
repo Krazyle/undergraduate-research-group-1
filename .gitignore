@@ -12,7 +12,7 @@ papers/pdf/
 /.quarto/
 **/*.quarto_ipynb
 
-# Mock defense build outputs
-mock-defense/slides.html
-mock-defense/slides_files/
-mock-defense/*.pdf
+# Archived mock defense build outputs
+archive/mock-defense-v1/slides.html
+archive/mock-defense-v1/slides_files/
+archive/mock-defense-v1/*.pdf
