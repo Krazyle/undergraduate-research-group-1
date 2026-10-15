@@ -1,0 +1,181 @@
+# INTRODUCTION
+
+This chapter presents the research foundation of the study. It explains why Taglish disaster tweets need one model for humanitarian classification and named entity recognition, and why the choice of multi-task optimizer matters for such a model. It then states the research questions, hypotheses, frameworks, and boundaries that guide the rest of the study.
+
+## Introduction to the Study
+
+The Philippines has the highest disaster risk in the world [@bundnis2025worldriskreport], and during disasters Filipinos post their needs and calls for help on social media, often in Taglish, a mix of Tagalog and English [@inoferio2025socialmedia; @caoile2025urdaneta; @montalan2025batayan]. These posts outnumber what responders can review manually [@somido2023actionable; @ali2026humaidner], so automated tools are needed. Two natural language processing tasks can sort the posts. Humanitarian classification identifies the type of report [@alam2021humaid], and named entity recognition finds details such as place names [@ali2026humaidner]. An existing Philippine system performs both tasks but sends the posts to a private company [@caoile2025urdaneta]. Running one model for both tasks on the computers of a local government unit would keep the posts in-house and use fewer computing resources than two models [@lin2023libmtl; @treviso2023efficient]. However, such a model can perform worse on one task than a model trained on that task alone, a problem called negative transfer [@ali2026humaidner]. Multi-task optimizers aim to reduce this problem, but studies disagree on whether any of them outperforms equal weighting, which simply gives both tasks the same importance, and many of the others need more memory and training time [@xin2022mtohelp; @kurin2022unitary; @gama2026uniform]. These optimizers have not been compared on Taglish disaster tweets, because no Taglish dataset labels the same posts for both tasks. This study therefore builds such a dataset and compares 13 multi-task optimizers on it in terms of negative transfer and training cost.
+
+## Background of the Study
+
+The Philippines has the highest disaster risk among 193 countries [@bundnis2025worldriskreport], and about eight or nine tropical cyclones cross the country each year [@pagasa2026cyclone]. During these disasters, Filipinos post their needs, report damage, and call for help on social media [@inoferio2025socialmedia; @caoile2025urdaneta], often in Taglish, a mix of Tagalog and English [@ermino2022urgency; @montalan2025batayan]. With social media accounts equal to about 82% of the population [@datareportal2026philippines], these posts quickly outnumber what responders can review individually [@somido2023actionable; @ali2026humaidner]. Automated tools that can process Taglish posts are therefore needed.
+
+Existing tools for Philippine disaster posts do not yet fully meet this need. Two tasks in natural language processing are relevant. Humanitarian classification identifies the type of report [@alam2021humaid], and named entity recognition finds details such as place names [@ali2026humaidner]. Earlier Philippine studies each trained a model for a single task [@regalado2015filiet; @ermino2022urgency; @somido2023actionable; @regacho2023disasternews; @yute2021satellite]. Caoile and Aviles [-@caoile2025urdaneta] designed a system for Urdaneta City that covers both tasks by identifying requests for help and barangay names in Facebook comments. However, the system sends the comments to OpenAI, a private company, and under the Data Privacy Act of 2012 [-@philippines2012dataprivacy], the city remains accountable for personal information sent to such a third party.
+
+A local government unit could avoid the third party by running one model for both tasks on its own computers. Such a model needs less storage space and runs faster than two separate models [@lin2023libmtl; @gama2026uniform], which matters because computing resources are often limited [@treviso2023efficient]. However, a model trained for several tasks, known as a multi-task model, can perform worse on one task than a model trained on that task alone. This problem is known as negative transfer [@mueller2022taskconflict; @elich2024paradigms]. Classification may suffer from it when paired with named entity recognition. Named entity recognition makes a decision for every word, whereas classification makes one for each post, so the word-level task can dominate training. Ali et al. [-@ali2026humaidner] attributed a drop in classification performance on English disaster tweets to this imbalance.
+
+Training methods called multi-task optimizers aim to reduce this problem by balancing the tasks, but whether they succeed for these tasks is unclear. The simplest, equal weighting, gives both tasks the same importance throughout training. @kurin2022unitary found that equal weighting performed as well as or better than the other multi-task optimizers once common techniques for stable training were added. @xin2022mtohelp found a similar result for tuned static weighting, which keeps the task weights fixed at values chosen by testing several options before training. In contrast, @chai2023improving found that their optimizer outperformed equal weighting in classifying product reviews and news topics. Gama and Grassi [-@gama2026uniform] found that when two tasks were similar in output and loss, the other multi-task optimizers learned task weights close to those of equal weighting, although they remained useful for more complex problems. The two tasks in this study are not similar in this way, and none of these studies used this pairing, disaster posts, or Taglish.
+
+The choice of optimizer also affects training cost. Many of the other multi-task optimizers need more memory and training time than equal weighting [@kurin2022unitary; @gama2026uniform]. This cost recurs, because models trained on past disasters often perform worse on new ones [@seeberger2025generalizing] and may need retraining on the same limited computers.
+
+The negative transfer and training cost of these optimizers cannot yet be measured on Taglish disaster tweets, because no dataset labels the same posts for both tasks. Ali et al. [-@ali2026humaidner] built one for English disaster tweets, whereas Taglish has far fewer datasets and software tools than English [@cruz2022tagalog; @herrera2022tweettaglish; @montalan2025batayan]. This study builds such a dataset and uses it to compare 13 multi-task optimizers in terms of negative transfer and training cost.
+
+## Statement of the Problem
+
+Specialized multi-task optimizers are designed to reduce negative transfer, but their effect and training cost have not been measured on Taglish disaster tweets. This study therefore examines one model that performs humanitarian classification and named entity recognition on these tweets. It compares equal weighting, which gives both tasks the same importance, with the other multi-task optimizers and asks which of them, if any, differ significantly in the negative transfer of this model. It also asks how much each of the 13 optimizers costs to train and how this cost relates to negative transfer. Specifically, the study answers four research questions.
+
+1. What is the predictive performance of single-task models for humanitarian classification and for named entity recognition on Taglish disaster tweets? (Baseline Analysis)
+
+2. What is the inter-annotator agreement of the humanitarian classification and named entity recognition labels in a Taglish disaster tweet dataset constructed for both tasks? (Design and Artifact Creation)
+
+3. What is the training cost of each of the 13 multi-task optimizers in terms of training time and peak memory? (Empirical Benchmarking)
+
+4. Which of the other 12 multi-task optimizers, if any, differ significantly from equal weighting in negative transfer? (Comparative Validation)
+
+## Objectives
+
+The general objective is to compare 13 multi-task optimizers in terms of negative transfer and training cost when one model performs humanitarian classification and named entity recognition on Taglish disaster tweets. It also aims to examine how negative transfer relates to training cost. Specifically, the study pursues four objectives.
+
+1. To measure the predictive performance of single-task models for humanitarian classification and for named entity recognition on Taglish disaster tweets. (Baseline Analysis)
+
+2. To construct a Taglish disaster tweet dataset labeled for both tasks and measure its inter-annotator agreement. (Design and Artifact Creation)
+
+3. To measure the training time and peak memory of each of the 13 multi-task optimizers. (Empirical Benchmarking)
+
+4. To identify which of the other 12 multi-task optimizers, if any, differ significantly from equal weighting in negative transfer. (Comparative Validation)
+
+## Hypotheses
+
+The study tests the following null and alternative hypotheses.
+
+**Null hypothesis ($H_0$).** The mean negative transfer across training runs is the same for equal weighting and each of the other 12 multi-task optimizers.
+
+**Alternative hypothesis ($H_1$).** The mean negative transfer across training runs differs between equal weighting and at least one of the other 12 multi-task optimizers.
+
+## Theoretical Framework
+
+This study is grounded in the view of multi-task learning as inductive transfer. When related tasks are learned by the same model, features that one task learns can also serve the other [@caruana1997multitask]. However, the same sharing can allow one task to interfere with the other, which causes negative transfer [@elich2024paradigms].
+
+During training, each task sends the model a signal, called a gradient, that indicates how the model should change. Studies explain this interference in two ways, both based on these signals. Gradient conflict occurs when the signals of the two tasks point in directions that work against each other, so a change that helps one task harms the other [@yu2020pcgrad; @liu2021cagrad]. Gradient dominance occurs when the signal of one task is much larger than that of the other task, so that task controls how the model changes [@yu2020pcgrad; @chen2018gradnorm]. Most multi-task optimizers address one or both causes, either by adjusting how strongly each task influences training or by adjusting the signals so that they no longer conflict [@elich2024paradigms]. Equal weighting makes neither adjustment, while the other optimizers adjust the task weights, the gradients, or both. They may therefore differ from equal weighting in how much negative transfer remains, as the alternative hypothesis states. In this way, the theory links the independent variable of this study, the multi-task optimizer, to its dependent variable, negative transfer.
+
+A competing view supports the null hypothesis. Kurin et al. [-@kurin2022unitary] found that equal weighting matched or outperformed specialized optimizers once common techniques for stable training were applied. They suggested that these optimizers may help partly by preventing the model from memorizing its training data, which the common techniques also do. If this view holds, the other optimizers should show no significant difference from equal weighting. The two views guide the interpretation of the results, since the findings can indicate which explanation better fits Taglish disaster tweets.
+
+## Conceptual Framework
+
+The conceptual framework uses the Input-Process-Output (IPO) model, which describes the inputs of the study, the processes applied to them, and the resulting outputs. Following the theoretical framework, the multi-task optimizer is the independent variable and negative transfer is the dependent variable. Every multi-task model uses the same encoder, dataset, and training hardware, so the optimizer is the only planned difference between them. Training cost is also measured for each optimizer, but it is not tested with a hypothesis.
+
+![Research workflow of the study](figures/fig-1-1-research-workflow-ipo.pdf){#fig-research-ipo}
+
+@fig-research-ipo shows the research workflow. The study is conducted in four phases, each answering one research question. The phases do not follow the numbering of the questions, because later phases need the results of earlier ones. The single-task and multi-task models are trained on the dataset built in the first phase. Negative transfer is then measured by comparing the F1-scores of the multi-task models with those of the single-task models. The final phase produces the results that test the hypotheses and combines them with the training costs from the third phase to show how training cost relates to negative transfer.
+
+![How the multi-task model processes an example tweet](figures/fig-1-2-artifact-ipo.pdf){#fig-artifact-ipo}
+
+@fig-artifact-ipo shows how the multi-task model handles an example tweet. The tweet is first split into smaller units called tokens. The shared encoder, which is the part of the model that reads the text and converts it into numbers, then processes the tokens. Two task heads, each a component of the model that makes the predictions for one task, use these numbers. The classification head assigns the tweet a humanitarian category, while the named entity recognition head identifies words such as place names. The encoder reads the tweet only once to produce both outputs. The tweet was written for this illustration and is not from the dataset. The figure does not show the optimizer because it acts only during training, where it determines how the signals from the two tasks change the shared encoder.
+
+## Scope and Delimitations
+
+### Scope of the Study
+
+The study covers Taglish tweets about tropical cyclones that crossed the Philippines between 2020 and 2026. The word "typhoon" in the title follows its common use in the Philippines, where it refers to any tropical cyclone. Every tweet in the dataset is labeled for both humanitarian classification and named entity recognition.
+
+The study trains and compares 15 model configurations on this dataset. Two single-task models, one for each task, provide the baseline scores. Thirteen multi-task models, one for each multi-task optimizer, form the main comparison. The 13 optimizers are equal weighting [@kurin2022unitary], tuned static weighting [@xin2022mtohelp], random loss weighting [@lin2022rlw], uncertainty weighting [@kendall2018uncertainty], gradient normalization (GradNorm) [@chen2018gradnorm], the multiple-gradient descent algorithm (MGDA) [@sener2018mgda], projecting conflicting gradients (PCGrad) [@yu2020pcgrad], gradient sign dropout (GradDrop) [@chen2020graddrop], impartial multi-task learning (IMTL) [@liu2021imtl], conflict-averse gradient descent (CAGrad) [@liu2021cagrad], Nash multi-task learning (Nash-MTL) [@navon2022bargaining], fast adaptive multitask optimization (FAMO) [@liu2023famo], and PCGrad with uncertainty weighting [@yu2020pcgrad; @kendall2018uncertainty]. All models use one pretrained encoder, SEA-LION-ModernBERT-300M, which was trained on 13 languages, including English and Filipino [@aisingapore2026sealion].
+
+The evaluation measures the inter-annotator agreement of the labels, the predictive performance of each model, the negative transfer of each multi-task model, and the training time and peak memory of each optimizer. It tests whether negative transfer differs significantly between equal weighting and each of the other 12 optimizers. It then examines how negative transfer relates to training cost. Each configuration is trained three times with different random seeds, and the significance tests use these repeated runs. Chapter 3 describes the data source, the labeling process, the hardware specifications, and the training configuration.
+
+### Delimitations of the Study
+
+The study sets the following boundaries and states the reason for each.
+
+**Social media platform.** The dataset uses tweets from X, formerly Twitter. Facebook and other platforms are excluded for two reasons. Earlier Philippine and international disaster datasets use tweets [@ermino2022urgency; @somido2023actionable; @alam2021humaid], so the results can be compared with theirs. Public posts on X can also be collected through the official access that the platform provides, while comments on Facebook pages are harder to collect within the terms of that platform.
+
+**Language.** The dataset covers Taglish only. Other Philippine languages, such as Cebuano and Waray, are excluded because results from a mix of languages would not show whether an optimizer works the same way in each one. Labeling tweets in more languages also exceeds the resources of this study.
+
+**Hazard.** The dataset includes tropical cyclones only. Earthquakes, volcanic eruptions, and other hazards are excluded because training on a mix of event types can cause the most common type to dominate the model [@seeberger2025generalizing]. This dominance would add a second imbalance to the one between the two tasks, which the optimizers are meant to address. Tropical cyclones also provide a sufficient number of events for the dataset, since about eight or nine cross the Philippines each year [@pagasa2026cyclone].
+
+**Time period.** The dataset covers events from 2020 to 2026. Earlier events, such as Typhoon Haiyan (Yolanda) in 2013, are excluded so that the tweets reflect current Taglish usage on X.
+
+**Modality.** The study includes text only. Images, video, and audio are excluded because both tasks in this study are defined on text.
+
+**Tasks.** The study covers only humanitarian classification and named entity recognition. Other tasks, such as sentiment, emotion, or urgency detection, are excluded because the study focuses on one pair of tasks. In this pair, one task assigns a category to the whole tweet, while the other assigns an entity type to each word. Earlier work suggests that classification may be prone to negative transfer in this pairing [@ali2026humaidner]. Adding more tasks would also change how the tasks interfere with one another. Differences in negative transfer would then be harder to attribute to the optimizers. Excluding these tasks does not imply that they are less useful to responders.
+
+**Multi-task optimizers.** The study compares 13 optimizers. Most were evaluated in earlier studies that examined the value of specialized optimizers [@xin2022mtohelp; @kurin2022unitary; @gama2026uniform], so the results can be compared with the findings of those studies. Ali et al. [-@ali2026humaidner] described uncertainty weighting, PCGrad, and GradNorm as complementary for disaster tweets but left their comparison open. PCGrad with uncertainty weighting combines two of these methods. Other optimizers are excluded to keep the number of training runs feasible on a single laptop.
+
+**Pretrained encoder.** The study uses one pretrained encoder for all models. Testing other pretrained encoders is excluded because a different encoder would introduce another variable besides the optimizer.
+
+**Training hardware.** All training and measurement are performed on a single laptop. Cloud servers and other machines are excluded so that the training time and peak memory of every optimizer are measured under the same conditions. Chapter 3 describes how the power and temperature conditions of the laptop are kept stable across runs.
+
+**Test data.** The study evaluates all models on the same Taglish test tweets. Other disaster datasets, such as the English HUMAID-NER dataset [@ali2026humaidner], are not used for evaluation because differences in language and labeling would lower the scores for reasons unrelated to the optimizer.
+
+**Large language models.** The study does not compare the multi-task model with large language models. Such a comparison is fair only once the multi-task model is well trained. Choosing its optimizer, which this study examines, is one step toward that.
+
+**Deployment.** The study evaluates models on test tweets only. Use by emergency responders during actual disasters is excluded because the research questions concern model training and comparison.
+
+## Significance of the Study
+
+**Primary beneficiaries.** Local government units and their disaster risk reduction and management offices could use one model on their own computers to identify both the type of report and its details in Taglish tweets. This study measures how much predictive performance such a model loses on each task under each optimizer. It also measures the training cost of each optimizer. It does not test the model in operational use.
+
+**Secondary beneficiaries.** Researchers in natural language processing and crisis informatics, the study of how information from social media can support disaster response, gain a comparison of 13 multi-task optimizers on Taglish disaster tweets, as do developers who build or maintain multi-task models for disaster posts. The results show whether any optimizer differs from equal weighting in negative transfer. They also show how much training time and memory each optimizer needs, which can guide the choice of optimizer for limited hardware. These results add evidence from a new language and domain to the debate on whether specialized optimizers outperform equal weighting. The findings may also guide later studies that add more tasks, such as emotion detection, to the same model. The study provides its code and labeling guidelines. The labeled dataset may be shared only in a form that complies with data privacy rules and the terms of the platform.
+
+**Tertiary beneficiaries.** Communities affected by tropical cyclones could benefit indirectly. If responders adopt such a model, they may identify urgent requests for rescue and relief more quickly among the large number of incoming posts.
+
+## Definitions of Terms
+
+The following terms are defined as they are used in this study.
+
+**Equal weighting.** The multi-task optimizer that gives both tasks the same importance by combining their task losses with equal fixed weights at every training step. It is the reference against which the other optimizers are compared.
+
+**F1-score.** A score between 0 and 1 that combines precision and recall, computed on the test tweets. Precision is the share of the model's predictions that are correct, and recall is the share of the labels in the test tweets that the model predicts correctly. Humanitarian classification uses macro-F1, which gives every category equal weight so that rare categories count as much as common ones. Named entity recognition uses span-level micro-F1, which counts a predicted entity as correct only when its boundaries and its type both match the label.
+
+**Gradient.** The signal that a task sends the model during training to indicate how the model should change.
+
+**Gradient conflict.** The case in which the gradients of the two tasks point in directions that work against each other, so a change that helps one task harms the other.
+
+**Gradient dominance.** The case in which the gradient of one task is much larger than that of the other, so that task controls how the model changes.
+
+**Humanitarian classification.** The task that assigns each tweet one category naming the kind of information it reports, such as a request for supplies or damaged infrastructure.
+
+**Inter-annotator agreement.** The degree to which different annotators assign the same label to the same tweet or word, which shows how consistently the dataset is labeled. Chapter 3 describes how it is measured.
+
+**Label.** The category or entity type that annotators assign to a tweet, or to a word in a tweet, which the models learn from and are tested against.
+
+**Large language model.** A model trained on very large collections of text to generate written responses to instructions, such as the models used in ChatGPT.
+
+**Local government unit.** A province, city, municipality, or barangay with its own local government.
+
+**Multi-task learning.** The training of one model to perform two or more related tasks at the same time.
+
+**Multi-task model.** A model with one pretrained encoder shared by both tasks and a task head for each. It is trained on both tasks together and produces both outputs for a tweet while reading it only once.
+
+**Multi-task optimizer.** A training method that balances how a model learns each task, usually by adjusting how strongly each task influences training or by adjusting the gradients so that they no longer conflict. The study compares 13 multi-task optimizers, which Chapter 2 describes. Optimizers that adjust task weights or gradients during training, which are all except equal weighting and tuned static weighting, are referred to as specialized optimizers, following Gama and Grassi [-@gama2026uniform].
+
+**Named entity recognition (NER).** The task that finds words or phrases in a tweet that name specific details, such as places, and assigns each an entity type. It works on parts of a tweet rather than the whole tweet.
+
+**Natural language processing.** The field of computer science that develops methods for computers to process and analyze human language.
+
+**Negative transfer.** A drop in predictive performance on a task when a model is trained on both tasks together, compared with the single-task model for that task. It is measured as the change in F1-score, which is the score of the multi-task model minus the score of the single-task model. A negative change shows negative transfer, and a positive change shows that the multi-task model performed better.
+
+**Peak memory.** The largest amount of memory that training uses at any one time. Chapter 3 describes how it is measured.
+
+**Post.** Any message that a person publishes on social media. The study uses this term for social media content in general.
+
+**Predictive performance.** The degree to which a model performs a task correctly on the test tweets, measured with F1-scores.
+
+**Pretrained encoder.** The language model, SEA-LION-ModernBERT-300M, that was trained on large amounts of text before this study. It reads every tweet and converts the text into numbers that the task heads can use, and all models use the same encoder. In the multi-task model, both tasks share it, so it is also called the shared encoder.
+
+**Random seed.** A number that fixes the random choices made during training, such as the starting values of the task heads and the order of the training tweets. Training with different seeds shows how much the results vary by chance.
+
+**Single-task model.** A model trained on one task only, using the same pretrained encoder as the multi-task models. Its score serves as the baseline for measuring negative transfer on that task.
+
+**Taglish.** The mix of Tagalog and English that many Filipinos use in everyday writing, and the language of the tweets in the dataset.
+
+**Task head.** The component of a model that makes the predictions for one task, using the output of the shared encoder.
+
+**Task loss.** A number that measures the error of the model's predictions against the labels on one task. A multi-task model has one task loss for each task.
+
+**Token.** A word or part of a word that the model reads as one unit.
+
+**Training cost.** The training time and peak memory needed to train one model with one multi-task optimizer.
+
+**Tuned static weighting.** The multi-task optimizer that combines the task losses with fixed weights, chosen by testing several values before training.
+
+**Tweet.** A post on X, formerly Twitter. The dataset of this study consists of tweets.

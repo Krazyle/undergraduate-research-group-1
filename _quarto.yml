@@ -1,9 +1,6 @@
 project:
   type: book
 
-metadata-files:
-  - format.yml
-
 bibliography: bibliography.bib
 csl: apa.csl
 
@@ -18,6 +15,14 @@ book:
     - Yngwie Sebastian Patricio
   chapters:
     - index.qmd
+    - 01-introduction.qmd
     - 02-literature.qmd
     - 03-methodology.qmd
     - references.qmd
+
+format:
+  typst:
+    fig-cap-location: top
+    citeproc: true
+    template-partials:
+      - template/typst-show.typ

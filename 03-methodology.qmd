@@ -1,4 +1,4 @@
-# Chapter 3 `\\`{=latex}METHODOLOGY
+# METHODOLOGY
 
 This chapter describes how the study answers the research questions stated in Chapter 1. It first explains the research methodology and how the tweets are selected, labeled, and divided. It then describes how the models are trained and measured and how their results are compared and analyzed. It ends with the software built for the study, which has two parts, a benchmarking system and a prototype web application, and with how both parts are tested.
 
@@ -128,7 +128,7 @@ The multi-task model follows the design shown in @fig-artifact-ipo of Chapter 1.
 | Model management | Load trained model | Loads the multi-task model chosen from the benchmark into the prototype |
 | Model management | Export corrected labels | Saves the labels corrected by the staff as a file that can be used to train future models |
 
-: Use case specifications {#tbl-usecases tbl-colwidths="[22,30,48]"}
+: Use case specifications {#tbl-usecases tbl-colwidths="[20,26,54]"}
 
 The prototype has three parts, shown at the bottom of @fig-system-architecture, all of which run on the computer of the study. The interface, built with React, runs in a web browser and shows the posts, filters, summaries, and forms that the staff use. The server, built with FastAPI in Python, receives the requests from the interface, runs the trained multi-task model with PyTorch to analyze new posts, and prepares the summaries and reports. The database, PostgreSQL, stores the posts, their predicted and corrected labels, and their status. Because the model and the database run on the same computer, the posts that the staff analyze are not sent to an outside service.
 
@@ -156,7 +156,7 @@ The prototype has three parts, shown at the bottom of @fig-system-architecture, 
 | React | 19.3.0 |
 | PostgreSQL | 18.6 |
 
-: Software of the study {#tbl-software tbl-colwidths="[40,60]"}
+: Software of the study {#tbl-software tbl-colwidths="[50,50]"}
 
 | Hardware | Specification |
 |:----------------------------|:-------------|
@@ -164,7 +164,7 @@ The prototype has three parts, shown at the bottom of @fig-system-architecture, 
 | Memory | 32 GB DDR5 |
 | Graphics processor | NVIDIA GeForce RTX 4060 Laptop GPU with 8 GB of memory |
 
-: Hardware of the study {#tbl-hardware tbl-colwidths="[40,60]"}
+: Hardware of the study {#tbl-hardware tbl-colwidths="[25,75]"}
 
 The laptop in @tbl-hardware is also the target testbed, because it stands for the kind of computer with limited resources that a local government unit could use (Chapter 1). An internet connection is needed only to collect the tweets and to download the encoder and the libraries. Training and measurement run without a connection. The code, the settings, and a file that fixes the version of every library are kept in a GitHub repository and archived on Zenodo with a permanent identifier. The labeled dataset is shared only in a form that complies with the Data Privacy Act of 2012 and the terms of X.
 
