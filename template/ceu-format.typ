@@ -52,7 +52,7 @@
   show figure: set block(above: line-gap, below: line-gap)
   show figure.where(kind: "quarto-float-tbl"): set block(breakable: true, above: line-gap - cell-pad, below: line-gap - cell-pad)
   show figure.where(kind: "quarto-float-tbl"): set figure(gap: line-gap - cell-pad)
-  show figure.caption: it => align(left, block(sticky: true)[
+  show figure.caption: it => align(left, block(width: 100%, sticky: true)[
     #strong[#it.supplement #context it.counter.display(it.numbering)] \
     #it.body
   ])

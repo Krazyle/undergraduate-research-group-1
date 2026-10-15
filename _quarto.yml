@@ -1,5 +1,6 @@
 project:
   type: book
+  pre-render: scripts/build_figures.py
 
 bibliography: bibliography.bib
 csl: apa.csl

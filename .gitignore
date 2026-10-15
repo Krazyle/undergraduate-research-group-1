@@ -3,8 +3,6 @@
 _book/
 __pycache__/
 papers/pdf/
-*.aux
-*.log
 .env
 .env.*
 !.env.example
@@ -19,3 +17,6 @@ canvas_docs/sample-manuscript-previous-batch.pdf
 archive/mock-defense-v1/slides.html
 archive/mock-defense-v1/slides_files/
 archive/mock-defense-v1/*.pdf
+
+# Figure PDFs, built from figures/*.typ by scripts/build_figures.py
+figures/*.pdf

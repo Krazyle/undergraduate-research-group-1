@@ -103,7 +103,7 @@ The software system of this study has two parts, both shown in @fig-system-archi
 
 ### System Structure
 
-![System architecture of the benchmarking system and the prototype web application](figures/fig-3-5-system-architecture.pdf){#fig-system-architecture}
+![System architecture of the benchmarking system and the prototype web application](figures/fig-3-1-system-architecture.pdf){#fig-system-architecture}
 
 The benchmarking system, shown at the top of @fig-system-architecture, has four components. Data preparation collects, cleans, and labels the tweets and splits the labeled dataset (Sections 3.3 and 3.5). The multi-task model holds the shared encoder, the two task heads, and the multi-task optimizer. Training and measurement trains each model, records its training time and peak memory with the instruments of Section 3.4, and saves its best epoch (Section 3.5). Evaluation and analysis scores the saved models on the test set and computes the measures and tests of Sections 3.6 and 3.7.
 
@@ -113,7 +113,7 @@ The multi-task model follows the design shown in @fig-artifact-ipo of Chapter 1.
 
 @fig-use-cases shows the actors of the prototype web application and their use cases. The prototype runs a trained multi-task model of the study to show how staff of a Disaster Risk Reduction and Management Office (DRRMO) could use it to sort disaster posts. It is not tested with DRRMO staff or during actual disasters. The DRRMO staff are the main actor, and X is a secondary actor that supplies posts when the staff collect them directly. The researcher loads the trained model into the prototype and collects the labels that the staff correct. @tbl-usecases groups the use cases into five categories and describes each one.
 
-![Use case diagram of the prototype web application](figures/fig-3-7-use-cases.pdf){#fig-use-cases}
+![Use case diagram of the prototype web application](figures/fig-3-2-use-cases.pdf){#fig-use-cases}
 
 | Use Case Category | Use Case | Description |
 |:----------------|:----------------|:------------------------------------------|
