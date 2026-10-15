@@ -12,6 +12,9 @@ papers/pdf/
 /.quarto/
 **/*.quarto_ipynb
 
+# Sample manuscript from a previous batch (large, and another group's work)
+canvas_docs/sample-manuscript-previous-batch.pdf
+
 # Archived mock defense build outputs
 archive/mock-defense-v1/slides.html
 archive/mock-defense-v1/slides_files/
