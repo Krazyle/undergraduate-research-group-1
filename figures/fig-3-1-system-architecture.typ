@@ -29,8 +29,8 @@
   ],
 
   part((0, 1), height: 2.6in)[Data Preparation][
-    - Collect tweets through the X API
-    - Clean the tweets and keep Taglish tweets
+    - Collect posts through the X API
+    - Clean the posts and keep Taglish posts
     - Label both tasks with two annotators
     - Split into training, validation, and test sets
   ],
@@ -43,7 +43,7 @@
   part((2, 1), height: 2.6in)[Evaluation and Analysis][
     - Score the saved models on the test set
     - Compute F1-scores and negative transfer
-    - Run the two-way ANOVA and Tukey's HSD test
+    - Run the two-way ANOVA and Dunnett's test
     - Build the Pareto frontier
   ],
 
