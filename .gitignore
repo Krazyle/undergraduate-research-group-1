@@ -6,6 +6,9 @@ papers/pdf/
 .env
 .env.*
 !.env.example
+credentials.json
+token.json
+service_account.json
 
 /.quarto/
 **/*.quarto_ipynb
