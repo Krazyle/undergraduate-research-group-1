@@ -13,14 +13,14 @@
 
 #let group-style = (inset: 4pt, stroke: (thickness: 0.6pt, dash: "dashed"), corner-radius: 8pt)
 
-#let ipo-diagram(height: auto, input, process, output) = diagram(
+#let ipo-diagram(height: auto, widths: (1.8in,) * 3, input, process, output) = diagram(
   spacing: (0.25in, 0.15in),
   edge-stroke: 1.2pt,
   ..range(3).map(x => node((x, 0), strong(("INPUT", "PROCESS", "OUTPUT").at(x)))),
   ..(input, process, output).enumerate().map(((x, body)) => node(
     (x, 1),
     align(left, body),
-    width: 1.8in,
+    width: widths.at(x),
     height: height,
     ..box-style,
   )),

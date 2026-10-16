@@ -2,33 +2,26 @@
 #show: figure-style
 
 #ipo-diagram(
-  height: 4in,
+  height: 3.3in,
+  widths: (1.6in, 2.5in, 1.6in),
   [
-    - Taglish disaster tweets
-    - Pretrained encoder
+    - Taglish tweets about tropical cyclones from 2020 to 2026
+    - Pretrained encoder \
+      (SEA-LION-ModernBERT-300M)
     - 13 multi-task optimizers
+    - Single laptop for training
   ],
   [
-    + Design and Artifact Creation \
-      Build and label the dataset \
-      (Research Question 2)
-    + Baseline Analysis \
-      Train two single-task models \
-      (Research Question 1)
-    + Empirical Benchmarking \
-      Train one multi-task model per optimizer \
-      (Research Question 3)
-    + Comparative Validation \
-      Test which optimizers differ significantly from equal weighting \
-      Relate negative transfer to training cost \
-      (Research Question 4)
+    + *Design and Artifact Creation* \
+      Build and label the dataset and measure inter-annotator agreement (RQ2)
+    + *Baseline Analysis* \
+      Train and score two single-task models (RQ1)
+    + *Empirical Benchmarking* \
+      Train one multi-task model per optimizer and measure training time and peak memory (RQ3)
+    + *Comparative Validation* \
+      Compute negative transfer, test each optimizer against equal weighting, relate negative transfer to training cost, and select the optimizer for the final model (RQ4)
   ],
   [
-    - Labeled dataset and its inter-annotator agreement
-    - Baseline scores for each task
-    - Training time and peak memory per optimizer
-    - Negative transfer per optimizer
-    - Optimizers that differ significantly from equal weighting
-    - Relation between negative transfer and training cost
+    A multi-task model for humanitarian classification and named entity recognition of Taglish typhoon tweets, trained with the selected optimizer on a single laptop
   ],
 )
