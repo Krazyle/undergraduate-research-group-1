@@ -11,13 +11,13 @@
 ## Content
 
 
-## 🚀 PRCE 191: Undergraduate Research 1
+# 🚀 PRCE 191: Undergraduate Research 1
 
-Term: 1st Semester, Academic Year 2026–2027 | Units: 3.0 Lec 
-Pre-requisites: 4th Year Standing & Software Engineering 
-Professor: Engr. Ma. Christina A. Florentino
+**Term:** 1st Semester, Academic Year 2026–2027 \| **Units:** 3.0 Lec\
+**Pre-requisites:** 4th Year Standing & Software Engineering\
+**Professor:** Engr. Ma. Christina A. Florentino
 
-## GMeet Link to the Online Synchronous Class
+## ![image.png](https://ceu.instructure.com/courses/50400/files/17497566/preview)**[GMeet Link to the Online Synchronous Class](https://meet.google.com/anv-ctvm-haa)**
 
 "Research is to see what everybody else has seen, and to think what nobody else has thought." — Albert Szent-Györgyi
 
@@ -25,54 +25,41 @@ Welcome to your capstone runway! This course provides a comprehensive introducti
 
 ## 🗺️ Course Navigation Matrix
 
-📚 Class Materials
-🛠️ Quick Access
-🏁 Major Milestones
-
-📂 Weekly Modules Pathway
-💬 Discussion Corner
-📋 Technical Search Log
-
-📄 Download Full Syllabus
-📊 Grades & Rubrics
-📊 Literature Synthesis Matrix
-
-📖 Digital Libraries
-🔒 Ethical Compliance Hub
-🎓 Formal Proposal Defense
+| 📚 Class Materials | 🛠️ Quick Access | 🏁 Major Milestones |
+|----|----|----|
+| [📂 Weekly Modules Pathway](https://ceu.instructure.com/modules) | [💬 Discussion Corner](https://ceu.instructure.com/discussion_topics) | [📋 Technical Search Log](https://ceu.instructure.com/assignments) |
+| [📄 Download Full Syllabus](https://ceu.instructure.com/files) | [📊 Grades & Rubrics](https://ceu.instructure.com/grades) | [📊 Literature Synthesis Matrix](https://ceu.instructure.com/assignments) |
+| [📖 Digital Libraries](#toolkit) | [🔒 Ethical Compliance Hub](https://ceu.instructure.com/assignments) | [🎓 Formal Proposal Defense](https://ceu.instructure.com/assignments) |
 
 ## 🧭 Your 4-Step Learning Journey
 
-## 🔍 Module 1: Foundations of Research in Computer Science
+### 🔍 [Module 1: Foundations of Research in Computer Science](https://ceu.instructure.com/modules)
 
-Focus: Exploring paradigms (Design Science vs. Empirical), systematic mapping, boolean string construction in IEEE/ACM repositories, and setting up reference management (Zotero).
-Key Deliverables: Technical Literature Search Log (20%) & Group Research Concept Pitch (80%).
+**Focus:** Exploring paradigms (Design Science vs. Empirical), systematic mapping, boolean string construction in IEEE/ACM repositories, and setting up reference management (Zotero).\
+**Key Deliverables:** Technical Literature Search Log (20%) & Group Research Concept Pitch (80%).
 
-## 📐 Module 2: Structuring the Research Proposal
+### 📐 [Module 2: Structuring the Research Proposal](https://ceu.instructure.com/modules)
 
-Focus: Proposal micro-structures (Titles, Abstracts, Introductions), critical literature synthesis matrices, modeling software system architectures, pipelines, and evaluation metrics.
-Key Deliverables: Group Literature Synthesis Matrix (30%) & Methodology Pipeline Diagram and Draft (50%).
+**Focus:** Proposal micro-structures (Titles, Abstracts, Introductions), critical literature synthesis matrices, modeling software system architectures, pipelines, and evaluation metrics.\
+**Key Deliverables:** Group Literature Synthesis Matrix (30%) & Methodology Pipeline Diagram and Draft (50%).
 
-## ⚖️ Module 3: Standards, Ethics, and Proposal Development
+### ⚖️ [Module 3: Standards, Ethics, and Proposal Development](https://ceu.instructure.com/modules)
 
-Focus: Data privacy acts, informed consent frameworks, code reproducibility compliance, academic integrity, anonymized double-blind peer review cycles, and multi-page LaTeX document compiling via Overleaf.
-Key Deliverables: Compliance, Standards, & Ethics Check Appendix (30%) & Technical Template Integration LaTeX Package (40%).
+**Focus:** Data privacy acts, informed consent frameworks, code reproducibility compliance, academic integrity, anonymized double-blind peer review cycles, and multi-page LaTeX document compiling via Overleaf.\
+**Key Deliverables:** Compliance, Standards, & Ethics Check Appendix (30%) & Technical Template Integration LaTeX Package (40%).
 
-## 🎙️ Module 4: Presentation, Defense, and Finalization
+### 🎙️ [Module 4: Presentation, Defense, and Finalization](https://ceu.instructure.com/modules)
 
-Focus: Designing clean, low-text presentation layouts, practicing for unscripted panel cross-examinations, delivering a 3-minute tech elevator pitch, and logging structural panel adjustments into a post-defense response matrix.
-Key Deliverables: Technical Proposal Defense Presentation (40%), Oral Defense Q&A Cross-Examination (30%), & Camera-Ready Document submission with a Response-to-Reviewers matrix (30%).
+**Focus:** Designing clean, low-text presentation layouts, practicing for unscripted panel cross-examinations, delivering a 3-minute tech elevator pitch, and logging structural panel adjustments into a post-defense response matrix.\
+**Key Deliverables:** Technical Proposal Defense Presentation (40%), Oral Defense Q&A Cross-Examination (30%), & Camera-Ready Document submission with a Response-to-Reviewers matrix (30%).
 
 ## 🛠️ Essential Research Toolkit
 
-* Digital Repositories: Access peer-reviewed paradigms directly via IEEE Xplore, ACM Digital Library, and Google Scholar.
+- **Digital Repositories:** Access peer-reviewed paradigms directly via [IEEE Xplore](https://ieeexplore.ieee.org/), [ACM Digital Library](https://dl.acm.org/), and [Google Scholar](https://scholar.google.com).
+- **Reference Management:** Track and sync your bibliography database using desktop installations of [Zotero](https://www.zotero.org/) or Mendeley.
+- **Typesetting & Graphics:** Build clean algorithmic layouts using [Overleaf (LaTeX Workspace)](https://www.overleaf.com/) and map pipelines via Lucidchart or Draw.io.
+- **Academic Integrity:** Run preliminary originality diagnostics through our integrated institutional scanner before formal grading review.
 
-* Reference Management: Track and sync your bibliography database using desktop installations of Zotero or Mendeley.
+### 📣 Professor's Weekly Standup
 
-* Typesetting & Graphics: Build clean algorithmic layouts using Overleaf (LaTeX Workspace) and map pipelines via Lucidchart or Draw.io.
-
-* Academic Integrity: Run preliminary originality diagnostics through our integrated institutional scanner before formal grading review.
-
-## 📣 Professor's Weekly Standup
-
-Current Status (Week 1): Welcome to Class! Your first challenge is to download the course syllabus from the navigation links above, install Zotero on your laptop, and begin reading through Module 1. Head straight over to our virtual Discussion Corner to pick a broad computing interest area (AI, Data Science, Cyber Security, Cloud, or Software Architecture) and bounce initial study directions off your peers. I'll see you in the laboratory!
+**Current Status (Week 1):** Welcome to Class! Your first challenge is to download the course syllabus from the navigation links above, install Zotero on your laptop, and begin reading through Module 1. Head straight over to our virtual **Discussion Corner** to pick a broad computing interest area (AI, Data Science, Cyber Security, Cloud, or Software Architecture) and bounce initial study directions off your peers. I'll see you in the laboratory!
