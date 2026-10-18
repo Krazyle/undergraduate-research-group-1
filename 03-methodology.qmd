@@ -1,80 +1,172 @@
 # METHODOLOGY
 
-This chapter describes how the study answers the research questions stated in Chapter 1. It first explains the research methodology and how the tweets are selected, labeled, and divided. It then describes how the models are trained and measured and how their results are compared and analyzed. It ends with the software built for the study, which has two parts, a benchmarking system and a prototype web application, and with how both parts are tested.
+This chapter describes how the study answers the research questions stated in Chapter 1. It first explains the research methodology and how the posts are selected, labeled, and divided. It then describes how the models are trained and measured and how their results are compared and analyzed. It ends with the software built for the study, which has two parts, a benchmarking system and a prototype web application, and with how both parts are tested.
 
 ## Research Methodology
 
-This study follows the Design Science Research Methodology (DSRM) of Peffers et al. [-@peffers2007design], a research process that builds artifacts to solve an identified problem and then evaluates how well they solve it. DSRM is used because no Taglish disaster tweet dataset is labeled for both humanitarian classification and named entity recognition, so the study must first build such a dataset and a multi-task model before it can compare the multi-task optimizers. The evaluation uses quantitative measures, which DSRM allows [@peffers2007design], namely the agreement of the labels, the predictive performance and negative transfer of the models, and the training cost of each optimizer.
+This study follows the Design Science Research Methodology (DSRM) of Peffers et al. [-@peffers2007design], a research process that builds an artifact to solve an identified problem and then evaluates how well it solves it. The main artifact of this study is the final multi-task model. DSRM fits the study because its main result is an artifact that addresses a practical problem, the sorting of Taglish typhoon posts, and not only a set of measurements. The study also builds a second artifact, a Taglish dataset labeled for both tasks, because the model cannot be trained without it.
+
+DSRM has six activities, which the study carries out as follows. Chapter 1 covers the first two, identifying the problem and defining the objectives of a solution. The single-task models of the first research question set the predictive performance against which the multi-task model is judged, since DSRM allows objectives that state how a solution should compare with current ones [@peffers2007design]. The design and development activity covers building the dataset, designing the multi-task model (second research question), and selecting its optimizer from the 13 candidate models on the validation posts (third research question). The demonstration activity is the prototype web application, which shows the final model sorting posts. The evaluation activity measures the agreement of the labels and compares the final model with the single-task models on the test posts (fourth research question), using quantitative measures of predictive performance, training time, peak memory, storage, and processing time, which DSRM allows [@peffers2007design]. The communication activity is this thesis and the release of its code.
 
 ## Subjects of the Study
 
-The subjects of this study are a sample of Taglish disaster tweets and the models trained on them. The tweets form the dataset that the study builds, and the models are the artifacts that the study compares.
+The subjects of this study are a sample of Taglish typhoon posts and the models trained on them. The posts form the dataset that the study builds. The models are the final model, which is the main artifact of the study, and the single-task and candidate models used to select and evaluate it.
 
-**Dataset.** The population is the Taglish tweets on X about tropical cyclones that crossed the Philippines between 2020 and 2026. The sample consists of the tweets drawn from the tropical cyclones selected in Section 3.3. Each tweet is labeled with one of the ten humanitarian categories of HumAID [@alam2021humaid], and its entities are marked with the ten entity types of HUMAID-NER [@ali2026humaidner] in the BIO format, which gives 21 possible labels per token. The distribution of categories and entity types is known only after annotation, so it is reported with the results.
+**Dataset.** The population is the Taglish posts about tropical cyclones that crossed the Philippines between 2020 and 2026, posted on X or, if X does not provide enough posts, on Facebook (Section 3.5). The sample consists of the posts drawn from the tropical cyclones selected in Section 3.3. Each post is labeled with one of the ten humanitarian categories of HumAID [@alam2021humaid], and its entities are marked with the ten entity types of HUMAID-NER [@ali2026humaidner] in the BIO format. This format labels the first word of an entity as its beginning (B), the following words of the same entity as inside it (I), and every other word as outside any entity (O), which gives 21 possible labels per word. @tbl-dataset summarizes the dataset, and @tbl-categories and @tbl-entities define the categories and the entity types. The distribution of categories and entity types is known only after annotation, so it is reported with the results.
 
-**Models.** The study trains the 15 model configurations stated in Chapter 1, which are two single-task models and 13 multi-task models, each trained with a different multi-task optimizer. All 15 start from the same pretrained encoder, SEA-LION-ModernBERT-300M, which was pretrained on 13 languages, including Filipino and English [@aisingapore2026sealion]. Section 3.8.1 describes the architecture.
+| Property | Specification |
+|:----------------------------|:-------------------------------------------|
+| Unit | One post, text only |
+| Language | Taglish |
+| Source | X, with public Facebook pages as a fallback |
+| Events | Tropical cyclones that crossed the Philippines from 2020 to 2026 |
+| Size | At least 2,801 training posts, about 3,900 posts in total |
+| Split | 72% training (about 2,800 posts), 14% validation (about 550), 14% test (about 550) |
+| Labels | One of 10 humanitarian categories per post, and one of 21 BIO labels per word for 10 entity types |
+| Personal details | User names, telephone numbers, email addresses, and links replaced with placeholders. Names in the text are kept because PERSON is an entity type, and post IDs are kept so that the dataset can be shared as IDs |
+| Length read by the model | Up to 128 tokens per post, with longer posts cut off |
+| File format | JSON Lines with UTF-8 encoding, a text file in which each line holds one post and its labels |
+| Fields per post | Post ID, cyclone, platform, date, text, category, entity spans, and part of the split |
+
+: Specification of the dataset {#tbl-dataset tbl-colwidths="[30,70]"}
+
+| Category | Definition |
+|:----------------------------|:-------------------------------------------|
+| Caution and advice | Warnings issued or lifted, and guidance or tips about the disaster |
+| Displaced people and evacuations | People who moved away because of the disaster, even for a short time, including evacuations |
+| Infrastructure and utility damage | Damage to buildings, houses, roads, bridges, power lines, communication lines, or vehicles |
+| Injured or dead people | Reports of people injured or killed by the disaster |
+| Missing or found people | Reports of people missing or found during the disaster |
+| Not humanitarian | Posts with no information related to humanitarian aid |
+| Other relevant information | Information useful for humanitarian aid that fits no other category |
+| Requests or urgent needs | Urgent needs or requests for supplies such as food, water, clothing, money, medicine, or blood |
+| Rescue, volunteering, or donation effort | Rescue, volunteer, or donation work, such as moving people to safe places, giving food or medical aid, or donating money or services |
+| Sympathy and support | Prayers, thoughts, and emotional support |
+
+: Humanitarian categories, adapted from Alam et al. [-@alam2021humaid] {#tbl-categories tbl-colwidths="[35,65]"}
+
+| Entity type | Definition | Example |
+|:----------------|:------------------------------|:----------------------|
+| LOCATION | Name of a place | "Marikina" |
+| DISASTER_TYPE | Named hazard or type of disaster | "Bagyong Kristine" (Tropical Storm Kristine) |
+| CASUALTY | Expression of injury or death | "3 patay" (3 dead) |
+| DISPLACED | Count of evacuated or displaced people | "500 evacuees" |
+| REQUEST | Expressed need for aid | "need ng tubig" (need water) |
+| RESOURCE | Aid supplies that are available | "relief goods" |
+| RESCUE | Emergency operation in progress | "rescue boats" |
+| ORGANIZATION | Named responding organization | "Philippine Red Cross" |
+| PERSON | Named individual | "Kapitan Santos" (Barangay Captain Santos) |
+| NUMBER | Number that is not part of another entity | "ika-3 araw" (the 3rd day) |
+
+: Entity types, adapted from Ali et al. [-@ali2026humaidner], with examples written for this study {#tbl-entities tbl-colwidths="[27,35,38]"}
+
+**Models.** The study trains the 15 model configurations stated in Chapter 1, which are two single-task models and 13 candidate models, each trained with a different multi-task optimizer. The candidate trained with the selected optimizer becomes the final model. All 15 start from the same pretrained encoder, SEA-LION-ModernBERT-300M [@aisingapore2026sealion]. Section 3.8.1 describes the architecture. All models are trained and tested on one laptop, described in Section 3.8.3.
 
 ## Sampling Technique
 
-The study samples in two stages. It first selects the tropical cyclones by criterion sampling and then draws tweets from them by stratified random sampling, with each selected cyclone as a stratum.
+The study samples in two stages. It first selects the tropical cyclones by criterion sampling and then draws posts from them by stratified random sampling, with each selected cyclone as a stratum.
 
-**Selection of tropical cyclones.** The cyclones are chosen by criterion sampling from the list of tropical cyclones that crossed the Philippines between 2020 and 2026, according to PAGASA [-@pagasa2026cyclone]. A cyclone is included when at least 400 Taglish tweets about it remain after cleaning, following Seeberger et al. [-@seeberger2025generalizing], who kept only events with at least 400 tweets. A tweet counts as Taglish when it contains at least one English word and one Tagalog word, identified with the dictionary-based method of Herrera et al. [-@herrera2022tweettaglish].
+**Selection of tropical cyclones.** The cyclones are chosen by criterion sampling from the list of tropical cyclones that crossed the Philippines between 2020 and 2026, according to PAGASA [-@pagasa2026cyclone]. A cyclone is included when at least 400 Taglish posts about it remain after cleaning, following Seeberger et al. [-@seeberger2025generalizing], who kept only events with at least 400 posts. A post counts as Taglish when it contains at least one English word and one Tagalog word, identified with the dictionary-based method of Herrera et al. [-@herrera2022tweettaglish].
 
-**Selection of tweets.** Tweets are drawn by stratified random sampling with equal allocation, in which each selected cyclone is a stratum and contributes an equal share of the total, or all of its tweets if it has fewer, so that the dataset is not drawn mostly from one cyclone. The total is set by how many tweets the research group can annotate, as HumAID sampled within its annotation budget [@alam2021humaid], so that the training set has at least 2,801 tweets, the size at which Tabuzo et al. [-@tabuzo2026phmartiallawner] found that the scores of Tagalog named entity recognition stopped improving significantly.
+**Selection of posts.** Posts are drawn by stratified random sampling with equal allocation. Each selected cyclone is a stratum and contributes an equal share of the total, or all of its posts if it has fewer, in which case the remaining share is divided equally among the other cyclones. This keeps the dataset from being drawn mostly from one cyclone. If Facebook posts are added (Section 3.5), they are pooled with the posts on X about the same cyclone. The total depends on how many posts the research group can annotate, but it must give at least 2,801 training posts, which means about 3,900 posts in total. This is the upper end of the range of 1,400 to 2,801 training examples that Tabuzo et al. [-@tabuzo2026phmartiallawner] recommended as a minimum for their Tagalog NER dataset.
 
-**Data split.** After annotation, the dataset is divided once into a training set (72%), a validation set (14%), and a test set (14%) by stratified random sampling, following the proportions of HUMAID-NER [@ali2026humaidner]. The tweets of each cyclone are divided separately, as in HumAID [@alam2021humaid], and each humanitarian category keeps the same share in all three sets. As in HumAID, a category with fewer than 15 tweets in a cyclone is left out of that cyclone [@alam2021humaid]. All 15 models and all random seeds use the same split. The validation set is used to choose the settings and the saved model of each run, and the test set is used only for the final scores. The categories keep their natural proportions, with no resampling or class weights, so that differences between the models come from the multi-task optimizer alone. Variation across runs is measured with the three random seeds stated in Chapter 1 instead of k-fold cross-validation, which would multiply the number of training runs.
+**Data split.** After annotation, the dataset is divided once into training posts (72%), validation posts (14%), and test posts (14%) by stratified random sampling, using the proportions of HUMAID-NER [@ali2026humaidner]. Following HumAID [@alam2021humaid], the posts of each cyclone are divided separately, and a category with fewer than 15 posts in a cyclone is left out of that cyclone. This rule can remove a rare category from most or all cyclones. Missing or found people, for example, appears in only 4 of the 19 events in the data splits of HumAID. The categories that remain are therefore reported with the results. Each humanitarian category keeps the same share in all three parts, and all models and random seeds use the same split. The validation posts are used to choose the learning rate of each model, the task weights of tuned static weighting, and the saved epoch of each run, and to select the optimizer of the final model. The test posts are used only for the final model and the single-task models, after the selection, to compare them and to measure their processing time. The categories keep their natural proportions, with no resampling or class weights, so that the scores reflect how often each category occurs in real posts.
 
 ## Instruments to Be Used
 
-The study uses software tools to collect, filter, and label the tweets, to measure label agreement, predictive performance, and training cost, and to test the results, together with a monitoring tool that checks the condition of the graphics processor during training. The version of every tool is given in Section 3.8.3.
+@tbl-instruments lists the tools of the study, and Section 3.8.3 gives their versions.
 
-**X API.** Public tweets are collected through the X API, the official access that X provides for searching posts by keyword and date (Section 3.5).
+| Instrument | Purpose |
+|:----------------------------|:-------------------------------------------|
+| X API, full-archive search | Collects public posts on X by keyword and date |
+| Language identification [@herrera2022tweettaglish] | Labels each word as English or Tagalog with an English and a Tagalog word list, after removing Tagalog affixes such as mag- and -um- |
+| GLiNER, model gliner_multi-v2.1 | Drafts the entity spans that the annotators correct, as in Tabuzo et al. [-@tabuzo2026phmartiallawner] |
+| doccano | Annotation tool, run on the computer of the study [@ramos2023tfnerd] |
+| seqeval | Span-level micro-F1 in its default mode [@ali2026humaidner] and agreement between the annotators on entities |
+| scikit-learn | Macro-F1 and Cohen's kappa |
+| SciPy | Analysis of variance (ANOVA), Dunnett's test, paired t-tests, and confidence intervals |
+| Python timer | Time of each training step, and processing time, read with `time.perf_counter()` after `torch.cuda.synchronize()` |
+| PyTorch memory statistics | Peak memory of the graphics processor, read with `torch.cuda.max_memory_allocated()` after `torch.cuda.reset_peak_memory_stats()` |
+| File system | Storage, the size of each saved model in mebibytes (MiB) |
+| nvidia-smi | Temperature, clock speed, and heat slowdowns of the graphics processor, recorded every second (`temperature.gpu`, `clocks.sm`, `clocks_event_reasons.sw_thermal_slowdown`, `clocks_event_reasons.hw_thermal_slowdown`) |
+| Windows performance counters | Shared memory of the graphics processor, recorded every second (`GPU Adapter Memory\Shared Usage`) |
+| psutil | Main memory used by the prototype server during the stress test |
 
-**Language identification.** Taglish tweets are identified with the word-level, dictionary-based method of Herrera et al. [-@herrera2022tweettaglish], which labels each word as English or Tagalog by looking it up in an English word list and a Tagalog word list, after removing common Tagalog verb affixes such as mag- and -um- (Section 3.3).
+: Instruments of the study {#tbl-instruments tbl-colwidths="[30,70]"}
 
-**Annotation guidelines.** The annotators follow written guidelines based on the definitions of the ten humanitarian categories of HumAID [@alam2021humaid] and the ten entity types of HUMAID-NER [@ali2026humaidner], with examples of each.
+**Annotation guidelines.** The annotators follow written guidelines based on the definitions in @tbl-categories and @tbl-entities, with examples of each. As in HumAID [@alam2021humaid], each post receives one category, that of its main message. The guidelines also settle overlaps between entity types, such as a number inside a casualty count, which belongs to the CASUALTY entity.
 
-**GLiNER.** GLiNER is a named entity recognition model that can find entities of any type named by the user without being trained on them. It runs on the computer of the study and drafts the entity spans, which the annotators then correct, as Tabuzo et al. [-@tabuzo2026phmartiallawner] did to reduce annotation time. Only the entity spans are drafted, and the annotators assign the humanitarian categories themselves.
+**Timer.** The timer is added to the training loop of LibMTL. It records each training step, which covers computing the predictions and the gradients, the work of the multi-task optimizer, and the update of the model, but not validation or saving the model. Because the graphics processor works separately from the main program, the timer waits for the graphics processor to finish each step before reading the time.
 
-**doccano.** The annotators label the tweets in doccano, an open-source annotation tool that was also used for a Tagalog named entity recognition dataset [@ramos2023tfnerd]. The tool runs on the computer of the study, so the tweets are not sent to an outside service.
-
-**seqeval and scikit-learn.** Span-level micro-F1 for named entity recognition is computed with the seqeval library in its default mode, as in HUMAID-NER [@ali2026humaidner], and macro-F1 for humanitarian classification is computed with scikit-learn (Section 3.7). The same libraries compute the agreement between the two annotators, with Cohen's kappa for the categories and span-level F1 for the entities, in which the labels of one annotator are treated as the reference.
-
-**SciPy.** The SciPy library computes the analysis of variance, Tukey's HSD test, and the 95% confidence intervals of Section 3.6.
-
-**Python timer and PyTorch Profiler.** A high-resolution timer in Python records the time of every training step. A step covers the forward pass, the backward pass, the work of the multi-task optimizer, and the update made by AdamW, but not validation or saving the model. Because the graphics processor runs separately from the main program, the timer waits for it to finish each step before recording the time. The step times are summed into the total training time. PyTorch Profiler is used during the pilot run only, because it slows training, to check that the timer agrees with the work recorded on the graphics processor.
-
-**PyTorch memory statistics.** The peak memory of the graphics processor in each run is read from the memory statistics of PyTorch, which are reset at the start of the run, and is reported in mebibytes (MiB).
-
-**nvidia-smi.** The nvidia-smi tool, which comes with the NVIDIA driver, records the temperature and clock speed of the graphics processor once per second during every run. These records show whether the graphics processor slowed itself down because of heat, which would lengthen the training time (Section 3.9).
+**Memory reading.** Peak memory is reset at the start of each run and read at its end. It counts the memory that holds the model, its gradients, and its intermediate results, but not the memory that PyTorch keeps in reserve, which depends on PyTorch rather than on the optimizer.
 
 ## Procedure of Data Gathering
 
 Data gathering has five steps, carried out in the following order.
 
-**Step 1. Collection.** Public tweets are collected through the X API, as Ermino et al. [-@ermino2022urgency] collected tweets through the official access of Twitter. For each tropical cyclone on the PAGASA list (Section 3.3), the search covers the days from when the cyclone entered to when it left the Philippine Area of Responsibility, following HumAID, which kept only the tweets posted on the actual days of each event [@alam2021humaid]. The search terms combine the names of the cyclone, disaster hashtags such as #RescuePH [@ermino2022urgency], and Tagalog words that signal Taglish [@herrera2022tweettaglish].
+**Step 1. Collection.** Posts on X are collected through the full-archive search of the X API, which charges a small fee for each post it returns. For each tropical cyclone on the PAGASA list (Section 3.3), the search covers the days the cyclone was in the Philippine Area of Responsibility, the area that PAGASA monitors, as HumAID kept only posts from the days of each event [@alam2021humaid]. The search terms combine the names of the cyclone, disaster hashtags such as #RescuePH [@ermino2022urgency], and Tagalog words that signal Taglish [@herrera2022tweettaglish]. Reposts are excluded because they repeat the text of other posts.
 
-**Step 2. Cleaning and selection.** Exact and near-duplicate tweets and tweets with fewer than three words are removed, following HumAID [@alam2021humaid]. User names, telephone numbers, email addresses, and links are replaced with placeholders, and the tweets are stored only on the computer of the study, in line with the Data Privacy Act of 2012 [-@philippines2012dataprivacy]. Each remaining tweet is then checked for Taglish by language identification (Section 3.4), and the cyclones and tweets are selected as described in Section 3.3.
+Spending on the X API is limited to US$200. A pilot search on a few cyclones first measures what share of the returned posts remains after cleaning, which sets a limit on the posts collected for each cyclone so that the budget is spread across the cyclones. Ermino et al. [-@ermino2022urgency] are also asked for the IDs of their typhoon posts, which are retrieved within the same budget.
 
-**Step 3. Annotation.** Two members of the research group who are fluent in Tagalog and English label every tweet in doccano and correct the entity spans drafted by GLiNER (Section 3.4). After a practice batch, the tweets are labeled in batches, and agreement is measured after each batch (Section 3.7). The target is a Cohen's kappa of at least .61, the lower bound of substantial agreement [@landis1977measurement], and a span-level F1 of at least .74, the agreement that Tabuzo et al. [-@tabuzo2026phmartiallawner] reached for Tagalog named entity recognition. When either value falls below its target, the guidelines are revised before the next batch, as Tabuzo et al. did. Disagreements are settled by discussion, and tweets without an agreed label or not in Taglish are removed, as in HumAID [@alam2021humaid]. The labeled dataset is then split as described in Section 3.3.
+If X does not provide enough Taglish posts, posts and comments are collected from public Facebook pages, such as those of local government units, news outlets, and PAGASA. As in Ramirez et al. [-@ramirez2026cultural], only publicly accessible comments are collected, and no profile information is stored. Each comment counts as a separate post. If the sample is still incomplete, the study uses the posts it has and reports the smaller dataset as a limitation.
 
-**Step 4. Training.** All models use AdamW with a weight decay of 0.01, a batch size of 8, a maximum length of 128 tokens, 15 epochs, a learning rate that rises and then falls linearly, and gradient clipping at a norm of 1.0, as in HUMAID-NER [@ali2026humaidner]. A short pilot run first checks that every model fits in the memory of the graphics processor. With random seed 0, the settings of each model are then chosen on the validation set. Every model searches the learning rate over 1 × 10^−5^, 2 × 10^−5^, and 3 × 10^−5^, around the 2 × 10^−5^ of HUMAID-NER, because Xin et al. [-@xin2022mtohelp] tuned the learning rate of each optimizer separately. Three models also search their own setting together with the learning rate. Tuned static weighting searches the weight of humanitarian classification over 0.1, 0.2, …, 0.9, and GradNorm searches its α over 0.25, 0.5, 0.75, 1.0, 1.25, and 1.5, as in Xin et al. [-@xin2022mtohelp]. CAGrad searches its c over 0.2, 0.5, and 0.8, as in Gama et al. [-@gama2026uniform]. Each model is then trained with random seeds 1, 2, and 3, which gives 45 main runs. After each epoch, the model is scored on the validation set, and the best epoch is saved and evaluated once on the test set [@kurin2022unitary]. The validation score of a multi-task model is the mean of its two F1-scores [@ali2026humaidner].
+**Step 2. Cleaning and selection.** Following HumAID [@alam2021humaid], posts with fewer than three words or hashtags, not counting links and numbers, are removed, and so are exact and near-duplicate posts. Two posts count as near-duplicates when the cosine similarity of their counts of single words and word pairs is above 0.75, where cosine similarity is a score from 0 to 1 that shows how alike the two posts are. User names, telephone numbers, email addresses, and links are replaced with placeholders, and the posts are stored only on the computer of the study, in line with the Data Privacy Act [-@philippines2012dataprivacy]. Each remaining post is then checked for Taglish, and the cyclones and posts are selected as described in Section 3.3.
 
-All runs use the same laptop settings. The first 20 steps of each run are left out of the mean time per step, and the runs are done in a shuffled order so that changes in the condition of the laptop over time do not favor any optimizer.
+**Step 3. Annotation.** Two members of the research group who are fluent in Tagalog and English label every post in doccano and correct the entity spans drafted by GLiNER. After a practice batch, the posts are labeled in batches, and agreement is measured after each batch. The target is a Cohen's kappa of at least .61, the lower bound of substantial agreement [@landis1977measurement], and a span-level F1 of at least .74, the agreement that Tabuzo et al. [-@tabuzo2026phmartiallawner] reached for Tagalog NER. When either value falls below its target, the guidelines are revised before the next batch. Disagreements are settled by discussion, and posts without an agreed label or not in Taglish are removed. The labeled dataset is then split as described in Section 3.3.
 
-**Step 5. Log generation.** The training script writes the settings, random seed, validation scores of each epoch, test scores, step times, peak memory, and GPU records of each run to a file, and the records of all runs are combined into one table for the analysis.
+**Step 4. Training.** All models are trained with the training loop of LibMTL [@lin2023libmtl] and the settings in @tbl-training. As in the benchmarks of Chapter 2, every model uses the same batch size for the same number of steps [@xin2022mtohelp], so training does not stop early. Only the learning rate is tuned for each model.
+
+| Setting | Value | Source |
+|:--------------------|:------------------------------|:--------------------|
+| Update method | Adam | LibMTL default |
+| Weight decay, which shrinks the learned values slightly at each update | 1 × 10^−5^ | LibMTL default |
+| Learning rate | Tuned from 1, 3, 5, and 8 × 10^−5^, constant during training | @warner2025modernbert, LibMTL default |
+| Limit on gradient size | None, except a maximum of 1.0 for Nash-MTL | LibMTL default |
+| Epochs | 10 | @warner2025modernbert |
+| Saved epoch | The epoch with the highest validation score | @kurin2022unitary |
+| Validation score | Mean of the two F1-scores, or the F1-score of a single-task model | @ali2026humaidner |
+| Batch size | 8 | Pilot run |
+| Number format | 32-bit numbers | LibMTL default |
+| Maximum length | 128 tokens | @ali2026humaidner |
+| Encoder parts trained | All except the embedding layer, in every epoch | Pilot run, @merchant2020happens |
+| GradNorm α and CAGrad c | 1.5 and 0.4 | @chen2018gradnorm, @liu2021cagrad |
+| Other optimizer settings | LibMTL defaults | @lin2023libmtl |
+
+: Training settings of all models {#tbl-training tbl-colwidths="[25,45,30]"}
+
+A pilot run set the batch size, the number format, and the parts of the encoder that are trained. The single-task models and the candidate models were each trained for 15 steps on random tokens at the maximum length of 128 tokens, and their peak memory and step time were recorded. For some runs, the shared memory of the graphics processor (Section 3.9) was also recorded. Tuned static weighting was represented by equal weighting, which does the same work. With the whole encoder trained, PCGrad, CAGrad, Nash-MTL, and PCGrad with uncertainty weighting needed 10,692 to 11,980 MiB at a batch of 8, more than the 8,188 MiB of the graphics processor, while the other models needed about 6,060 MiB. Bfloat16 mixed precision, which uses 16-bit numbers for most calculations, did not bring the four below this limit, because the parameters, their gradients, and the values that Adam keeps stay in 32-bit numbers. The embedding layer holds 201 million of the 312 million parameters of the encoder. Without training this layer, the four optimizers needed at most 5,323 MiB. Merchant et al. [-@merchant2020happens] found that fine-tuning a BERT encoder changed mainly its upper layers. Keeping its embeddings and lower layers fixed lowered performance on inference and question answering only when few upper layers were left to train. The embedding layer is therefore not trained in any model, so that all 15 are compared under the same condition. A batch of 16 also fit, but only when no other program used the graphics processor. When one small program was also open, Nash-MTL moved part of its memory to the main memory, and each of its steps took about 50% longer. The batch size is therefore 8.
+
+Each model except tuned static weighting is then trained once with random seed 0 at each of the four learning rates, and the rate with the highest validation score is kept, as in the benchmarks reviewed in Chapter 2 [@xin2022mtohelp; @kurin2022unitary; @gama2026uniform]. Tuned static weighting searches its task weights together with the learning rate [@gama2026uniform]. It is trained at each learning rate with nine weights for humanitarian classification, 0.1, 0.2, …, 0.9, and the weight of NER set to one minus that value [@xin2022mtohelp], and the best of these 36 runs sets both. The settings of the other optimizers are not tuned, as in the benchmark of Lin et al. [-@lin2022rlw].
+
+Each candidate model is then trained with random seeds 1, 2, and 3, and each single-task model with seeds 1 to 5. After the selection (Section 3.6), the final model is also trained with seeds 4 and 5, giving five runs to pair with those of the single-task models. These 51 main runs follow the 92 tuning runs. Of the five runs of the final model, the one with the highest validation score is released and used in the prototype.
+
+All runs are done with the laptop plugged in, in the Performance mode of Acer, and with no other programs open. The tuning runs, and then the main runs before the selection, are each done in a shuffled order so that changes in the condition of the laptop over time do not favor any optimizer.
+
+**Step 5. Log generation.** The training script writes the settings, random seed, validation scores of each epoch, step times, peak memory, nvidia-smi records, and shared memory records of each run to a JSON file, together with the test scores, processing time, and storage of the runs scored on the test posts. The records of all runs are then combined into one CSV table for the analysis.
 
 ## Statistical Treatment
 
-The statistical tests answer the fourth research question and test the hypotheses of Chapter 1. They follow the design of Tabuzo et al. [-@tabuzo2026phmartiallawner], who first tested whether the choice of model affected the F1-scores at all and then compared pairs of models.
+The statistical tests first select the optimizer of the final model on the validation posts, which answers the third research question, and then test the hypotheses of Chapter 1 on the test posts, which answers part of the fourth.
 
-The null hypothesis of Chapter 1 is tested with a two-way analysis of variance (ANOVA) of the average change $\Delta_{\text{avg}}$ (Section 3.7), with the multi-task optimizer and the random seed as the two factors, as in Tabuzo et al. The seed is a factor because all 13 multi-task models are trained with the same three seeds, so runs with the same seed can be compared directly. The null hypothesis is rejected when the effect of the optimizer is significant at a level of .05.
+The selection follows the design of Tabuzo et al. [-@tabuzo2026phmartiallawner], who first tested whether the choice of model affected the F1-scores at all and then compared models in pairs. A one-way analysis of variance (ANOVA) first tests whether the mean $\Delta_{\text{avg}}$ on the validation posts (Section 3.7) differs among the 13 candidate models, with the three runs of each candidate as its observations. Its null hypothesis is that all 13 candidate models have the same mean $\Delta_{\text{avg}}$. The test statistic is
+$$F = \frac{\frac{1}{k-1}\sum_{j=1}^{k} n\,(\bar{y}_j - \bar{y})^2}{\frac{1}{k(n-1)}\sum_{j=1}^{k}\sum_{i=1}^{n} (y_{ij} - \bar{y}_j)^2}$$
+where $y_{ij}$ is the $\Delta_{\text{avg}}$ of candidate $j$ with seed $i$, $\bar{y}_j$ is the mean of candidate $j$, $\bar{y}$ is the mean of all runs, $k = 13$ is the number of candidates, and $n = 3$ is the number of runs of each. $F$ is compared with the F distribution with 12 and 26 degrees of freedom. If the effect of the optimizer is significant at a level of .05, each of the other 12 optimizers is compared with equal weighting using Dunnett's test, which compares several methods with one reference method and corrects for the number of comparisons. For each optimizer $j$, the test statistic is
+$$t_j = \frac{\bar{y}_j - \bar{y}_{\text{EW}}}{\sqrt{2\,\mathit{MS}_W / n}}$$
+where $\bar{y}_{\text{EW}}$ is the mean of equal weighting and $\mathit{MS}_W$ is the denominator of $F$. Its $p$-value comes from a distribution that accounts for all 12 comparisons together [@dunnett1955multiple]. An optimizer differs significantly from equal weighting when its corrected $p$-value is below .05. If the ANOVA is not significant, no optimizer is treated as different from equal weighting. In either case, the difference between each optimizer and equal weighting is reported with a 95% confidence interval that holds for all 12 comparisons together [@dunnett1955multiple],
+$$(\bar{y}_j - \bar{y}_{\text{EW}}) \pm q\,\sqrt{2\,\mathit{MS}_W / n}$$
+where $q$ is the critical value of Dunnett's test for 12 comparisons and 26 degrees of freedom at the .05 level.
 
-If the null hypothesis is rejected, the multi-task models are compared in pairs with Tukey's honestly significant difference (HSD) test, which corrects for the number of comparisons. The fourth research question is answered by the 12 comparisons that involve equal weighting, and an optimizer differs significantly from equal weighting when its corrected $p$-value is below .05. For each multi-task model, the mean F1-score of each task, the change on each task, and $\Delta_{\text{avg}}$ are reported, and the mean of $\Delta_{\text{avg}}$ is reported with its 95% confidence interval across seeds, as in Kurin et al. [-@kurin2022unitary].
+The final model is then selected by the following rule. An optimizer qualifies if its $\Delta_{\text{avg}}$ is significantly higher than that of equal weighting, which means less negative transfer, and if its mean F1-score on neither task is lower than that of equal weighting. Among the qualifying optimizers, the final model uses the one with the shortest training time. If none qualifies, the final model uses equal weighting, since it adds nothing to the cost of training a multi-task model.
 
-The other research questions are answered with descriptive statistics. The mean and standard deviation across the three seeds are reported for the F1-scores of the single-task models and for the training time and peak memory of each optimizer. Cohen's kappa is described with the bands of Landis and Koch [-@landis1977measurement], and span-level F1 is compared with the target of .74 (Section 3.5).
+The hypotheses are tested separately for each task with a two-sided paired t-test on the test posts. For each task, the null hypothesis states that the mean F1-score of the final model equals that of the single-task model, and the alternative hypothesis states that the two means differ (Chapter 1). Each pair is a run of the final model and the run of the single-task model with the same random seed, since both see the training posts in the same order, which gives five pairs. For seed $i$, the difference is $d_i = F1_{\text{final},i} - F1_{\text{single},i}$. With $n = 5$ pairs,
+$$\bar{d} = \frac{1}{n}\sum_{i=1}^{n} d_i, \qquad s_d = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(d_i - \bar{d})^2}, \qquad t = \frac{\bar{d}}{s_d/\sqrt{n}}$$
+and $t$ is compared with the t distribution with 4 degrees of freedom. The null hypothesis is rejected for a task when $p$ is below .05. The mean difference $\bar{d}$ is reported with its 95% confidence interval,
+$$\bar{d} \pm t_{0.975,\,n-1}\,\frac{s_d}{\sqrt{n}}$$
+where $t_{0.975,\,n-1}$ is the value of the t distribution that leaves 2.5% in each tail. For Dunnett's test and the paired t-test, a difference that is not significant is not taken to mean that the two models perform the same. Its confidence interval shows the range of differences that agree with the data.
 
-The relationship between negative transfer and training cost is examined with a Pareto frontier, which Treviso et al. [-@treviso2023efficient] recommend for weighing performance against resource use. An optimizer lies on the frontier when no other optimizer reaches a better or equal mean $\Delta_{\text{avg}}$ with a lower mean training time and peak memory, where a higher $\Delta_{\text{avg}}$ means less negative transfer.
+The ANOVA, Dunnett's test, and the paired t-test assume that the scores are roughly normal, and the ANOVA and Dunnett's test also assume that the candidate models vary by similar amounts across seeds. These assumptions are checked with the Shapiro–Wilk test and Levene's test, and any violation is reported as a limitation. The Wilcoxon signed-rank test, which does not need these assumptions, is not used, because with only five pairs it cannot give a $p$-value below .05.
+
+The other results are described with the mean and standard deviation across runs. These are the F1-scores of the single-task models (first research question), the F1-scores, $\Delta_t$, $\Delta_{\text{avg}}$, training time, and peak memory of each candidate model on the validation posts (third research question), and the training time, peak memory, storage, and processing time of the final model and the single-task models (fourth research question). Standard deviations are computed as $s_d$ is. The total time of the tuning runs of each optimizer is also reported, since tuned static weighting needs 36 tuning runs while every other optimizer needs four, and searches for task weights can become costly [@royer2023scalarization]. Cohen's kappa is described with the bands of Landis and Koch [-@landis1977measurement], and the span-level F1 between the annotators is compared with the target of .74 (Section 3.5).
 
 ## Data Analysis
 
@@ -84,98 +176,121 @@ The measures below are computed from the logs of Section 3.5. F1-scores lie betw
 $$P_c = \frac{TP_c}{TP_c + FP_c}, \qquad R_c = \frac{TP_c}{TP_c + FN_c}, \qquad F1_c = \frac{2 P_c R_c}{P_c + R_c}$$
 where $P_c$ is precision, $R_c$ is recall, $TP_c$ counts correct predictions of $c$, $FP_c$ counts wrong predictions of $c$, and $FN_c$ counts instances of $c$ that the model missed. When a denominator is zero, the score is set to 0. Humanitarian classification is scored with macro-F1 [@ali2026humaidner].
 $$\text{Macro-F1} = \frac{1}{|C|}\sum_{c \in C} F1_c$$
-Here $C$ is the set of categories that occur in the test set. Named entity recognition is scored with span-level micro-F1, in which the counts are pooled over all entity types and a predicted span is correct only when its boundaries and type both match a true span [@ali2026humaidner].
-
-**Negative transfer.** The change on each task, $\Delta_t$, and the average change, $\Delta_{\text{avg}}$, are computed as defined in Chapter 2 for each optimizer $k$ and seed $r$, with task 1 being humanitarian classification and task 2 being named entity recognition. The single-task model trained with the same seed is the reference, and $\Delta_{\text{avg}}$ is the value compared across optimizers in Section 3.6.
+Here $C$ is the set of categories that occur in the true labels or the predictions for the posts being scored, which is the default of scikit-learn. NER is scored with span-level micro-F1 [@ali2026humaidner], in which a predicted span is correct only when its boundaries and type both match a true span. The counts are pooled over the set $E$ of entity types before the scores are computed,
+$$P_{\text{micro}} = \frac{\sum_{e \in E} TP_e}{\sum_{e \in E} (TP_e + FP_e)}, \qquad R_{\text{micro}} = \frac{\sum_{e \in E} TP_e}{\sum_{e \in E} (TP_e + FN_e)}, \qquad \text{Micro-F1} = \frac{2 P_{\text{micro}} R_{\text{micro}}}{P_{\text{micro}} + R_{\text{micro}}}$$
+**Negative transfer.** The change on each task, $\Delta_t$, and the average change, $\Delta_{\text{avg}}$, are computed as defined in Chapter 2,
+$$\Delta_t = F1_{\text{multi-task},\,t} - F1_{\text{single-task},\,t}, \qquad \Delta_{\text{avg}} = \frac{1}{2}\left(\Delta_1 + \Delta_2\right)$$
+where task 1 is humanitarian classification and task 2 is NER. A negative value shows negative transfer. The single-task score in these formulas is the mean over the five runs of the single-task model for that task, since studies of multi-task optimizers measure the change against one single-task result for each task [@navon2022bargaining; @liu2023famo].
 
 **Inter-annotator agreement.** Agreement on the categories is measured with Cohen's kappa [@cohen1960coefficient],
 $$\kappa = \frac{p_o - p_e}{1 - p_e}$$
-where $p_o$ is the share of tweets that both annotators placed in the same category, and $p_e$ is the share expected by chance from how often each annotator used each category. Agreement on the entities is the span-level F1 between the annotators (Section 3.4).
+where $p_o$ is the share of posts that both annotators placed in the same category, and $p_e$ is the share expected by chance from how often each annotator used each category. Agreement on the entities is the span-level F1 between the annotators (Section 3.4).
 
-**Training cost.** For a run with $S$ steps, where step $i$ takes $t_i$ milliseconds,
-$$T = \frac{1}{1000}\sum_{i=1}^{S} t_i, \qquad \bar{t} = \frac{1}{S - 20}\sum_{i=21}^{S} t_i, \qquad \text{Throughput} = \frac{1000}{\bar{t}}$$
-where $T$ is the total training time in seconds, $\bar{t}$ is the mean time per step in milliseconds, and throughput is the number of steps per second, as reported by Xin et al. [-@xin2022mtohelp]. Peak memory $M$ is measured in mebibytes (Section 3.4). The overhead of optimizer $k$ on a cost $X$, either $T$ or $M$, is its extra cost as a percentage of equal weighting, computed from the means across the three seeds [@kurin2022unitary; @liu2023famo].
+**Training cost.** For a run with $S$ steps, where step $i$ takes $t_i$ milliseconds, the training time in seconds is
+$$T = \frac{1}{1000}\sum_{i=1}^{S} t_i$$
+and peak memory $M$ is measured in mebibytes (Section 3.4). The training time of a model is the mean of $T$ across its main runs. For the single-task models, $T$ is the sum of the training times of the two models, since both must be trained, and $M$ is the larger of their two peak memories, since they are trained one after the other. It includes the first steps, when the graphics processor is still starting up, because this start-up is part of the cost of every training run. The overhead of optimizer $k$ on a cost $X$, either training time or peak memory, is its extra cost as a percentage of that of equal weighting [@kurin2022unitary; @liu2023famo].
 $$O_k = \frac{X_k - X_{\text{EW}}}{X_{\text{EW}}} \times 100$$
+
+**Storage and processing time.** Storage $W$ is the size of the saved model in mebibytes (Section 3.4). Processing time is the time a model takes to label all the test posts on the graphics processor of the laptop, in batches of the same size as in training. Before it is measured, the model labels the test posts once without timing, so that the one-time start-up work of the graphics processor is not counted. The test posts are then labeled three times, and the mean of the three times is used. During this measurement, the model uses the same number format as in training and does not compute gradients, and no other program is open on the laptop. Processing time is reported as the mean time per post,
+$$p = \frac{P}{N}$$
+where $P$ is the mean time in milliseconds that a model takes to label all $N$ test posts. For the single-task models, $W$ and $P$ are the sums for the two models, since both are needed to perform the two tasks. When posts are labeled one at a time (Section 3.9), $p$ is the latency, the time the model needs to label a single post.
 
 ## Software System Description
 
-The software system of this study has two parts, both shown in @fig-system-architecture. The benchmarking system prepares the dataset and trains, evaluates, and compares the 15 models (Section 3.8.1). The prototype web application uses a trained multi-task model from the benchmark to show how the model could support disaster response (Section 3.8.2).
+The software system of this study has two parts, a benchmarking system that prepares the dataset and trains, selects, and evaluates the models, and a prototype web application that runs the final model.
 
 ### System Structure
 
 ![System architecture of the benchmarking system and the prototype web application](figures/fig-3-1-system-architecture.pdf){#fig-system-architecture}
 
-The benchmarking system, shown at the top of @fig-system-architecture, has four components. Data preparation collects, cleans, and labels the tweets and splits the labeled dataset (Sections 3.3 and 3.5). The multi-task model holds the shared encoder, the two task heads, and the multi-task optimizer. Training and measurement trains each model, records its training time and peak memory with the instruments of Section 3.4, and saves its best epoch (Section 3.5). Evaluation and analysis scores the saved models on the test set and computes the measures and tests of Sections 3.6 and 3.7.
+@fig-system-architecture is read from top to bottom. Its first two phases, data preparation and model training and selection, make up the benchmarking system and follow Sections 3.3 to 3.7. The third phase is the prototype web application (Section 3.8.2). The cylinders are stored data, and the slanted boxes are the input and output of the whole system.
 
-The multi-task model follows the design shown in @fig-artifact-ipo of Chapter 1. The encoder, SEA-LION-ModernBERT-300M, has 22 layers and represents each token with 768 numbers [@aisingapore2026sealion]. As in HUMAID-NER [@ali2026humaidner], the classification head joins the output for the first token with the mean output over all tokens and maps them to the ten categories with one linear layer. The NER head maps the output for each token to the 21 BIO labels with one linear layer, and only the first token of each word carries an NER label. The multi-task optimizer combines the losses or gradients of the two tasks into one update of the shared encoder. As in Kurin et al. [-@kurin2022unitary], MGDA, IMTL, and GradDrop use the gradients of the encoder output, which are cheaper to compute, while PCGrad, CAGrad, Nash-MTL, and PCGrad with uncertainty weighting use the gradients of all encoder weights. Ten optimizers come from the LibMTL library [@lin2023libmtl], FAMO comes from the code released by its authors [@liu2023famo], and tuned static weighting and PCGrad with uncertainty weighting are written for this study from their published descriptions.
+The multi-task model follows the design shown in @fig-artifact-ipo of Chapter 1. The encoder, SEA-LION-ModernBERT-300M, has 22 layers and represents each token with 768 numbers [@aisingapore2026sealion]. As in HUMAID-NER [@ali2026humaidner], the task head for classification joins the output for the first token with the mean output over all tokens and maps them to the ten categories with one linear layer, which gives a score for each category. The task head for NER maps the output for each token to the 21 BIO labels with one linear layer, which gives a score for each label, and only the first token of each word carries an NER label. Each single-task model uses the same encoder with only the task head of its own task, and it is trained with the loss of that task alone.
+
+Both task heads are trained, as in HUMAID-NER [@ali2026humaidner], with the cross-entropy loss, which is low when the model gives a high probability to the true label. For a batch of $B$ posts,
+$$\mathcal{L}_1 = -\frac{1}{B}\sum_{i=1}^{B} \log \hat{y}_{i,c_i}, \qquad \mathcal{L}_2 = -\frac{1}{|K|}\sum_{(i,k) \in K} \log \hat{y}_{i,k,\ell_{ik}}$$
+where $\hat{y}_{i,c_i}$ is the probability that the model gives to the true category $c_i$ of post $i$, $K$ is the set of labeled tokens in the batch, and $\hat{y}_{i,k,\ell_{ik}}$ is the probability given to the true BIO label $\ell_{ik}$ of token $k$. Equal weighting and tuned static weighting add the two losses with the task weights of Chapter 2, with $w_1 = w_2 = 1$ for equal weighting, as in the code of LibMTL [@lin2023libmtl], and $w_2 = 1 - w_1$ for tuned static weighting (Section 3.5). GradNorm, MGDA, GradDrop, and IMTL take the task gradients at the output of the encoder, and PCGrad, CAGrad, Nash-MTL, and PCGrad with uncertainty weighting take them over all trained encoder parameters, following Kurin et al. [-@kurin2022unitary] and LibMTL. Eleven optimizers come from LibMTL, which also provides the training loop, and tuned static weighting and PCGrad with uncertainty weighting are written for this study from their published descriptions. In its first epoch, GradNorm in LibMTL adds the two losses with equal weights to record their starting values, and because its task gradients are taken at the output of the encoder, only the task heads are trained in that epoch. The study changes this so that the encoder is also trained in the first epoch, as in the algorithm of @chen2018gradnorm, which updates the whole model from the first step.
 
 ### Use Cases
 
-@fig-use-cases shows the actors of the prototype web application and their use cases. The prototype runs a trained multi-task model of the study to show how staff of a Disaster Risk Reduction and Management Office (DRRMO) could use it to sort disaster posts. It is not tested with DRRMO staff or during actual disasters. The DRRMO staff are the main actor, and X is a secondary actor that supplies posts when the staff collect them directly. The researcher loads the trained model into the prototype and collects the labels that the staff correct. @tbl-usecases groups the use cases into five categories and describes each one.
+@fig-use-cases shows the actors of the prototype web application and their use cases. The staff of a Disaster Risk Reduction and Management Office (DRRMO) are the main actor, and X is a secondary actor that supplies posts when the staff collect them directly. The researcher loads the trained model into the prototype and collects the labels that the staff correct. @tbl-usecases groups the use cases into five categories and describes each one and its result.
 
 ![Use case diagram of the prototype web application](figures/fig-3-2-use-cases.pdf){#fig-use-cases}
 
-| Use Case Category | Use Case | Description |
-|:----------------|:----------------|:------------------------------------------|
-| Data input | Import posts | Loads a file of collected posts, or collects new posts from X using keywords and a date range set by the staff |
-| Classification and extraction | Analyze posts | Assigns one humanitarian category to each post and marks its entities with the trained multi-task model |
-| Classification and extraction | View analyzed posts | Shows each post with its category and its entities highlighted |
-| Classification and extraction | Correct a label | Lets the staff fix a wrong category or entity span |
-| Monitoring | Filter posts | Shows only the posts of selected categories (such as requests or urgent needs), entity types, or dates |
-| Monitoring | Mark post status | Marks a post as reviewed, forwarded to a response team, or not actionable |
-| Reporting | View summary | Shows the number of posts per category and per location over time |
-| Reporting | Export report | Saves the filtered posts and summary counts as a file for situation reports |
-| Model management | Load trained model | Loads the multi-task model chosen from the benchmark into the prototype |
-| Model management | Export corrected labels | Saves the labels corrected by the staff as a file that can be used to train future models |
+| Use Case Category | Use Case | Description | Result |
+|:----------------|:----------------|:------------------------------|:--------------------|
+| Data input | Import posts | Loads a file of collected posts, or collects new posts from X using keywords and a date range set by the staff | The posts are stored in the database, ready to be analyzed |
+| Classification and extraction | Analyze posts | Assigns one humanitarian category to each post and marks its entities with the trained multi-task model | Each post has a stored category and stored entity spans |
+| Classification and extraction | View analyzed posts | Shows each post with its category and its entities highlighted | The staff see each post with its category and its entities highlighted |
+| Classification and extraction | Correct a label | Lets the staff fix a wrong category or entity span | The corrected category or entity span replaces the predicted one and is saved as a correction |
+| Monitoring | Filter posts | Shows only the posts of selected categories (such as requests or urgent needs), entity types, or dates | Only the posts that match the selected filters are shown |
+| Monitoring | Mark post status | Marks a post as reviewed, forwarded to a response team, or not actionable | The new status of the post is saved |
+| Reporting | View summary | Shows the number of posts per category and per location over time | The counts of posts per category and per location are shown over time |
+| Reporting | Export report | Saves the filtered posts and summary counts as a file for situation reports | A CSV file of the filtered posts and summary counts is saved |
+| Model management | Load trained model | Loads the final model into the prototype | The prototype uses the loaded model for every new analysis |
+| Model management | Export corrected labels | Saves the labels corrected by the staff as a file that can be used to train future models | A JSON Lines file of the corrected posts is saved in the same format as the dataset (@tbl-dataset) |
 
-: Use case specifications {#tbl-usecases tbl-colwidths="[20,26,54]"}
+: Use case specifications {#tbl-usecases tbl-colwidths="[17,20,38,25]"}
 
-The prototype has three parts, shown at the bottom of @fig-system-architecture, all of which run on the computer of the study. The interface, built with React, runs in a web browser and shows the posts, filters, summaries, and forms that the staff use. The server, built with FastAPI in Python, receives the requests from the interface, runs the trained multi-task model with PyTorch to analyze new posts, and prepares the summaries and reports. The database, PostgreSQL, stores the posts, their predicted and corrected labels, and their status. Because the model and the database run on the same computer, the posts that the staff analyze are not sent to an outside service.
+The prototype has three parts, shown in the last phase of @fig-system-architecture, all of which run on the computer of the study, so the posts that the staff analyze are not sent to an outside service. The interface, built with React, runs in a web browser and shows the posts, filters, summaries, and forms that the staff use. The server, built with FastAPI in Python, receives the requests from the interface, runs the final model with PyTorch to analyze new posts, and prepares the summaries and reports. The requests that the server accepts, such as a request to analyze a post, are described in an API specification that FastAPI generates in the standard OpenAPI format, and the specification is kept in the GitHub repository with the code. The database, PostgreSQL, stores the posts, their predicted and corrected labels, and their status.
 
 ### Materials and Equipment
 
 @tbl-software and @tbl-hardware list the software and hardware of the study.
 
-| Software | Version |
+| Software | Minimum version |
 |:----------------------------|:-------------|
 | Operating system | Windows 11 64-bit |
 | Windows Subsystem for Linux | 2 |
-| Linux distribution | Ubuntu 24.04 LTS |
-| Python | 3.12.3 |
-| PyTorch | 2.8.0, built for CUDA 12.8 |
+| Linux distribution | Ubuntu 26.04 LTS |
+| Python | 3.12 |
+| PyTorch | 2.8, built for CUDA 12.8 |
 | CUDA | 12.8 |
-| NVIDIA driver | 572.83 |
-| Hugging Face Transformers | 4.57.6 |
-| LibMTL | 1.1.5 |
-| GLiNER | 0.2.29 |
-| scikit-learn | 1.7.2 |
-| seqeval | 1.2.2 |
-| SciPy | 1.16.2 |
-| doccano | 1.8.4 |
-| FastAPI | 0.143.0 |
-| React | 19.3.0 |
-| PostgreSQL | 18.6 |
+| NVIDIA driver | 596.36 |
+| Hugging Face Transformers | 4.57 |
+| SEA-LION-ModernBERT-300M encoder | Hugging Face revision e3d70b8 |
+| LibMTL | GitHub version, commit 4336804 (May 2025) |
+| CVXPY, for Nash-MTL | 1.9 |
+| ECOS solver for CVXPY | 2.0 |
+| GLiNER | 0.2 |
+| GLiNER model, gliner_multi-v2.1 | Hugging Face revision 443d26d |
+| scikit-learn | 1.7 |
+| seqeval | 1.2 |
+| SciPy | 1.18 |
+| pytest | 9.1 |
+| psutil | 7.2 |
+| doccano | 1.8 |
+| FastAPI | 0.143 |
+| React | 19.3 |
+| Node.js | 22 |
+| PostgreSQL | 18 |
 
 : Software of the study {#tbl-software tbl-colwidths="[50,50]"}
 
+Note. Each version is the lowest version with which the code of the study is run. The exact versions are fixed in a file kept in the GitHub repository of the study, as described below.
+
 | Hardware | Specification |
 |:----------------------------|:-------------|
+| Laptop | Acer Predator Helios Neo 16 (PHN16-71) |
 | Processor | Intel Core i5-13500HX with 14 cores and 20 threads |
-| Memory | 32 GB DDR5 |
+| Memory | 32 GB DDR5-4800 (2 × 16 GB) |
 | Graphics processor | NVIDIA GeForce RTX 4060 Laptop GPU with 8 GB of memory |
+| Storage | 1 TB NVMe solid-state drive (Kingston NV2) |
 
 : Hardware of the study {#tbl-hardware tbl-colwidths="[25,75]"}
 
-The laptop in @tbl-hardware is also the target testbed, because it stands for the kind of computer with limited resources that a local government unit could use (Chapter 1). An internet connection is needed only to collect the tweets and to download the encoder and the libraries. Training and measurement run without a connection. The code, the settings, and a file that fixes the version of every library are kept in a GitHub repository and archived on Zenodo with a permanent identifier. The labeled dataset is shared only in a form that complies with the Data Privacy Act of 2012 and the terms of X.
+The laptop in @tbl-hardware is the only machine used for training and measurement (Chapter 1). An internet connection is needed only to collect the posts and to download the encoder and the libraries. Training and measurement run without a connection. The code, the settings, and a file that fixes the version of every library are kept in a GitHub repository and archived on Zenodo with a permanent identifier. The labeled dataset is shared only in a form that complies with the Data Privacy Act of 2012 and the terms of the platforms. Posts from X are shared as post IDs, and posts from Facebook are not shared.
 
 ## Testing and Evaluation
 
 Testing checks that the software works as designed before any results are gathered. The benchmarking system is tested so that its scores and measurements can be trusted, and the prototype is tested to confirm that each use case works. The models themselves are evaluated with the measures and tests of Sections 3.6 and 3.7.
 
-**Unit testing.** Each part of the benchmarking code is tested on small examples whose correct output is worked out by hand. The tests check that the label of each word is placed on its first token, and that the scoring code gives the expected results for an exact span match, a wrong span boundary, a wrong entity type, and a category with no test tweets. They also check that each multi-task optimizer behaves as its original paper describes, for example that PCGrad leaves two gradients that do not conflict unchanged. Two further tests check that no tweet appears in more than one of the three sets and that two runs with the same seed give the same results within a small tolerance.
+**Unit testing.** Each part of the benchmarking code is tested with pytest on small examples whose correct output is worked out by hand. The tests check that the label of each word is placed on its first token, and that the scoring code gives the expected results for an exact span match, a wrong span boundary, a wrong entity type, and a category with no posts in the part being scored. They also check that each multi-task optimizer behaves as its original paper describes, for example that PCGrad leaves two gradients that do not conflict unchanged and that Nash-MTL changes its task weights during training. Further tests check that no post appears in more than one of the three parts and that only the final model and the single-task models can be scored on the test posts, and that two runs with the same random seed see the training posts in the same order.
 
-**Integration testing.** The whole benchmarking system, from training to the result files, is run for all 15 models on a small part of the data. The main runs start only after all unit and integration tests pass.
+**Integration testing.** The whole benchmarking system, from training to the result files, is run with pytest for all 15 models on a small part of the data. The tuning runs and the main runs start only after all unit and integration tests pass.
 
-**Run validity.** During every run, the nvidia-smi records (Section 3.4) are checked for heat slowdowns. A run in which the graphics processor slowed itself down because of heat is repeated, because the slowdown would lengthen its training time.
+**Run validity.** During every run, the nvidia-smi records (Section 3.4) are checked for heat slowdowns, which the two slowdown fields report. When the memory of the graphics processor is nearly full, its driver also moves part of the memory of a run to the main memory, and the run continues at a lower speed [@nvidia2023sysmem]. The shared memory that Windows reports for the graphics processor, which includes this moved memory, is therefore also recorded. In the pilot run, it grew by at most 12 MiB while a model trained if the model fit in memory, and by 66 MiB or more when part of the memory was moved. A run in which either slowdown field shows a slowdown, or in which the shared memory grows by more than 50 MiB while the model trains, is repeated, because the slowdown would lengthen its training time or processing time.
 
-**Functional testing of the prototype.** Each use case in @tbl-usecases is tested with test cases that state an input, the expected result, and the actual result. A use case passes when the actual result matches the expected result in every test case. The tests are carried out by the researchers, and the prototype is not evaluated with DRRMO staff (Section 3.8.2).
+**Stress testing.** Because the prototype may receive one post at a time or a whole file of posts, the best run of the final model and of each single-task model also label the test posts in batches of 1, 16, and 32 posts, timed as in Section 3.7, and the mean time per post and the peak memory are recorded for each batch size. These results are only described. The prototype server also labels the test posts repeatedly for one hour, and its memory use on the graphics processor and in the main memory is recorded every minute to check that it does not keep growing.
+
+**Functional testing of the prototype.** Each use case in @tbl-usecases is tested with test cases that state an input, the expected result, and the actual result. A use case passes when the actual result matches the expected result in every test case. The tests are carried out by the researchers. Because the prototype is not evaluated with DRRMO staff, its intended users, the quality characteristics of ISO/IEC 25010 are not rated.
