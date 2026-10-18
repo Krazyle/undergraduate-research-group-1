@@ -2,19 +2,16 @@
 #show: figure-style
 
 #ipo-diagram(
-  height: 2.9in,
+  height: 2.3in,
   [
     A Taglish disaster post
 
-    Example \
     "Kailangan namin ng tubig at pagkain dito sa Brgy. San Isidro, Rodriguez. Wala pang relief na dumarating."
   ],
   [
     + Split the post into tokens
-    + The shared encoder reads the tokens and converts them into numbers
-    + Two task heads make predictions from the same numbers
-      - Classification head
-      - Named entity recognition head
+    + The pretrained encoder, shared by both tasks, reads the tokens and converts them into numbers
+    + Two task heads, one for each task, make predictions from the same numbers
   ],
   [
     - Humanitarian category \
