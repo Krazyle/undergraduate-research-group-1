@@ -153,15 +153,6 @@
     "url": "https://proceedings.neurips.cc/paper/2020/hash/16002f7a455a9d1fbdec97e3609a0650-Abstract.html"
   },
   {
-    "citation_key": "regalado2015filiet",
-    "title": "FILIET: An Information Extraction System for Filipino Disaster-Related Tweets",
-    "year": 2015,
-    "doi": null,
-    "summary": "Introduces FILIET, an information extraction tool for Filipino disaster tweets that evaluates category classification algorithms across caution, casualty, donation, and other message types.",
-    "arxiv_id": null,
-    "url": "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/HCT-010.pdf"
-  },
-  {
     "citation_key": "yute2021satellite",
     "title": "Supplementing Satellite Imagery with Social Media Data for Remote Reconnaissance: A Case Study of the 2020 Taal Volcano Eruption",
     "year": 2021,
@@ -261,15 +252,6 @@
     "url": "https://doi.org/10.18653/v1/2025.findings-naacl.239"
   },
   {
-    "citation_key": "miranda2023calamancy",
-    "title": "calamanCy: A Tagalog Natural Language Processing Toolkit",
-    "year": 2023,
-    "doi": "10.18653/v1/2023.nlposs-1.1",
-    "summary": "Introduces calamanCy, an open-source spaCy toolkit for Tagalog natural language processing that provides pipelines and models for dependency parsing, part-of-speech tagging, and named entity recognition.",
-    "arxiv_id": null,
-    "url": "https://doi.org/10.18653/v1/2023.nlposs-1.1"
-  },
-  {
     "citation_key": "ramos2023tfnerd",
     "title": "TF-NERD: Tagalog Fine-grained Named Entity Recognition Dataset",
     "year": 2023,
@@ -277,15 +259,6 @@
     "summary": "Presents TF-NERD, a fine-grained named entity recognition dataset for Tagalog containing 2,337 paragraphs annotated across 12 entity categories, establishing transformer benchmark baselines.",
     "arxiv_id": null,
     "url": "https://doi.org/10.1145/3639233.3639341"
-  },
-  {
-    "citation_key": "regacho2023disasternews",
-    "title": "Automated Identification of Disaster News For Crisis Management Using Machine Learning",
-    "year": 2023,
-    "doi": "10.5121/ijci.2023.120104",
-    "summary": "Evaluates machine learning models using Bag-of-Words and TF-IDF features to classify legitimate versus illegitimate news articles during Typhoon Odette in the Philippines.",
-    "arxiv_id": "2301.09896",
-    "url": "https://doi.org/10.5121/ijci.2023.120104"
   },
   {
     "citation_key": "somido2023actionable",
@@ -387,15 +360,6 @@
     "url": "https://doi.org/10.47760/OAJMR.2026.v02i06.002"
   },
   {
-    "citation_key": "abisado2023legazpi",
-    "title": "Discovering Insights via Hybrid Thematic Analysis: A Case Study on Disaster Risk Reduction and Management for Legazpi City, Albay",
-    "year": 2023,
-    "doi": "10.3233/FAIA230763",
-    "summary": "Applies KeyBERT and thematic NLP to analyze community focus group discussions on disaster risk reduction and climate change adaptation in typhoon-prone Legazpi City, Albay.",
-    "arxiv_id": null,
-    "url": "https://doi.org/10.3233/FAIA230763"
-  },
-  {
     "citation_key": "ramirez2026cultural",
     "title": "Cultural values in disaster discourse: Behavioral propositions from the Philippines",
     "year": 2026,
@@ -421,15 +385,6 @@
     "summary": "Provides climatological records on tropical cyclones entering the Philippine Area of Responsibility. Reports that an average of twenty cyclones enter the region annually, with eight to nine crossing the country and seventy percent forming between July and October.",
     "arxiv_id": null,
     "url": "https://www.pagasa.dost.gov.ph/climate/tropical-cyclone-information"
-  },
-  {
-    "citation_key": "datareportal2026philippines",
-    "title": "Digital 2026: The Philippines",
-    "year": 2026,
-    "doi": null,
-    "summary": "Presents statistics on internet connectivity and digital media adoption in the Philippines for 2026. Records 98.0 million internet users representing an 83.8 percent penetration rate, alongside 95.8 million social media identities.",
-    "arxiv_id": null,
-    "url": "https://datareportal.com/reports/digital-2026-philippines"
   },
   {
     "citation_key": "bundnis2025worldriskreport",
@@ -529,5 +484,77 @@
     "summary": "Proposes random loss weighting and random gradient weighting, which sample task weights from a distribution at each step, and finds they perform comparably to twelve specialized methods, recommending them as baselines.",
     "arxiv_id": "2111.10603",
     "url": "https://openreview.net/forum?id=jjtFD8A1Wx"
+  },
+  {
+    "citation_key": "mcdaniel2024zeroshot",
+    "title": "Zero-Shot Classification of Crisis Tweets Using Instruction-Finetuned Large Language Models",
+    "year": 2024,
+    "doi": "10.1109/IHTC61819.2024.10855037",
+    "summary": "Tests GPT-4o, Gemini 1.5 Flash, and Claude 3.5 Sonnet with zero-shot prompts on CrisisBench crisis tweets for informativeness and 16 humanitarian categories. The best LLM reached 0.828 weighted F1 on informativeness against 0.883 for fine-tuned RoBERTa, the gap was larger on some source datasets, and the LLMs broadly underperformed fine-tuned CrisisTransformers models on humanitarian classification.",
+    "arxiv_id": "2410.00182",
+    "url": "https://doi.org/10.1109/IHTC61819.2024.10855037"
+  },
+  {
+    "citation_key": "bucher2024finetuned",
+    "title": "Fine-Tuned 'Small' LLMs (Still) Significantly Outperform Zero-Shot Generative AI Models in Text Classification",
+    "year": 2024,
+    "doi": "10.48550/arXiv.2406.08660",
+    "summary": "Compares fine-tuned RoBERTa, DeBERTa V3, ELECTRA, and XLNet with zero-shot GPT-3.5, GPT-4, and Claude 3 Opus on sentiment, stance, emotion, and party-position classification of news, tweets, and speeches, finding that the fine-tuned models significantly outperform the zero-shot models in every case. arXiv preprint.",
+    "arxiv_id": "2406.08660",
+    "url": "https://arxiv.org/abs/2406.08660"
+  },
+  {
+    "citation_key": "zou2025typhoon",
+    "title": "Spatiotemporal Typhoon Damage Assessment: A Multi-Task Learning Method for Location Extraction and Damage Identification from Social Media Texts",
+    "year": 2025,
+    "doi": "10.3390/ijgi14050189",
+    "summary": "Trains one BERT-base-Chinese model for toponym (location) extraction and multi-label typhoon damage identification of Sina Weibo texts about typhoons In-fa, Chaba, and Doksuri in China. The two tasks use different texts (MSRA news for location extraction, 6,000 labeled Weibo posts for damage). Loss weights are fixed by hand (0.001 on the location loss). In the ablation (mean of ten runs), plain multi-task learning changed F1 from 0.854 to 0.860 for location and from 0.876 to 0.875 for damage compared with separate models; most of the reported 4.3% and 2.5% gains come from added auxiliary classifiers and toponym-enhanced weights. No significance tests.",
+    "arxiv_id": null,
+    "url": "https://doi.org/10.3390/ijgi14050189"
+  },
+  {
+    "citation_key": "zhu2025prefinetuning",
+    "title": "Multi-Task Pre-Finetuning of Lightweight Transformer Encoders for Text Classification and NER",
+    "year": 2025,
+    "doi": "10.18653/v1/2025.emnlp-industry.118",
+    "summary": "Pre-finetunes small English BERT-like encoders (MiniLM, DistilBERT) for NER and text classification on mobile devices and evaluates on 5 NER and 16 classification datasets. Naive multi-task pre-finetuning causes interference: NER pushes entities of the same type toward similar representations, while classification makes token representations within a text more uniform, so the two task families place conflicting requirements on token embeddings. Naive joint pre-finetuning scored below individual pre-finetuning (MiniLM NER 76.4 vs 77.1), PCGrad improved it only slightly (+0.1 NER), and task-primary LoRA modules recovered individual-level performance.",
+    "arxiv_id": null,
+    "url": "https://aclanthology.org/2025.emnlp-industry.118/"
+  },
+  {
+    "citation_key": "royer2023scalarization",
+    "title": "Scalarization for Multi-Task and Multi-Domain Learning at Scale",
+    "year": 2023,
+    "doi": "10.52202/075280-0740",
+    "summary": "Large-scale empirical study of scalarization (fixed loss weights) for multi-task and multi-domain learning on image benchmarks (CIFAR-10/STL-10, DomainNet, CelebA, Taskonomy). Benefits of joint training over single-dataset models grow with model capacity, and at small capacities joint training can underperform. The best weights are rarely uniform, so tuning them matters under imbalance. Gradient conflicts occur throughout training, rise near the end without harming performance, and are little affected by model size or weights, suggesting that removing them at every step may not justify the extra memory and compute of gradient-based optimizers. Weights tuned by population-based training outperformed uniform weighting and the tested optimizers (uncertainty weighting, IMTL-L, CAGrad, GradDrop, PCGrad) on DomainNet; differences on CelebA were very small. No NLP tasks.",
+    "arxiv_id": "2310.08910",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2023/hash/368559ed8ede03b21f624feaeb3a5867-Abstract-Conference.html"
+  },
+  {
+    "citation_key": "hu2023scalarization",
+    "title": "Revisiting Scalarization in Multi-Task Learning: A Theoretical Perspective",
+    "year": 2023,
+    "doi": "10.52202/075280-2106",
+    "summary": "Theoretical analysis of linear scalarization in two-layer linear multi-task regression networks. When the network is under-parametrized, scalarization with any fixed weights cannot reach some Pareto-optimal solutions, especially balanced trade-offs between tasks, because of 'gradient disagreement' between surfaces of the feasible region. When the network is wide enough (over-parametrized), the Pareto front reduces to one point and any weights suffice. A three-task SARCOS robot-arm experiment shows scalarization favoring one or two tasks while MGDA and MGDA-UB reach more balanced solutions. The authors note the results are limited to linear models and do not refute the empirical findings of Xin et al. (2022).",
+    "arxiv_id": "2308.13985",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2023/hash/97c8a8eb0e5231d107d0da51b79e09cb-Abstract-Conference.html"
+  },
+  {
+    "citation_key": "merchant2020happens",
+    "title": "What Happens To BERT Embeddings During Fine-tuning?",
+    "year": 2020,
+    "doi": "10.18653/v1/2020.blackboxnlp-1.4",
+    "summary": "Studies how fine-tuning changes BERT-base on MNLI, SQuAD, and dependency parsing with probing classifiers, representational similarity analysis, and layer ablations. Fine-tuning mainly changes the upper layers and leaves the lower layers close to the pretrained model, and it changes in-domain token representations more than out-of-domain ones. In partial freezing, where the embeddings and the bottom k layers are kept fixed, MNLI accuracy did not drop significantly unless the last two layers were frozen, SQuAD F1 dropped significantly when three or fewer layers could change, and dependency parsing dropped more rapidly.",
+    "arxiv_id": "2004.14448",
+    "url": "https://aclanthology.org/2020.blackboxnlp-1.4/"
+  },
+  {
+    "citation_key": "nvidia2023sysmem",
+    "title": "System Memory Fallback for Stable Diffusion",
+    "year": 2023,
+    "doi": null,
+    "summary": "NVIDIA support article on system memory fallback. Starting with driver 536.40, applications that run out of GPU memory can use shared system memory and continue to run at lower speeds instead of crashing, with the switch happening close to the GPU memory limit. From driver 546.01, setting CUDA - Sysmem Fallback Policy to Prefer No Sysmem Fallback in the NVIDIA Control Panel turns this off, which keeps performance stable at the risk of a crash when more GPU memory is needed. The steps shown are for one program on Windows. Last updated October 31, 2023. Does not mention WSL.",
+    "arxiv_id": null,
+    "url": "https://nvidia.custhelp.com/app/answers/detail/a_id/5490/~/system-memory-fallback-for-stable-diffusion"
   }
 ]
