@@ -3,7 +3,58 @@
 #let single = 1.15em
 #let double = 2 * single
 #let line-gap = double - 1em
-#let cell-pad = line-gap / 2
+
+// The table of contents, list of tables, and list of figures, laid out like
+// earlier CEU theses: double-spaced entries with dot leaders and page numbers.
+#let front-matter() = {
+  set par(first-line-indent: 0in, justify: false)
+  let title(t) = block(width: 100%, below: line-gap, align(center, strong(t)))
+  let entry(indent, body, loc) = {
+    let page-number = numbering(loc.page-numbering(), ..counter(page).at(loc))
+    par(first-line-indent: (amount: indent, all: true), hanging-indent: indent)[
+      #link(loc)[#body#box(width: 1fr, repeat[.])#page-number]
+    ]
+  }
+  // Captions can end with a space, which would show before the dot leader.
+  let trim(c) = if c.func() == [].func() and c.children.len() > 0 and c.children.last() == [ ] {
+    c.children.slice(0, -1).join()
+  } else { c }
+  let float-list(kind, supplement) = context {
+    for f in query(figure.where(kind: kind)) {
+      let loc = f.location()
+      let n = str(counter(heading).at(loc).first()) + "." + str(f.counter.at(loc).first())
+      entry(0in, [#strong[#supplement #n.] #trim(f.caption.body)], loc)
+    }
+  }
+
+  title[TABLE OF CONTENTS]
+  context {
+    let chapters-started = false
+    for h in query(heading).filter(h => h.body != [] and h.level <= 3) {
+      let loc = h.location()
+      if h.level == 1 and h.numbering == none {
+        entry(0in, upper(h.body), loc)
+      } else if h.level == 1 {
+        if not chapters-started {
+          par[CHAPTER]
+          chapters-started = true
+        }
+        entry(0.25in, [#counter(heading).at(loc).first(). #h.body], loc)
+      } else {
+        let number = counter(heading).at(loc).map(str).join(".")
+        entry(if h.level == 2 { 0.25in } else { 0.5in }, [#number #h.body], loc)
+      }
+    }
+  }
+
+  pagebreak()
+  title[LIST OF TABLES]
+  float-list("quarto-float-tbl", "Table")
+
+  pagebreak()
+  title[LIST OF FIGURES]
+  float-list("quarto-float-fig", "Figure")
+}
 
 #let ceu-format(title: none, authors: (), body) = {
   set document(title: title, author: authors)
@@ -11,7 +62,8 @@
   set page(
     paper: "us-letter",
     margin: (left: 1.5in, right: 1in, top: 1in, bottom: 1in),
-    header: context align(right, counter(page).display("1")),
+    header: context align(right, counter(page).display()),
+    footer: none,
     numbering: none,
   )
 
@@ -50,23 +102,51 @@
   set figure(numbering: n => numbering("1.1", counter(heading).get().first(), n))
   set figure(gap: line-gap)
   show figure: set block(above: line-gap, below: line-gap)
-  show figure.where(kind: "quarto-float-tbl"): set block(breakable: true, above: line-gap - cell-pad, below: line-gap - cell-pad)
-  show figure.where(kind: "quarto-float-tbl"): set figure(gap: line-gap - cell-pad)
+  show figure.where(kind: "quarto-float-tbl"): set block(breakable: true)
   show figure.caption: it => align(left, block(width: 100%, sticky: true)[
     #strong[#it.supplement #context it.counter.display(it.numbering)] \
     #it.body
   ])
 
-  set table(stroke: 0.5pt, inset: (x: 0.5em, y: cell-pad))
+  set table(stroke: 0.5pt, inset: (x: 0.5em, top: 0.45em, bottom: 0.6em))
   set table.hline(stroke: 0.5pt)
   set table.header(repeat: false)
-  show table.cell.where(y: 0): set text(weight: "bold")
-  show table: set par(justify: false, first-line-indent: 0in)
+  set table.cell(breakable: false)
+  show table: set par(justify: false, first-line-indent: 0in, leading: single - 1em, spacing: single - 1em)
+
+  show table: it => {
+    if it.at("label", default: none) == <ceu-rebuilt> { return it }
+    let ncols = if type(it.columns) == array { it.columns.len() } else { it.columns }
+    let is-head = c => c.func() == table.header or c.func() == table.hline
+    let head = it.children.filter(is-head).map(c => {
+      if c.func() == table.header { table.header(..c.children.map(x => strong(x))) } else { c }
+    })
+    let cells = it.children.filter(c => not is-head(c))
+    let args = (columns: it.columns, align: it.align)
+    let keep = 2 * ncols
+    if cells.len() <= keep + ncols {
+      return block(breakable: false, [#table(..args, ..head, ..cells)<ceu-rebuilt>])
+    }
+    set block(spacing: 0pt)
+    block(breakable: false, [#table(..args, ..head, ..cells.slice(0, keep))<ceu-rebuilt>])
+    [#table(..args, stroke: (x, y) => (
+      left: 0.5pt, right: 0.5pt, bottom: 0.5pt, top: if y == 0 { none } else { 0.5pt },
+    ), ..cells.slice(keep))<ceu-rebuilt>]
+  }
 
   show math.equation.where(block: true): set block(above: line-gap, below: line-gap)
 
   show <refs>: set par(first-line-indent: 0in, hanging-indent: 0.5in)
 
   title-page(title: title, authors: authors)
+
+  // Front matter is numbered with Roman numerals from i, and the chapters
+  // with Arabic numerals from 1.
+  {
+    set page(numbering: "i")
+    front-matter()
+  }
+  set page(numbering: "1")
+  counter(page).update(1)
   body
 }
