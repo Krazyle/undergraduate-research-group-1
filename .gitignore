@@ -16,6 +16,7 @@ service_account.json
 # Sample manuscript from a previous batch (large, and another group's work)
 canvas_docs/sample-manuscript-previous-batch.pdf
 canvas_docs/00-announcements/attachments/
+canvas_docs/*/files/
 
 # Archived mock defense build outputs
 archive/mock-defense-v1/slides.html

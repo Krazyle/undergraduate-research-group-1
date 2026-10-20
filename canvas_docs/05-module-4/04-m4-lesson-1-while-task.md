@@ -1,15 +1,10 @@
 # M4. Lesson 1 While Task
 
-
 - Type: Page
-
 - Item ID: 4357292
-
 - Module ID: 496211
 
-
 ## Content
-
 
 🧩
 

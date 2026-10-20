@@ -1,19 +1,12 @@
 # M. Chapter 3 - FINAL
 
-
 - Type: Assignment
-
 - Item ID: 4546385
-
 - Module ID: 496209
-
 - Due Date: 2026-09-30T15:59:59Z
-
 - Points: 50.0
 
-
 ## Instructions
-
 
 ## Module Task: Research Proposal Chapter 3 Revision
 

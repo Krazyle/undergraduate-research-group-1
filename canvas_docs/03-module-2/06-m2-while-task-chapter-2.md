@@ -1,19 +1,12 @@
 # M2. While Task - Chapter 2
 
-
 - Type: Assignment
-
 - Item ID: 4494448
-
 - Module ID: 496209
-
 - Due Date: 2026-09-02T05:00:00Z
-
 - Points: 50.0
 
-
 ## Instructions
-
 
 # Module Task: Research Proposal Chapter 2 Draft
 

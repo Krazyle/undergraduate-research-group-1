@@ -1,15 +1,10 @@
 # M3. Lesson 3
 
-
 - Type: Page
-
 - Item ID: 4357277
-
 - Module ID: 496210
 
-
 ## Content
-
 
 ## 3. The Double-Blind Peer Review Cycle
 

@@ -1,15 +1,10 @@
 # M2. Preliminary & Chapter 1
 
-
 - Type: Page
-
 - Item ID: 4494245
-
 - Module ID: 496209
 
-
 ## Content
-
 
 CEU Department of Computer Science and Information Technology
 
@@ -149,7 +144,49 @@ Performance under noise, low-light degradation, packet loss, sparse data.
 
 Represent the analytical and experimental flow of your CS project using the IPO format:
 
-[TABLE]
+<table
+style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 14px;">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr style="background-color: #003366; color: #ffffff;">
+<th
+style="text-align: center; padding: 10px; border: 1px solid #cccccc; width: 33%;">INPUT</th>
+<th
+style="text-align: center; padding: 10px; border: 1px solid #cccccc; width: 34%;">PROCESS</th>
+<th
+style="text-align: center; padding: 10px; border: 1px solid #cccccc; width: 33%;">OUTPUT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td
+style="padding: 12px; border: 1px solid #cccccc; vertical-align: top; background-color: #fafafa"><ul>
+<li>Raw Datasets &amp; Testbed Hardware Specs</li>
+<li>Baseline Algorithmic Parameters</li>
+<li>Hyperparameter Constraints</li>
+<li>DSR Evaluation Metrics &amp; Benchmarks</li>
+</ul></td>
+<td
+style="padding: 12px; border: 1px solid #cccccc; vertical-align: top; background-color: #fafafa"><ul>
+<li>Data Preprocessing &amp; Feature Extraction</li>
+<li>Algorithm Modification / Quantization</li>
+<li>Software PoC Artifact Implementation</li>
+<li>Empirical Benchmarking &amp; Statistical Testing</li>
+</ul></td>
+<td
+style="padding: 12px; border: 1px solid #cccccc; vertical-align: top; background-color: #fafafa"><ul>
+<li>Novel / Optimized Algorithmic Artifact</li>
+<li>Validated Empirical Benchmark Results</li>
+<li>Comparative Performance Proof (<em>p</em> &lt; 0.05)</li>
+<li>Open Research Codebase / PoC</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
 
 ## 6. Scope, Significance & Terminology
 

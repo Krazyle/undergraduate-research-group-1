@@ -1,15 +1,10 @@
 # M.  Mock Defense Guidelines
 
-
 - Type: Page
-
 - Item ID: 4549564
-
 - Module ID: 496211
 
-
 ## Content
-
 
 # Midterm Exam: Proposal Mock Defense Guidelines
 
@@ -27,7 +22,159 @@ Undergraduate Research 1 — Computer Science Track
 
 Required Length: Exactly 11 Slides (Derived from Chapters 1–3)
 
-[TABLE]
+<table
+style="width: 100%; border-collapse: separate; border-spacing: 12px; margin: 0; padding: 0;">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+1</span>
+<h4 id="title-group-details"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Title &amp;
+Group Details</h4>
+<ul>
+<li>Project title (Algorithm / Theoretical Focus)</li>
+<li>Names of all group members</li>
+<li>Adviser name and date of defense</li>
+</ul></td>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+2</span>
+<h4 id="background-problem-statement-ch.-1"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Background
+&amp; Problem Statement (Ch. 1)</h4>
+<ul>
+<li>Real-world context &amp; current system bottlenecks</li>
+<li>Clear statement of the computational problem</li>
+<li>Main research question being addressed</li>
+</ul></td>
+</tr>
+<tr>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+3</span>
+<h4 id="objectives-scope-ch.-1"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Objectives
+&amp; Scope (Ch. 1)</h4>
+<ul>
+<li>General objective (Overall algorithm goal)</li>
+<li>Specific actionable objectives</li>
+<li>Project bounds, limits, and exclusions</li>
+</ul></td>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+4</span>
+<h4 id="literature-baseline-algorithms-ch.-2"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Literature
+&amp; Baseline Algorithms (Ch. 2)</h4>
+<ul>
+<li>2–3 existing baseline methods/algorithms</li>
+<li>Comparison table of current solutions</li>
+<li>The specific gap your study fills</li>
+</ul></td>
+</tr>
+<tr>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+5</span>
+<h4 id="expected-scientific-contribution"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Expected
+Scientific Contribution</h4>
+<ul>
+<li>Theoretical value added to Computer Science</li>
+<li>Practical benefits to developers or end-users</li>
+<li>Summary of tangible research deliverables</li>
+</ul></td>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+6</span>
+<h4 id="software-artifact-uiux-design-ch.-3"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Software
+Artifact &amp; UI/UX Design (Ch. 3)</h4>
+<ul>
+<li>System architecture diagram (Testbed layout)</li>
+<li>Tech stack (Language, libraries, execution environment)</li>
+<li><strong>UI/UX Wireframes/Screenshots</strong> for user testing</li>
+</ul></td>
+</tr>
+<tr>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+7</span>
+<h4 id="testing-method-metrics-ch.-3"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Testing
+Method &amp; Metrics (Ch. 3)</h4>
+<ul>
+<li><strong>Algorithm Metrics:</strong> Speed, memory usage,
+accuracy</li>
+<li><strong>Usability Metrics:</strong> User testing setup &amp; survey
+tool</li>
+<li>Test datasets and participant evaluation plans</li>
+</ul></td>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+8</span>
+<h4 id="development-testing-schedule-ch.-3"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Development
+&amp; Testing Schedule (Ch. 3)</h4>
+<ul>
+<li>Gantt Chart (Coding, Testing, Documentation)</li>
+<li>Proof of completion by <strong>1st week of April 2027</strong></li>
+<li>Feasibility defense of remaining workload</li>
+</ul></td>
+</tr>
+<tr>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+9</span>
+<h4 id="immediate-next-steps"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Immediate
+Next Steps</h4>
+<ul>
+<li>Immediate action items following proposal approval</li>
+<li>Specific targets for the next 2 to 4 weeks</li>
+<li>Upcoming milestones before full data gathering</li>
+</ul></td>
+<td
+style="width: 50%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+10</span>
+<h4 id="technical-risks-backup-plans-ch.-3"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">Technical
+Risks &amp; Backup Plans (Ch. 3)</h4>
+<ul>
+<li>Potential coding bugs or hardware bottlenecks</li>
+<li>Risks during user usability testing</li>
+<li>Clear contingency plans for delays</li>
+</ul></td>
+</tr>
+<tr>
+<td colspan="2"
+style="width: 100%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px"><span
+style="background-color: #dbeafe; color: #1e40af;  font-size: 12px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px;">SLIDE
+11</span>
+<h4 id="references"
+style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; ">References</h4>
+<ul>
+<li>Clean, formatted reference list of all cited research literature and
+baseline software projects.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
 
 ## Rubric 1: Presentation Material (Group Grade)
 

@@ -1,15 +1,10 @@
 # M1. CS Research - Software  Artifact
 
-
 - Type: Page
-
 - Item ID: 4494455
-
 - Module ID: 496208
 
-
 ## Content
-
 
 CEU Department of Computer Science and Information Technology
 

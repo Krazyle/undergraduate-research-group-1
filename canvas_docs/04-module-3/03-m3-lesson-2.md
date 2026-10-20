@@ -1,15 +1,10 @@
 # M3. Lesson 2
 
-
 - Type: Page
-
 - Item ID: 4357276
-
 - Module ID: 496210
 
-
 ## Content
-
 
 ## 2. Technical Standards & Reproducibility
 

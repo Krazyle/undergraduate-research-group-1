@@ -2,20 +2,28 @@
 
 - Course ID: 52066
 - Modules: 5
-- Announcements: 3
+- Announcements: 9
 
 ## Announcements
 
 - [RESEARCH PROPOSAL MANUSCRIPT](00-announcements/01-research-proposal-manuscript.md) (2026-10-14)
 - [OCTOBER 14, 2026 - MOCK DEFENSE](00-announcements/02-october-14-2026-mock-defense.md) (2026-10-13)
 - [FOR YOUR MIDTERM EXAM IN UR1 -- OCTOBER 14, 2026](00-announcements/03-for-your-midterm-exam-in-ur1-october-14-2026.md) (2026-10-05)
+- [FOR SEPTEMBER 30, 2026](00-announcements/04-for-september-30-2026.md) (2026-09-29)
+- [FOR SEPTEMBER 23, 2026](00-announcements/05-for-september-23-2026.md) (2026-09-22)
+- [PRELIM GRADE - BASIS](00-announcements/06-prelim-grade-basis.md) (2026-09-12)
+- [Prelim Exam in UR1](00-announcements/07-prelim-exam-in-ur1.md) (2026-08-22)
+- [FOR AUGUST 19, 2026](00-announcements/08-for-august-19-2026.md) (2026-08-19)
+- [Important Notice: Onsite Class Meeting Schedule](00-announcements/09-important-notice-onsite-class-meeting-schedule.md) (2026-07-20)
 
 ## Course Modules
 
 ### UR1 - Sandbox (ID: 495934)
+
 - [Home](01-ur1-sandbox/01-home.md) (Page)
 
 ### Module 1 (ID: 496208)
+
 - [Module 1: Foundations of Research in Computer Science](02-module-1/01-module-1-foundations-of-research-in-computer-science.md) (Page)
 - [P Activity 1](02-module-1/02-p-activity-1.md) (Assignment)
 - [P  M1. Lesson 1 - Foundations of CS Research](02-module-1/03-p-m1-lesson-1-foundations-of-cs-research.md) (Page)
@@ -25,6 +33,7 @@
 - [M1. Research Pitch](02-module-1/07-m1-research-pitch.md) (Assignment)
 
 ### Module 2 (ID: 496209)
+
 - [Module 2: Structuring the Research Proposal](03-module-2/01-module-2-structuring-the-research-proposal.md) (Page)
 - [M2. The Preliminaries](03-module-2/02-m2-the-preliminaries.md) (Page)
 - [M2. Preliminary & Chapter 1](03-module-2/03-m2-preliminary-chapter-1.md) (Page)
@@ -43,6 +52,7 @@
 - [Preliminary Exam](03-module-2/16-preliminary-exam.md) (Quiz)
 
 ### Module 3 (ID: 496210)
+
 - [Module 3: Standards, Ethics, and Proposal Development](04-module-3/01-module-3-standards-ethics-and-proposal-development.md) (Page)
 - [M3. Lesson 1](04-module-3/02-m3-lesson-1.md) (Page)
 - [M3. Lesson 2](04-module-3/03-m3-lesson-2.md) (Page)
@@ -50,6 +60,7 @@
 - [M3. Lesson 4](04-module-3/05-m3-lesson-4.md) (Page)
 
 ### Module 4 (ID: 496211)
+
 - [Module 4:  Presentation, Defense, and Finalization](05-module-4/01-module-4-presentation-defense-and-finalization.md) (Page)
 - [M.  Mock Defense Guidelines](05-module-4/02-m-mock-defense-guidelines.md) (Page)
 - [M4. Lesson 1](05-module-4/03-m4-lesson-1.md) (Page)

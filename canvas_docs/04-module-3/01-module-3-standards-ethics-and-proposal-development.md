@@ -1,15 +1,10 @@
 # Module 3: Standards, Ethics, and Proposal Development
 
-
 - Type: Page
-
 - Item ID: 4279424
-
 - Module ID: 496210
 
-
 ## Content
-
 
 ### 📝 Module Description
 

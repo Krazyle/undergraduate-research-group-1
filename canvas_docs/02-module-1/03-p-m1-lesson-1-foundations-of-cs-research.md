@@ -1,15 +1,10 @@
 # P  M1. Lesson 1 - Foundations of CS Research
 
-
 - Type: Page
-
 - Item ID: 4353762
-
 - Module ID: 496208
 
-
 ## Content
-
 
 ### Undergraduate Research 1 — Module 1
 

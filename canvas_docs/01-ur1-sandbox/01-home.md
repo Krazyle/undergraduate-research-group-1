@@ -1,15 +1,10 @@
 # Home
 
-
 - Type: Page
-
 - Item ID: 4279419
-
 - Module ID: 495934
 
-
 ## Content
-
 
 # 🚀 PRCE 191: Undergraduate Research 1
 

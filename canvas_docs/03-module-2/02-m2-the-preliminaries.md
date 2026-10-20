@@ -1,15 +1,10 @@
 # M2. The Preliminaries
 
-
 - Type: Page
-
 - Item ID: 4494458
-
 - Module ID: 496209
 
-
 ## Content
-
 
 CEU Department of Computer Science and Information Technology
 
