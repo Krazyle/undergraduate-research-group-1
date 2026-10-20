@@ -4,6 +4,8 @@ uv = "latest"
 typst = "latest"
 pandoc = "latest"
 "aqua:quarto-dev/quarto-cli" = "latest"
+node = "26"
+pnpm = "latest"
 
 [tasks.sync]
 description = "Synchronize Quarto manuscript to Google Docs"
@@ -24,3 +26,15 @@ run = "uv run python scripts/gdocs_manager.py comments"
 [tasks.build-figures]
 description = "Compile Typst figures to PDF"
 run = "uv run python scripts/build_figures.py"
+
+[tasks.defense-dev]
+description = "Start Slidev development server for defense-v1"
+run = "pnpm --prefix defense-v1 dev"
+
+[tasks.defense-build]
+description = "Build static presentation for defense-v1"
+run = "pnpm --prefix defense-v1 build"
+
+[tasks.defense-export]
+description = "Export defense-v1 presentation to PDF"
+run = "pnpm --prefix defense-v1 export"
