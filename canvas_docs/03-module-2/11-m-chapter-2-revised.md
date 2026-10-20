@@ -1,19 +1,12 @@
 # M. Chapter 2 - Revised
 
-
 - Type: Assignment
-
 - Item ID: 4541514
-
 - Module ID: 496209
-
 - Due Date: 2026-09-15T15:59:59Z
-
 - Points: 50.0
 
-
 ## Instructions
-
 
 ## Module Task: Research Proposal Chapter 2 Revision
 

@@ -1,15 +1,10 @@
 # M4. Lesson 1
 
-
 - Type: Page
-
 - Item ID: 4357288
-
 - Module ID: 496211
 
-
 ## Content
-
 
 Module 4
 

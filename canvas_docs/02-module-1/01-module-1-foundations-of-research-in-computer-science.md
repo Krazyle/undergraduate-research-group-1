@@ -1,15 +1,10 @@
 # Module 1: Foundations of Research in Computer Science
 
-
 - Type: Page
-
 - Item ID: 4279420
-
 - Module ID: 496208
 
-
 ## Content
-
 
 ### 📝 Module Description
 

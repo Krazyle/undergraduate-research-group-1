@@ -1,15 +1,10 @@
 # M4. Lesson 2
 
-
 - Type: Page
-
 - Item ID: 4357290
-
 - Module ID: 496211
 
-
 ## Content
-
 
 ## 2. Navigating the Panel Cross-Examination (Q&A)
 

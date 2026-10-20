@@ -1,15 +1,10 @@
 # M3. Lesson 1
 
-
 - Type: Page
-
 - Item ID: 4357275
-
 - Module ID: 496210
 
-
 ## Content
-
 
 Module 3
 

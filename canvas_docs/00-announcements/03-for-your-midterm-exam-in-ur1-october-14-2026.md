@@ -1,13 +1,9 @@
 # FOR YOUR MIDTERM EXAM IN UR1 -- OCTOBER 14, 2026
 
-
 - Date: 2026-10-05T00:20:07Z
-
 - Author: Ma Christina Florentino
 
-
 ## Announcement Content
-
 
 Important Midterm Notice
 

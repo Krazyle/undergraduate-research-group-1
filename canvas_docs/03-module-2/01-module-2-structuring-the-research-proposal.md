@@ -1,15 +1,10 @@
 # Module 2: Structuring the Research Proposal
 
-
 - Type: Page
-
 - Item ID: 4279422
-
 - Module ID: 496209
 
-
 ## Content
-
 
 ### 📝 Module Description
 

@@ -1,15 +1,10 @@
 # M2. Chapter 2
 
-
 - Type: Page
-
 - Item ID: 4494446
-
 - Module ID: 496209
 
-
 ## Content
-
 
 CEU Department of Computer Science and Information Technology
 

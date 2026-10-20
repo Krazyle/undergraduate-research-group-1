@@ -1,15 +1,10 @@
 # M4. Lesson 3
 
-
 - Type: Page
-
 - Item ID: 4357291
-
 - Module ID: 496211
 
-
 ## Content
-
 
 ## 3. The 3-Minute Tech Elevator Pitch
 

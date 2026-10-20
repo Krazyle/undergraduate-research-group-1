@@ -1,19 +1,12 @@
 # M1. Research Pitch
 
-
 - Type: Assignment
-
 - Item ID: 4495951
-
 - Module ID: 496208
-
 - Due Date: 2026-08-12T05:00:00Z
-
 - Points: 50.0
 
-
 ## Instructions
-
 
 # Assignment: CS Research Pitch Video
 
@@ -50,4 +43,111 @@ Structure your 15–25 minute recording into the following five core sections:
 
 ## 4. Grading Rubric Matrix (50 Points Total)
 
-[TABLE]
+<table
+style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 12px;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr style="background-color: #1e3a8a; color: #ffffff;">
+<th
+style="padding: 10px; width: 20%; border: 1px solid #cbd5e1">Criteria</th>
+<th
+style="padding: 10px; width: 20%; border: 1px solid #cbd5e1">Exemplary
+(Full Marks)</th>
+<th
+style="padding: 10px; width: 20%; border: 1px solid #cbd5e1">Proficient</th>
+<th
+style="padding: 10px; width: 20%; border: 1px solid #cbd5e1">Developing</th>
+<th
+style="padding: 10px; width: 20%; border: 1px solid #cbd5e1">Unsatisfactory</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #ffffff;">
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>Problem
+&amp; Research Gap</strong><br />
+<em>(10 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>9–10
+pts:</strong> Precise CS problem motivation; research gap in existing
+literature or systems is clearly articulated.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>7–8
+pts:</strong> Clear problem framing, but research gap lacks depth or
+specific comparison.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>5–6
+pts:</strong> Motivation is too generic; research gap is poorly defined
+or vague.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>0–4
+pts:</strong> Failed to state a clear CS problem or research gap.</td>
+</tr>
+<tr style="background-color: #f8fafc;">
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>Technical
+Methodology</strong><br />
+<em>(12 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>11–12
+pts:</strong> Outstanding technical rigor. Includes detailed system
+architecture diagram and pseudocode/workflow walkthrough.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>9–10
+pts:</strong> Strong technical design. Architecture diagram included,
+but walkthrough lacks complete detail.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>6–8
+pts:</strong> High-level methodology. Architecture diagram missing or
+uninformative.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>0–5
+pts:</strong> Technical approach is missing, flawed, or lacks computer
+science depth.</td>
+</tr>
+<tr style="background-color: #ffffff;">
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>Evaluation
+Plan &amp; Metrics</strong><br />
+<em>(10 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>9–10
+pts:</strong> Quantitative metrics (latency, accuracy, runtime, etc.),
+datasets, baselines, and testbed setup are rigorously defined.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>7–8
+pts:</strong> Evaluation plan has clear metrics, but baselines or
+dataset choices are incomplete.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>5–6
+pts:</strong> Evaluation metrics are vague without quantitative rigor or
+clear benchmarks.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>0–4
+pts:</strong> Missing evaluation plan or quantitative metrics.</td>
+</tr>
+<tr style="background-color: #f8fafc;">
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>Feasibility
+&amp; Timeline</strong><br />
+<em>(8 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>7–8
+pts:</strong> Highly realistic roadmap with clear milestones, risk
+mitigation strategies, and deliverables.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>5–6
+pts:</strong> Feasible roadmap provided, but lacks clear risk
+mitigations or milestone detail.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>3–4
+pts:</strong> Unrealistic project scope for undergraduate timeline.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>0–2
+pts:</strong> Missing timeline or unrealistic scope.</td>
+</tr>
+<tr style="background-color: #ffffff;">
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>Visuals,
+Audio &amp; Camera Presence</strong><br />
+<em>(10 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>9–10
+pts:</strong> High-quality slides, clear webcam overlay showing
+presenter's face throughout, crisp audio, on time (15–25 mins).</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>7–8
+pts:</strong> Good visuals and audio quality. Camera visible. Minor
+pacing issues or slight duration mismatch.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>5–6
+pts:</strong> Poor slide quality, obscured camera feed, audio quality
+issues, or video duration out of range.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e1"><strong>0–4
+pts:</strong> Face not shown on camera or severe recording/audio
+failures.</td>
+</tr>
+</tbody>
+</table>

@@ -1,19 +1,12 @@
 # P M1. Post task
 
-
 - Type: Assignment
-
 - Item ID: 4353769
-
 - Module ID: 496208
-
 - Due Date: 2026-07-29T15:59:59Z
-
 - Points: 30.0
 
-
 ## Instructions
-
 
 # PRCO191 – Undergraduate Research 1
 
@@ -66,4 +59,98 @@ Copy and paste the box below into your submission document:
 
 ### 📊 Grading Rubric (30 Points)
 
-[TABLE]
+<table
+style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; text-align: left;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr style="background-color: #2d3748; color: #ffffff;">
+<th
+style="padding: 10px; width: 20%; border: 1px solid #cbd5e0">Criteria</th>
+<th
+style="padding: 10px; width: 22%; border: 1px solid #cbd5e0">Exemplary
+(100%)</th>
+<th
+style="padding: 10px; width: 22%; border: 1px solid #cbd5e0">Satisfactory
+(75%-80%)</th>
+<th
+style="padding: 10px; width: 22%; border: 1px solid #cbd5e0">Developing
+(50%-60%)</th>
+<th style="padding: 10px; width: 14%; border: 1px solid #cbd5e0">Needs
+Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td
+style="padding: 10px; background-color: #f7fafc; border: 1px solid #cbd5e0"><strong>Title
+Refinement &amp; CS Focus</strong><br />
+<em>(8 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>8
+pts</strong><br />
+Title explicitly shifts from basic software development to a CS research
+artifact/experiment. Concise, specific, and includes rationale.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>6
+pts</strong><br />
+Title is improved and scholarly, but slightly verbose, broad, or still
+reads like commercial software development.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>4
+pts</strong><br />
+Title shows minimal refinement from Activity 1 and lacks clear
+research/experimental focus.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>0–2
+pts</strong><br />
+Title is incomplete, overly vague, or unchanged.</td>
+</tr>
+<tr>
+<td
+style="padding: 10px; background-color: #f7fafc; border: 1px solid #cbd5e0"><strong>RQ
+Structure &amp; Scoping</strong><br />
+<em>(12 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>11–12
+pts</strong><br />
+Main and Sub-RQs follow the funnel model. They are complex, empirical,
+measurable, and perfectly aligned with CS research.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>9–10
+pts</strong><br />
+RQs are clear and measurable, but sub-questions are slightly broad or
+resemble system build tasks rather than research queries.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>6–8
+pts</strong><br />
+RQs are simple "Yes/No" queries, lack clear empirical evaluation
+metrics, or are unfeasible.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>0–5
+pts</strong><br />
+RQs are missing, unmeasurable, or describe software features instead of
+research problems.</td>
+</tr>
+<tr>
+<td
+style="padding: 10px; background-color: #f7fafc; border: 1px solid #cbd5e0"><strong>Literature
+&amp; Boolean Search</strong><br />
+<em>(10 Points)</em></td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>9–10
+pts</strong><br />
+Includes valid Boolean search string. Source is peer-reviewed and
+recent. Summary and justification clearly tie to RQ. APA citation is
+flawless.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>7–8
+pts</strong><br />
+Valid Boolean string provided. Source is relevant, but APA citation has
+minor errors or summary lacks depth.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>5–6
+pts</strong><br />
+Boolean string missing or invalid. Source is outdated/non-peer-reviewed.
+APA formatting has major errors.</td>
+<td style="padding: 10px; border: 1px solid #cbd5e0"><strong>0–4
+pts</strong><br />
+Literature section is incomplete, irrelevant, or lacks proper citation
+and justification.</td>
+</tr>
+</tbody>
+</table>

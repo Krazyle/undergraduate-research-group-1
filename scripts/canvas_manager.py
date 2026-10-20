@@ -17,6 +17,7 @@ from rich.table import Table
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = ROOT_DIR / ".env"
+TABLE_FILTER_PATH = Path(__file__).resolve().parent / "keep_complex_tables.lua"
 DEFAULT_COURSE_KEYWORD = "Undergraduate Research 1"
 
 
@@ -64,7 +65,7 @@ def html_to_markdown(raw_html: str | None) -> str:
             raw_html,
             "gfm-raw_html",
             format="html",
-            extra_args=["--wrap=none"],
+            extra_args=["--wrap=none", f"--lua-filter={TABLE_FILTER_PATH}"],
         ).strip()
         return re.sub(r"\n{3,}", "\n\n", converted)
     except (OSError, RuntimeError) as err:
@@ -287,7 +288,14 @@ def export_cmd(
     try:
         with console.status("[bold blue]Fetching course structure...[/bold blue]"):
             modules = list(course.get_modules(include=["items"]))
-            announcements = list(canvas.get_announcements(context_codes=[f"course_{course.id}"]))
+            # Without explicit dates, Canvas only returns announcements from the last 14 days
+            announcements = list(
+                canvas.get_announcements(
+                    context_codes=[f"course_{course.id}"],
+                    start_date="2000-01-01",
+                    end_date="2100-01-01",
+                )
+            )
     except (CanvasException, requests.RequestException) as err:
         console.print(f"[bold red]Error communicating with Canvas:[/bold red] {err}")
         raise typer.Exit(1)

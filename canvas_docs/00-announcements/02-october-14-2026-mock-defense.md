@@ -1,13 +1,9 @@
 # OCTOBER 14, 2026 - MOCK DEFENSE
 
-
 - Date: 2026-10-13T07:22:20Z
-
 - Author: Ma Christina Florentino
 
-
 ## Announcement Content
-
 
 ## Mock Defense Reminders & Guidelines
 

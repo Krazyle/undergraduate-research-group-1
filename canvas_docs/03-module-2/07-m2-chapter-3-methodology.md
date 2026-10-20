@@ -1,15 +1,10 @@
 # M2. Chapter 3 - Methodology
 
-
 - Type: Page
-
 - Item ID: 4494449
-
 - Module ID: 496209
 
-
 ## Content
-
 
 CEU Department of Computer Science and Information Technology
 

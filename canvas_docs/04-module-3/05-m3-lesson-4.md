@@ -1,15 +1,10 @@
 # M3. Lesson 4
 
-
 - Type: Page
-
 - Item ID: 4357278
-
 - Module ID: 496210
 
-
 ## Content
-
 
 ## 4. Professional Typesetting with LaTeX and Overleaf
 

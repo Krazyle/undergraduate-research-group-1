@@ -1,15 +1,10 @@
 # Module 4:  Presentation, Defense, and Finalization
 
-
 - Type: Page
-
 - Item ID: 4279426
-
 - Module ID: 496211
 
-
 ## Content
-
 
 ### 📝 Module Description
 

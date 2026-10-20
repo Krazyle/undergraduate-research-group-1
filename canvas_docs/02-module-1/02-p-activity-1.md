@@ -1,19 +1,12 @@
 # P Activity 1
 
-
 - Type: Assignment
-
 - Item ID: 4458376
-
 - Module ID: 496208
-
 - Due Date: 2026-07-28T23:00:00Z
-
 - Points: 30.0
 
-
 ## Instructions
-
 
 ### **Step 1: Team Consolidation**
 
@@ -74,7 +67,7 @@ Group Name/Number: \[Insert Group Name / Number\]\
 Date: \[Insert Date\]
 
 --------------------------------------------------------------------------------\
-1. TEAM ROSTER & SKILL INVENTORY\
+1\. TEAM ROSTER & SKILL INVENTORY\
 --------------------------------------------------------------------------------\
 \* Team Member 1: \[Full Name\] \| \[Email/Contact\]\
   - Primary Roles: \[e.g., Frontend Developer, Project Manager\]\
@@ -91,7 +84,7 @@ Date: \[Insert Date\]
 \[Add more team members as needed\]
 
 --------------------------------------------------------------------------------\
-2. MEETING SCHEDULE & COMMUNICATION PLAN\
+2\. MEETING SCHEDULE & COMMUNICATION PLAN\
 --------------------------------------------------------------------------------\
 \* Communication Channels: \[e.g., Discord / WhatsApp Group / Slack\]\
 \* Project Folder / Repository: \[e.g., GitHub Link / Google Drive Link\]
@@ -103,7 +96,7 @@ Date: \[Insert Date\]
 \* First Official Group Meeting: \[Date & Time\]
 
 --------------------------------------------------------------------------------\
-3. TOPIC EXPLORATIONS (3 COMPUTING PROBLEMS)\
+3\. TOPIC EXPLORATIONS (3 COMPUTING PROBLEMS)\
 --------------------------------------------------------------------------------
 
 PROBLEM OUTLINE 1: \[Short Title of Problem 1\]\
