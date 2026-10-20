@@ -258,8 +258,7 @@ def convert_cmd(
     batch_size: Annotated[int, typer.Option("--batch-size", "-b", help="Batch size for MinerU parser")] = 10,
     key: Annotated[str | None, typer.Option("--key", "-k", help="Target a specific citation key")] = None,
     backend: Annotated[str, typer.Option("--backend", help="LMDeploy backend for MinerU")] = "turbomind",
-    mode: Annotated[str, typer.Option("--mode", "-m", help="MinerU parsing mode")] = "hybrid",
-    layout: Annotated[str, typer.Option("--layout", "-l", help="MinerU layout model")] = "vlm",
+    tier: Annotated[str | None, typer.Option("--tier", "-t", help="MinerU parse tier: flash, basic, standard, advanced")] = None,
     mineru_bin: Annotated[str | None, typer.Option("--mineru-bin", help="Path to mineru-kit executable")] = None,
 ) -> None:
     ensure_directories()
@@ -305,11 +304,12 @@ def convert_cmd(
 
             cmd = [
                 executable,
-                "-p", str(temp_input_path),
+                "parse",
+                str(temp_input_path),
                 "-o", str(temp_output_dir),
-                "-m", mode,
-                "--layout", layout,
             ]
+            if tier:
+                cmd += ["--tier", tier]
 
             try:
                 subprocess.run(cmd, check=True)
@@ -319,24 +319,13 @@ def convert_cmd(
 
             for paper in batch:
                 pkey = paper["citation_key"]
-                paper_output_dir = temp_output_dir / pkey
-                if not paper_output_dir.is_dir():
+                md_out = temp_output_dir / f"{pkey}.md"
+                if not md_out.is_file():
+                    console.print(f"[red]✗[/red] No Markdown output: [bold]{pkey}[/bold]")
                     continue
 
-                for md_cand in paper_output_dir.glob("*.md"):
-                    content = md_cand.read_text(encoding="utf-8")
-                    images_dir = paper_output_dir / "images"
-
-                    if images_dir.is_dir():
-                        target_img_dir = MD_DIR / "images" / pkey
-                        target_img_dir.mkdir(parents=True, exist_ok=True)
-                        for img in images_dir.glob("*"):
-                            shutil.copy2(img, target_img_dir / img.name)
-                        content = content.replace("images/", f"images/{pkey}/")
-
-                    (MD_DIR / f"{pkey}.md").write_text(content, encoding="utf-8")
-                    console.print(f"[green]✓[/green] Saved Markdown: [bold]{pkey}[/bold]")
-                    break
+                shutil.copy2(md_out, MD_DIR / f"{pkey}.md")
+                console.print(f"[green]✓[/green] Saved Markdown: [bold]{pkey}[/bold]")
 
     console.print("[bold green]Conversion process finished.[/bold green]")
 

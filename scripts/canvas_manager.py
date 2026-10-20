@@ -2,8 +2,6 @@
 
 import os
 import re
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -21,10 +19,6 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = ROOT_DIR / ".env"
 DEFAULT_COURSE_KEYWORD = "Undergraduate Research 1"
 
-CourseIdOpt = Annotated[
-    int | None,
-    typer.Option("--course-id", "-c", help="Override course ID"),
-]
 
 app = typer.Typer(
     name="canvas-manager",
@@ -46,11 +40,11 @@ def load_config() -> tuple[str, str]:
                     config[key.strip()] = val.strip().strip('"').strip("'")
 
     base_url = (
-        config.get("CANVAS_BASE_URL")
-        or os.environ.get("CANVAS_BASE_URL")
+        os.environ.get("CANVAS_BASE_URL")
+        or config.get("CANVAS_BASE_URL")
         or "https://ceu.instructure.com"
     ).rstrip("/")
-    token = config.get("CANVAS_API_TOKEN") or os.environ.get("CANVAS_API_TOKEN") or ""
+    token = os.environ.get("CANVAS_API_TOKEN") or config.get("CANVAS_API_TOKEN") or ""
     return base_url, token
 
 
@@ -65,13 +59,17 @@ def init_canvas() -> Canvas:
 def html_to_markdown(raw_html: str | None) -> str:
     if not raw_html:
         return ""
-    converted = pypandoc.convert_text(
-        raw_html,
-        "gfm-raw_html",
-        format="html",
-        extra_args=["--wrap=none"],
-    ).strip()
-    return re.sub(r"\n{3,}", "\n\n", converted)
+    try:
+        converted = pypandoc.convert_text(
+            raw_html,
+            "gfm-raw_html",
+            format="html",
+            extra_args=["--wrap=none"],
+        ).strip()
+        return re.sub(r"\n{3,}", "\n\n", converted)
+    except (OSError, RuntimeError) as err:
+        console.print(f"[bold red]Error:[/bold red] Pandoc conversion failed: {err}")
+        raise typer.Exit(1)
 
 
 def slugify(text: str) -> str:
@@ -87,23 +85,22 @@ def download_file(url: str, dest: Path) -> bool:
     if dest.exists():
         return True
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ThesisCanvasManager/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            dest.write_bytes(resp.read())
+        with requests.get(url, headers={"User-Agent": "ThesisCanvasManager/1.0"}, stream=True, timeout=30) as resp:
+            resp.raise_for_status()
+            with open(dest, "wb") as file:
+                for chunk in resp.iter_content(chunk_size=65536):
+                    file.write(chunk)
         return True
-    except (urllib.error.URLError, TimeoutError, OSError) as err:
+    except (requests.RequestException, OSError) as err:
         console.print(f"[yellow]Warning: Failed to download {dest.name}: {err}[/yellow]")
         return False
 
 
 def get_course(
     canvas: Canvas,
-    course_id: int | None = None,
     keyword: str = DEFAULT_COURSE_KEYWORD,
 ) -> Course:
     try:
-        if course_id:
-            return canvas.get_course(course_id)
         courses = canvas.get_courses(enrollment_state="active")
         for course in courses:
             name = getattr(course, "name", "")
@@ -119,12 +116,16 @@ def get_course(
 
 
 @app.command("modules")
-def list_modules_cmd(course_id: CourseIdOpt = None) -> None:
+def list_modules_cmd() -> None:
     canvas = init_canvas()
-    course = get_course(canvas, course_id)
+    course = get_course(canvas)
 
     console.print(f"\n[bold green]Course:[/bold green] {course.name} [dim](ID: {course.id})[/dim]\n")
-    modules = list(course.get_modules(include=["items"]))
+    try:
+        modules = list(course.get_modules(include=["items"]))
+    except (CanvasException, requests.RequestException) as err:
+        console.print(f"[bold red]Error communicating with Canvas:[/bold red] {err}")
+        raise typer.Exit(1)
     if not modules:
         console.print("[yellow]No modules found.[/yellow]")
         return
@@ -154,10 +155,9 @@ def list_modules_cmd(course_id: CourseIdOpt = None) -> None:
 @app.command("module")
 def inspect_module_cmd(
     module_id: Annotated[int, typer.Argument(help="ID of the module to inspect")],
-    course_id: CourseIdOpt = None,
 ) -> None:
     canvas = init_canvas()
-    course = get_course(canvas, course_id)
+    course = get_course(canvas)
 
     try:
         module = course.get_module(module_id)
@@ -172,32 +172,20 @@ def inspect_module_cmd(
     for item in items:
         itype = getattr(item, "type", "")
         ititle = getattr(item, "title", "")
-        content_id = getattr(item, "content_id", None)
-        extra = ""
-
-        try:
-            if itype == "Assignment" and content_id:
-                assign = course.get_assignment(content_id)
-                extra = f"Points: {getattr(assign, 'points_possible', 'None')} | Due: {getattr(assign, 'due_at', 'None')}"
-            elif itype == "File" and content_id:
-                f = course.get_file(content_id)
-                extra = f"Download: {getattr(f, 'url', '')}"
-        except (CanvasException, requests.RequestException) as err:
-            extra = f"Notice: Could not fetch details ({err})"
-
         console.print(f"- [bold]{ititle}[/bold] [magenta]({itype})[/magenta] [dim]ID: {item.id}[/dim]")
-        if extra:
-            console.print(f"  [dim]{extra}[/dim]")
 
 
 @app.command("item")
 def inspect_item_cmd(
     item_id: Annotated[int, typer.Argument(help="ID of the module item to inspect")],
-    course_id: CourseIdOpt = None,
 ) -> None:
     canvas = init_canvas()
-    course = get_course(canvas, course_id)
-    modules = list(course.get_modules(include=["items"]))
+    course = get_course(canvas)
+    try:
+        modules = list(course.get_modules(include=["items"]))
+    except (CanvasException, requests.RequestException) as err:
+        console.print(f"[bold red]Error communicating with Canvas:[/bold red] {err}")
+        raise typer.Exit(1)
 
     target_item: dict[str, Any] | None = None
     target_module_name: str = ""
@@ -250,10 +238,14 @@ def inspect_item_cmd(
 
 
 @app.command("announcements")
-def list_announcements_cmd(course_id: CourseIdOpt = None) -> None:
+def list_announcements_cmd() -> None:
     canvas = init_canvas()
-    course = get_course(canvas, course_id)
-    announcements = list(canvas.get_announcements(context_codes=[f"course_{course.id}"]))
+    course = get_course(canvas)
+    try:
+        announcements = list(canvas.get_announcements(context_codes=[f"course_{course.id}"]))
+    except (CanvasException, requests.RequestException) as err:
+        console.print(f"[bold red]Error communicating with Canvas:[/bold red] {err}")
+        raise typer.Exit(1)
 
     if not announcements:
         console.print("[yellow]No announcements found.[/yellow]")
@@ -286,16 +278,19 @@ def list_announcements_cmd(course_id: CourseIdOpt = None) -> None:
 @app.command("export")
 def export_cmd(
     output_dir: Annotated[str, typer.Option("--output-dir", "-o", help="Target export directory")] = "canvas_docs",
-    course_id: CourseIdOpt = None,
 ) -> None:
     canvas = init_canvas()
-    course = get_course(canvas, course_id)
+    course = get_course(canvas)
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 
-    with console.status("[bold blue]Fetching course structure...[/bold blue]"):
-        modules = list(course.get_modules(include=["items"]))
-        announcements = list(canvas.get_announcements(context_codes=[f"course_{course.id}"]))
+    try:
+        with console.status("[bold blue]Fetching course structure...[/bold blue]"):
+            modules = list(course.get_modules(include=["items"]))
+            announcements = list(canvas.get_announcements(context_codes=[f"course_{course.id}"]))
+    except (CanvasException, requests.RequestException) as err:
+        console.print(f"[bold red]Error communicating with Canvas:[/bold red] {err}")
+        raise typer.Exit(1)
 
     console.print(f"[1/3] Loaded {len(modules)} modules and {len(announcements)} announcements for {course.name}")
 
