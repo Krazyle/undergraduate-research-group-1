@@ -5,8 +5,11 @@ title: Benchmarking Multi-Task Optimizers for Humanitarian Classification and Na
 info: Presentation deck for defense
 drawings:
   persist: false
-transition: slide-left
+transition: view-transition
+defaults:
+  transition: slide-left
 layout: two-cols-header
+class: title-morph
 ---
 
 # Benchmarking Multi-Task Optimizers for Humanitarian Classification and Named Entity Recognition of Taglish Typhoon Tweets
@@ -26,3 +29,14 @@ layout: two-cols-header
 ### Research Advisor
 
 Engr. Ma Christina A. Florentino
+
+---
+layout: center
+class: text-center title-morph title-focus
+---
+
+# Benchmarking Multi-Task Optimizers for Humanitarian Classification and Named Entity Recognition of Taglish Typhoon Tweets
+
+---
+
+# Background and Problem
