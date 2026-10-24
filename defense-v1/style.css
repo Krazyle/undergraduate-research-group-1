@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700&display=swap');
+
+:root {
+  --space-0: 0.25rem;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4rem;
+
+  --text-2xs: 1.125rem;
+  --text-xs: 1.238rem;
+  --text-sm: 1.361rem;
+  --text-base: 1.497rem;
+  --text-md: 1.647rem;
+  --text-lg: 1.812rem;
+  --text-xl: 1.993rem;
+  --text-2xl: 2.192rem;
+  --text-3xl: 2.412rem;
+  --text-4xl: 2.653rem;
+  --text-5xl: 2.918rem;
+
+  --leading-tight: 1.1;
+  --leading-body: 1.5;
+  --leading-list: 1.35;
+
+  --color-muted: #404040;
+
+  --grid-columns: 12;
+  --grid-gutter: var(--space-3);
+}
+
+.slidev-layout {
+  padding: var(--space-5);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  font-weight: 700;
+  text-wrap: balance;
+  margin-bottom: var(--space-3);
+}
+
+h3 {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}

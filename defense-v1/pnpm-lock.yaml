@@ -11,9 +11,6 @@ importers:
       '@slidev/cli':
         specifier: ^53.0.0
         version: 53.0.0(@nuxt/kit@3.21.11)(@oxc-project/types@0.154.0)(@types/markdown-it@14.2.0)(@types/node@22.20.5)(@vitejs/devtools-kit@0.7.6(cac@7.1.0)(crossws@0.4.15(srvx@1.0.6))(srvx@1.0.6)(vite@8.3.4(@types/node@22.20.5)(jiti@2.7.0)(yaml@2.9.1)))(@vue/compiler-sfc@3.5.44)(cac@7.1.0)(crossws@0.4.15(srvx@1.0.6))(lightningcss@1.33.0)(markdown-it@14.3.3)(oxc-parser@0.153.0)(postcss@8.5.31)(rolldown@1.2.14)(srvx@1.0.6)
-      '@slidev/theme-default':
-        specifier: latest
-        version: 0.25.0
 
 packages:
 
@@ -663,14 +660,6 @@ packages:
   '@slidev/rough-notation@0.1.0':
     resolution: {integrity: sha512-a/CbVmjuoO3E4JbUr2HOTsXndbcrdLWOM+ajbSQIY3gmLFzhjeXHGksGcp1NZ08pJjLZyTCxfz1C7v/ltJqycA==}
 
-  '@slidev/theme-default@0.25.0':
-    resolution: {integrity: sha512-iWvthH1Ny+i6gTwRnEeeU+EiqsHC56UdEO45bqLSNmymRAOWkKUJ/M0o7iahLzHSXsiPu71B7C715WxqjXk2hw==}
-    engines: {node: '>=14.0.0', slidev: '>=v0.47.0'}
-
-  '@slidev/types@0.47.5':
-    resolution: {integrity: sha512-X67V4cCgM0Sz50bP8GbVzmiL8DHC2IXvdKcsN7DlxHyf+/T4d9GveeGukwha5Fx3MuYeGZWKag7TFL2ZY4w54A==}
-    engines: {node: '>=18.0.0'}
-
   '@slidev/types@53.0.0':
     resolution: {integrity: sha512-Iyr37tIJAC65lTLgFim+5c5iqNAaj7NfkcFUzu8yqxY9SAeuFyk7rB8MBc/VC4JVpPVaahVO+35EX+wPY6BAeg==}
     engines: {node: '>=22.12.0'}
@@ -1207,9 +1196,6 @@ packages:
   clone-regexp@3.0.0:
     resolution: {integrity: sha512-ujdnoq2Kxb8s3ItNBtnYeXdm07FcU0u8ARAT1lQ2YdMwQC+cdiXX8KoqMVuglztILivceTtp4ivqGSmEmhBUJw==}
     engines: {node: '>=12'}
-
-  codemirror-theme-vars@0.1.2:
-    resolution: {integrity: sha512-WTau8X2q58b0SOAY9DO+iQVw8JKVEgyQIqArp2D732tcc+pobbMta3bnVMdQdmgwuvNrOFFr6HoxPRoQOgooFA==}
 
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
@@ -2351,9 +2337,6 @@ packages:
     resolution: {integrity: sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==}
     engines: {node: '>=14'}
     hasBin: true
-
-  prism-theme-vars@0.2.5:
-    resolution: {integrity: sha512-/D8gBTScYzi9afwE6v3TC1U/1YFZ6k+ly17mtVRdLpGy7E79YjJJWkXFgUDHJ2gDksV/ZnXF7ydJ4TvoDm2z/Q==}
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -3793,14 +3776,6 @@ snapshots:
     dependencies:
       roughjs: 4.6.6
 
-  '@slidev/theme-default@0.25.0':
-    dependencies:
-      '@slidev/types': 0.47.5
-      codemirror-theme-vars: 0.1.2
-      prism-theme-vars: 0.2.5
-
-  '@slidev/types@0.47.5': {}
-
   '@slidev/types@53.0.0(@nuxt/kit@3.21.11)(@oxc-project/types@0.154.0)(@vue/compiler-sfc@3.5.44)(cac@7.1.0)(crossws@0.4.15(srvx@1.0.6))(rolldown@1.2.14)(srvx@1.0.6)(typescript@6.0.3)(vite@8.3.4(@types/node@22.20.5)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
       '@antfu/utils': 9.3.0
@@ -4584,8 +4559,6 @@ snapshots:
   clone-regexp@3.0.0:
     dependencies:
       is-regexp: 3.1.0
-
-  codemirror-theme-vars@0.1.2: {}
 
   colorette@2.0.20: {}
 
@@ -5819,8 +5792,6 @@ snapshots:
       jszip: 3.10.2
 
   prettier@3.9.10: {}
-
-  prism-theme-vars@0.2.5: {}
 
   process-nextick-args@2.0.1: {}
 
