@@ -73,3 +73,9 @@ How can **a multi-task model** perform <strong class="classification">humanitari
 The general objective is to **develop a multi-task model** that performs <strong class="classification">humanitarian classification</strong> and <strong class="ner">NER</strong> on Taglish typhoon posts.
 
 </div>
+
+---
+clicks: 4
+---
+
+<SpecificObjectives />
