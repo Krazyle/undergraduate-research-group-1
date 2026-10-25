@@ -44,3 +44,9 @@ clicks: 5
 ---
 
 <RiskMap />
+
+---
+clicks: 6
+---
+
+<ApproachDiagram />

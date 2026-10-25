@@ -21,6 +21,9 @@ const exit = { duration: 0.2, ease: 'power1.in' }
 const travel = { duration: 1.2, ease: 'power1.inOut' }
 const pop = { duration: 0.25, ease: 'back.out(3)' }
 
+// Posts popped by time t grow with t³, so a few arrive one by one before the map floods
+const flood = (progress: number) => progress ** (1 / 3)
+
 const root = ref<HTMLElement>()
 
 useClickTimeline(root, (timeline) => {
@@ -38,9 +41,10 @@ useClickTimeline(root, (timeline) => {
     .to('.storm, .track, .casing', { opacity: 1, ...enter })
     .to('.track, .casing', { strokeDashoffset: 0, ...travel }, '<')
     .to('.storm', { motionPath: { path: map.track }, ...travel }, '<')
+    // Counterclockwise, as typhoons turn north of the equator, and slowing to a stop on arrival
+    .to('.spin', { rotation: -720, svgOrigin: '0 0', duration: travel.duration, ease: 'power2.out' }, '<')
     .addLabel('step3')
-    // A few posts pop up at first, then they arrive faster and faster until they flood the map
-    .to('.posts .post', { scale: 1, ...pop, stagger: { amount: 2, from: 'random', ease: 'power3.out' } })
+    .to('.posts .post', { scale: 1, ...pop, stagger: { amount: 2, from: 'random', ease: flood } })
     .to('.legend .one', { opacity: 1, ...enter }, '<')
     .addLabel('step4')
     .to('.posts', { opacity: 0.35, ...exit })
@@ -77,16 +81,18 @@ useClickTimeline(root, (timeline) => {
       <path class="casing" :d="map.track" pathLength="1" />
       <path class="track" :d="map.track" pathLength="1" />
       <g class="storm">
-        <g class="halo" transform="scale(1.3)">
-          <circle r="9" />
-          <path :d="arm" />
-          <path :d="arm" transform="rotate(180)" />
-        </g>
-        <g class="symbol" transform="scale(1.3)">
-          <path :d="arm" />
-          <path :d="arm" transform="rotate(180)" />
-          <circle r="7" />
-          <circle class="eye" r="2.5" />
+        <g class="spin">
+          <g class="halo" transform="scale(1.3)">
+            <circle r="9" />
+            <path :d="arm" />
+            <path :d="arm" transform="rotate(180)" />
+          </g>
+          <g class="symbol" transform="scale(1.3)">
+            <path :d="arm" />
+            <path :d="arm" transform="rotate(180)" />
+            <circle r="7" />
+            <circle class="eye" r="2.5" />
+          </g>
         </g>
       </g>
 
