@@ -99,14 +99,14 @@ useClickTimeline(svg, (timeline) => {
     .addLabel('step6')
     .to('.decline > *', { opacity: 1, ...enter })
     .addLabel('step7')
-    .to('.optimizer', { opacity: 1, ...enter })
-    .to('.pull-ner .shaft', { attr: { y2: reach - 14 }, ...moveShort }, '<0.15')
+    .to('.decline > *', { opacity: 0, ...exit })
+    .to('.pull-ner .shaft', { attr: { y2: reach - 14 }, ...moveShort }, '<')
     .to('.pull-ner .head', { y: reach, ...moveShort }, '<')
     .to('.pull-ner .tag', { x: 442 + start.x, y: 176 + start.y, ...moveShort }, '<')
     .to('.rig', { x: 0, y: 0, ...moveShort }, '<')
     .to('.model-box', { rotation: 0, svgOrigin: '442 144', ...moveShort }, '<')
     .to('.pulls', { x: 0, y: 0, ...moveShort }, '<')
-    .to('.decline > *', { opacity: 0, ...exit }, '<')
+    .to('.optimizer', { opacity: 1, ...enter }, '<0.2')
     .addLabel('step8')
     .to('.tick', { opacity: 1, ...enter })
     .addLabel('step9')
@@ -142,7 +142,12 @@ watch($clicks, loopDecline)
       <path class="head" d="M 442 102 l -7 -12 h 14 z" />
     </g>
 
-    <path class="midline" d="M 442 54 V 390" />
+    <path class="midline" d="M 442 56 V 390" />
+    <!-- Negative transfer sits at the foot of the line, and the optimizer that reduces it takes its place -->
+    <g class="decline">
+      <path class="marker" d="M 311 410 h 18 l -9 16 z" />
+      <text class="tag" x="442" y="424" text-anchor="middle">Negative transfer</text>
+    </g>
     <text class="tag optimizer" x="442" y="424" text-anchor="middle">Multi-task optimizer</text>
     <text class="tag kept-name" x="150" y="424" text-anchor="middle">Optimizer 1</text>
 
@@ -164,11 +169,6 @@ watch($clicks, loopDecline)
             <tspan x="0" y="34">Humanitarian</tspan>
             <tspan x="0" y="56">classification</tspan>
           </text>
-        </g>
-
-        <g class="decline" :transform="`translate(${442 - start.x} ${176 + start.y})`">
-          <path class="marker" d="M -131 84 h 18 l -9 16 z" />
-          <text class="tag" x="0" y="98" text-anchor="middle">Negative transfer</text>
         </g>
 
         <g class="pull-ner">
