@@ -39,16 +39,6 @@ header {
   margin-bottom: 0;
 }
 
-:slotted(h3) {
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  line-height: var(--leading-tight);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  margin-bottom: var(--space-0);
-}
-
 :slotted(p + h3) {
   margin-top: var(--space-3);
 }
@@ -60,7 +50,6 @@ header {
 
 :slotted(li),
 :slotted(p) {
-  font-size: var(--text-base);
   line-height: var(--leading-list);
 }
 </style>

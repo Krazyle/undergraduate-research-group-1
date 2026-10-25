@@ -32,3 +32,15 @@ Engr. Ma Christina A. Florentino
 ### Date of Defense
 
 October 27, 2026
+
+---
+clicks: 13
+---
+
+<ModelDiagram />
+
+---
+clicks: 4
+---
+
+<RiskMap />

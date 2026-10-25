@@ -20,12 +20,20 @@
   --text-3xl: 2.412rem;
   --text-4xl: 2.653rem;
   --text-5xl: 2.918rem;
+  --text-display: 4.4rem;
 
   --leading-tight: 1.1;
   --leading-body: 1.5;
   --leading-list: 1.35;
 
+  --color-surface: #ffffff;
+  --color-ink: #262626;
   --color-muted: #404040;
+  --color-subtle: #737373;
+  --color-land: #ededed;
+  --color-classification: #1f5fbf;
+  --color-ner: #b45309;
+  --color-negative: #b91c1c;
 
   --grid-columns: 12;
   --grid-gutter: var(--space-3);
@@ -44,8 +52,17 @@ h1 {
 }
 
 h3 {
-  font-size: var(--text-md);
-  line-height: 1.4;
-  font-weight: 700;
-  margin-bottom: var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: var(--space-0);
+}
+
+p,
+li {
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
 }
