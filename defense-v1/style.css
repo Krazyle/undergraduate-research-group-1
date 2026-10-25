@@ -66,3 +66,12 @@ li {
   font-size: var(--text-base);
   line-height: var(--leading-body);
 }
+
+/* Diagrams that share a slide sit on top of each other, each taking over from the last */
+.stack {
+  display: grid;
+}
+
+.stack > * {
+  grid-area: 1 / 1;
+}

@@ -114,6 +114,12 @@ useClickTimeline(root, (timeline) => {
     .to('.english, .english-source', { opacity: 1, ...enter }, '<')
     .fromTo('.english .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step6')
+    // The next diagram takes over this study's encoder and its outputs, drawn in the same place, and
+    // morphs them into the multi-task model. Everything else leaves where it stands. The hand-over
+    // comes just after the label, so seeking to step6 does not hide the encoder
+    .set('.panel-2 .model, .panel-2 .name, .panel-2 .classification, .panel-2 .ner', { opacity: 0 }, '+=0.01')
+    .to('.example, .legend, .english-source, .panel-2 .post, .panel-2 .input, .panel-2 .tag', { opacity: 0, ...exit })
+    .addLabel('step7')
 })
 </script>
 
@@ -123,8 +129,8 @@ useClickTimeline(root, (timeline) => {
       <g v-for="(panel, index) in panels" :key="index" class="panel" :class="`panel-${index}`">
         <g v-for="pipeline in panel.pipelines" :key="pipeline.x" :transform="`translate(${pipeline.x} 0)`">
           <text class="post" y="32" text-anchor="middle">Post</text>
-          <path d="M 0 46 V 128" />
-          <path class="head" d="M 0 140 l -7 -12 h 14 z" />
+          <path class="input" d="M 0 46 V 128" />
+          <path class="input head" d="M 0 140 l -7 -12 h 14 z" />
 
           <rect class="model" :x="-pipeline.width / 2" y="144" :width="pipeline.width" height="64" rx="12" />
           <text class="name" y="184" text-anchor="middle">{{ pipeline.name }}</text>

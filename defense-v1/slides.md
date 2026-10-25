@@ -46,7 +46,10 @@ clicks: 5
 <RiskMap />
 
 ---
-clicks: 6
+clicks: 15
 ---
 
-<ApproachDiagram />
+<div class="stack">
+  <ApproachDiagram />
+  <NegativeTransfer :first="6" />
+</div>

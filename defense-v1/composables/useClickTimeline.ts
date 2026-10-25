@@ -2,13 +2,18 @@ import { useSlideContext } from '@slidev/client'
 import gsap from 'gsap'
 import { onMounted, onUnmounted, watch, type Ref } from 'vue'
 
-// The build callback adds labels step0, step1, … to match the slide's clicks
-export function useClickTimeline(scope: Ref<Element | undefined>, build: (timeline: gsap.core.Timeline) => void) {
+// The build callback adds labels step0, step1, … to match the slide's clicks. A diagram that shares
+// a slide with an earlier one starts at click `first`: it holds step0 until then, and holds its last
+// step once its steps run out
+export function useClickTimeline(scope: Ref<Element | undefined>, build: (timeline: gsap.core.Timeline) => void, first = 0) {
   const { $clicks } = useSlideContext()
 
   let context: gsap.Context
   let timeline: gsap.core.Timeline
   let move: gsap.core.Tween | undefined
+  let last = 0
+
+  const stepAt = (clicks: number) => Math.min(Math.max(clicks - first, 0), last)
 
   onMounted(() => {
     context = gsap.context(() => {
@@ -17,10 +22,15 @@ export function useClickTimeline(scope: Ref<Element | undefined>, build: (timeli
       build(timeline)
     }, scope.value)
 
-    timeline.seek(`step${$clicks.value}`)
+    last = Object.keys(timeline.labels).filter(label => label.startsWith('step')).length - 1
+    timeline.seek(`step${stepAt($clicks.value)}`)
   })
 
-  watch($clicks, (step, previous) => {
+  watch($clicks, (clicks, previousClicks) => {
+    const step = stepAt(clicks)
+    const previous = stepAt(previousClicks)
+    if (step === previous)
+      return
     move?.kill()
     if (step === previous + 1) {
       // Finish a click that is still playing, so the next one starts at once
