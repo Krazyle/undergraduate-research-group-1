@@ -86,7 +86,13 @@ Together, these form the gap our study fills. Yngwie will now present what our s
 
 ### Yngwie
 
-Thank you, Kyle. Our results will first show whether training classification and NER together helps, hurts, or makes no difference to each task on Taglish posts. They will also add evidence to the debate on optimizers, and either outcome is useful. If an advanced optimizer reduces negative transfer more than equal weighting, our tasks become one of the settings Kurin et al. asked future work to find. If none does, it will show that equal weighting is enough for our tasks too, as Kurin et al. found for images and robot tasks. Finally, we will measure the training time and memory of all 13 optimizers on the same testbed, so researchers can weigh any gain against its cost.
+Thank you, Kyle. Earlier, I said that an advanced optimizer is worth using only if it reduces negative transfer enough to justify its cost, and that we have to test this for our two tasks. Our benchmark will test it in three steps, and each step adds something new.
+
+First, it will show whether training classification and NER together helps, hurts, or makes no difference to each task on Taglish posts. Earlier studies found small changes that went both ways, depending on the dataset, so this has to be measured on Taglish posts. No study we reviewed could do this, because no Taglish dataset labels the same posts for both tasks.
+
+Second, it will show whether any advanced optimizer reduces negative transfer more than equal weighting, and either outcome adds evidence to the debate. If one does, our tasks become one of the settings Kurin et al. asked future work to find. If none does, our results will support their finding that equal weighting is often enough, now on Taglish text as well as on images and robot tasks.
+
+Third, it will measure the training time and memory of all 13 optimizers on the same laptop, so researchers can weigh any gain against its cost.
 
 Isaiah will now explain the practical benefits and what we will deliver.
 
