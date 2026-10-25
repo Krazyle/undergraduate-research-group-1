@@ -61,13 +61,13 @@ const examplesX = -48 + 2 * space + modelWidth
 // The Taglish post sits level with the model alone, then moves down to share the height
 const taglishDrop = 63
 
-// A 12 px dash is centred on each corner, so it bends around the corner and covers the end tick.
-// The gaps stretch so whole periods fit between the two corners
-function fitDashes(path: SVGPathElement) {
+// The Taglish labels turn dashed by opening gaps in place. A 12 px dash is centred on each corner,
+// so it bends around the corner and covers the end tick, and whole periods fit between the corners
+const dash = 12
+
+function period(path: SVGPathElement) {
   const length = path.getTotalLength()
-  const dash = 12
-  const periods = Math.round((length - dash) / (dash + 6))
-  path.style.strokeDasharray = `${dash} ${(length - dash) / periods - dash}`
+  return (length - dash) / Math.round((length - dash) / (dash + 6))
 }
 
 // The same motion tokens as slides 2 and 3
@@ -79,9 +79,8 @@ const moveShort = { duration: 0.5, ease: 'power2.inOut' }
 const root = ref<HTMLElement>()
 
 useClickTimeline(root, (timeline) => {
-  gsap.set('.panel, .legend, .example, .missing, .english-source', { opacity: 0 })
+  gsap.set('.panel, .legend, .example, .english-source', { opacity: 0 })
   panels.forEach((_, index) => gsap.set(`.panel-${index}`, { x: place(index, index + 1) }))
-  gsap.utils.toArray<SVGPathElement>('.missing').forEach(fitDashes)
 
   timeline
     .addLabel('step0')
@@ -99,12 +98,19 @@ useClickTimeline(root, (timeline) => {
     .addLabel('step4')
     .to('.panel-2', { x: modelX, ...moveShort })
     .to('.taglish', { opacity: 1, ...enter }, '>-0.1')
-    .fromTo('.taglish .bracket:not(.missing)', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
+    .fromTo('.taglish .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step5')
     // The Taglish labels turn dashed: needed, but no dataset has them yet
     .to('.taglish', { y: taglishDrop, ...moveShort })
-    .to('.taglish .bracket:not(.missing)', { opacity: 0, ...exit }, '<')
-    .to('.taglish .missing', { opacity: 1, ...enter }, '<0.2')
+    // Each dash shrinks around its own centre, from a full period with no gap down to 12 px
+    .fromTo('.taglish .bracket', {
+      strokeDasharray: (_: number, path: SVGPathElement) => `${period(path)} 0`,
+      strokeDashoffset: (_: number, path: SVGPathElement) => (period(path) - dash) / 2,
+    }, {
+      strokeDasharray: (_: number, path: SVGPathElement) => `${dash} ${period(path) - dash}`,
+      strokeDashoffset: 0,
+      ...draw,
+    }, '<0.2')
     .to('.english, .english-source', { opacity: 1, ...enter }, '<')
     .fromTo('.english .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step6')
@@ -142,10 +148,6 @@ useClickTimeline(root, (timeline) => {
             <text class="post">{{ example.text }}</text>
             <path v-for="[start, end] in example.entities" :key="start" class="bracket ner" :d="bracket(start, end, 9)" />
             <path class="bracket classification" :d="bracket(0, example.end, 27)" />
-            <template v-if="example.kind === 'taglish'">
-              <path v-for="[start, end] in example.entities" :key="start" class="bracket ner missing" :d="bracket(start, end, 9)" />
-              <path class="bracket classification missing" :d="bracket(0, example.end, 27)" />
-            </template>
           </g>
         </g>
       </g>
