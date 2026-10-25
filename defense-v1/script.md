@@ -36,13 +36,13 @@ Multi-task optimizers are meant to reduce negative transfer, but studies disagre
 
 The optimizers also differ in training cost. Many of them need more time and memory, and this cost is paid again each time the model needs retraining after a new disaster. So an advanced optimizer is worth using only if it reduces negative transfer enough to justify that cost. Since Gama and Grassi's results show that the answer depends on the problem, we cannot tell in advance which side holds for our two tasks. We have to test it.
 
-This brings us to the main problem of our study. We need one model that does both tasks on Taglish typhoon posts. We also need to find which optimizer it should use, by comparing how well each one reduces negative transfer and how much it costs to train. Carlo will now present the objectives that address this problem.
+This brings us to the main problem of our study. How can one model perform both tasks on Taglish typhoon posts while keeping negative transfer and training cost low? Carlo will now present the objectives that answer this question.
 
 ## Objectives and Scope
 
 ### Carlo
 
-Thank you, Yngwie. To address this problem, the general objective of our study is to develop one multi-task model that performs both humanitarian classification and NER on Taglish typhoon posts. As Isaiah mentioned, this model cannot be trained without the right data, so we will first build a Taglish dataset labeled for both tasks.
+Thank you, Yngwie. To answer this question, the general objective of our study is to develop a multi-task model that performs humanitarian classification and NER on Taglish typhoon posts. As Isaiah mentioned, this model cannot be trained without the right data, so we will first build a Taglish dataset labeled for both tasks.
 
 Our study has four specific objectives. First is the baseline analysis. We will train one single-task model for each task and measure how well it performs. Second is design and artifact creation. We will design and implement the multi-task model. Third is empirical benchmarking. We will train 13 versions of the multi-task model, one for each optimizer, and select the optimizer by comparing their negative transfer and training cost. The version with the selected optimizer will become our final multi-task model. Fourth is comparative validation. We will compare this final model with the single-task models in accuracy, speed, and memory.
 

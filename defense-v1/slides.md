@@ -53,3 +53,23 @@ clicks: 15
   <ApproachDiagram />
   <NegativeTransfer :first="6" />
 </div>
+
+---
+
+<div class="quote">
+
+### Statement of the problem
+
+How can **a multi-task model** perform <strong class="classification">humanitarian classification</strong> and <strong class="ner">NER</strong> on Taglish typhoon posts while keeping **negative transfer** and **training cost** low?
+
+</div>
+
+---
+
+<div class="quote">
+
+### General objective
+
+The general objective is to **develop a multi-task model** that performs <strong class="classification">humanitarian classification</strong> and <strong class="ner">NER</strong> on Taglish typhoon posts.
+
+</div>
