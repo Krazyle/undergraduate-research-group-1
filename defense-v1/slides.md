@@ -40,7 +40,7 @@ clicks: 13
 <ModelDiagram />
 
 ---
-clicks: 4
+clicks: 5
 ---
 
 <RiskMap />
