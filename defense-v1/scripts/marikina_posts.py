@@ -47,15 +47,19 @@ BARANGAYS = {
     "Tumana": (14.66041, 121.10078, 3),
 }
 
-# The categories the side panel lists, each with its share of the posts and the share of its posts
-# that name a place. Sympathy posts seldom say where they are
+# The ten humanitarian categories of HumAID, as in Chapter 3, each with a made-up share of the posts and
+# the share of its posts that name a place. Sympathy and non-humanitarian posts seldom say where they are
 CATEGORIES = [
-    ("Requests or urgent needs", 0.25, 0.9),
-    ("Rescue, volunteering, or donation effort", 0.17, 0.85),
-    ("Displaced people and evacuations", 0.14, 0.9),
-    ("Infrastructure and utility damage", 0.12, 0.9),
-    ("Sympathy and support", 0.18, 0.3),
-    ("Other categories", 0.14, 0.6),
+    ("Caution and advice", 0.12, 0.5),
+    ("Displaced people and evacuations", 0.11, 0.9),
+    ("Infrastructure and utility damage", 0.10, 0.9),
+    ("Injured or dead people", 0.04, 0.85),
+    ("Missing or found people", 0.03, 0.85),
+    ("Not humanitarian", 0.05, 0.2),
+    ("Other relevant information", 0.08, 0.6),
+    ("Requests or urgent needs", 0.18, 0.9),
+    ("Rescue, volunteering, or donation effort", 0.14, 0.85),
+    ("Sympathy and support", 0.15, 0.3),
 ]
 POSTS = 640
 
@@ -70,26 +74,38 @@ def tile(lon, lat, zoom):
     return int(x), int(y)
 
 
+# The posts that the slide opens in turn, written for the slide, each at its barangay's centre
+FEATURED = [
+    ("Displaced people and evacuations", "Nangka", "Mahigit 200 pamilya na ang nasa evacuation center sa Nangka Elementary School"),
+    ("Infrastructure and utility damage", "Tumana", "Bagsak ang tulay sa Brgy. Tumana, hindi madaanan ng sasakyan"),
+    ("Rescue, volunteering, or donation effort", "Malanday", "Nag-deploy na ng rescue boats ang Marikina Rescue 161 sa Malanday"),
+    ("Caution and advice", "Santo Niño", "Lumikas na po ang mga nakatira malapit sa ilog sa Santo Niño, tumataas pa ang tubig"),
+    ("Requests or urgent needs", "Concepcion Dos", "Need ng tubig at pagkain dito sa Brgy. Concepcion Dos, Marikina. Stranded kami sa 2nd floor"),
+]
+
+# The posts in the order the simulated stream replays them. A post without a location has no place
 generator = random.Random(7)
 names = list(BARANGAYS)
 weights = [BARANGAYS[name][2] for name in names]
-located, unlocated = [], [0] * len(CATEGORIES)
-for _ in range(POSTS):
+stream = []
+for _ in range(POSTS - len(FEATURED)):
     category = generator.choices(range(len(CATEGORIES)), [share for _, share, _ in CATEGORIES])[0]
     if generator.random() > CATEGORIES[category][2]:
-        unlocated[category] += 1
+        stream.append([None, None, category])
         continue
     lat, lon, _ = BARANGAYS[generator.choices(names, weights)[0]]
-    located.append([round(generator.gauss(lat, SPREAD), 5), round(generator.gauss(lon, SPREAD), 5), category])
+    stream.append([round(generator.gauss(lat, SPREAD), 5), round(generator.gauss(lon, SPREAD), 5), category])
 
+categories = [name for name, _, _ in CATEGORIES]
 OUTPUT.parent.mkdir(exist_ok=True)
 OUTPUT.write_text(json.dumps({
     "bounds": [[SOUTH, WEST], [NORTH, EAST]],
-    "categories": [name for name, _, _ in CATEGORIES],
-    "posts": located,
-    "unlocated": unlocated,
+    "categories": categories,
+    "stream": stream,
+    "featured": [{"lat": BARANGAYS[place][0], "lon": BARANGAYS[place][1], "category": categories.index(category), "text": text} for category, place, text in FEATURED],
 }, ensure_ascii=False))
-print(f"Wrote {OUTPUT} with {len(located)} posts on the map and {sum(unlocated)} without a location")
+located = sum(1 for post in stream if post[0] is not None) + len(FEATURED)
+print(f"Wrote {OUTPUT} with {located} posts on the map and {POSTS - located} without a location")
 
 
 def fetch(url):

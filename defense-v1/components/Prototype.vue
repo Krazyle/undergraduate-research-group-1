@@ -1,47 +1,78 @@
 <script setup lang="ts">
-import { Map, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
+import { onSlideEnter, useIsSlideActive } from '@slidev/client'
+import { type GeoJSONSource, Map, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 // Vite moves the map library when it bundles it, so the library cannot find its worker beside itself
 import worker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 // Built by scripts/marikina_posts.py. The posts are an illustration placed around each barangay's
 // centre, not real posts
 import data from '../data/marikina-posts.json'
 
-// A mock-up of the prototype's main screen as DRRMO staff in Marikina would see it. A post goes on the
-// map only when the model finds a location in it, so the side panel also counts the posts without one.
-// The prototype is its own app, so it has its own tokens instead of the slides' ones
+// A mock-up of the prototype's main screen as DRRMO staff in Marikina would see it, playing in a loop.
+// Posts arrive from the simulated stream, a few at first and then many, and the counts rise with them.
+// A post goes on the map only when the model finds a location in it, so the side panel also counts the
+// posts without one. Every few seconds, a post that has just arrived is opened. The prototype is its
+// own app, so it has its own tokens instead of the slides' ones
 
-// Dots on a map can sit beside any other colour, so only three categories, the ones a response team
-// acts on, get their own colour and the rest share a grey. The three pass the colour-vision checks
-// against the map's background for every pair, and the side panel names each colour
+// Every category has its own colour, the clearest ones going to the categories a response team acts on
+// first. Ten colours cannot all stay apart when any two dots can sit side by side, so some pairs look
+// alike, above all to colour-blind viewers, and the side panel's names serve as the key
 const SLOTS: Record<string, string> = {
   'Requests or urgent needs': 'series-1',
   'Infrastructure and utility damage': 'series-2',
   'Displaced people and evacuations': 'series-3',
+  'Rescue, volunteering, or donation effort': 'series-4',
+  'Sympathy and support': 'series-5',
+  'Missing or found people': 'series-6',
+  'Caution and advice': 'series-7',
+  'Injured or dead people': 'series-8',
+  'Other relevant information': 'series-9',
+  'Not humanitarian': 'series-10',
 }
-const slot = (category: string) => SLOTS[category] ?? 'series-rest'
+const slot = (category: string) => SLOTS[category]
 const swatch = (category: string) => `var(--app-${slot(category)})`
 
-const located = data.posts.length
-const unlocated = data.unlocated.reduce((sum, count) => sum + count, 0)
+// One cycle, in seconds. Posts arrive between ARRIVE and ARRIVED, the posts arriving by time t
+// growing with t³, the screen holds, and everything fades out in the last FADE seconds
+const CYCLE = 20
+const ARRIVE = 0.5
+const ARRIVED = 15
+const FADE = 1
+// When each featured post is opened. Each one arrives just before its turn, and the last stays open
+const OPENS = [3.5, 6.5, 9.5, 12.5, 15.2]
+const LEAD = 0.4
 
-// Every post counts in the side panel, on the map or not, largest first with the remainder last
-const summary = data.categories.map((category, index) => ({
-  category,
-  count: data.posts.filter(post => post[2] === index).length + data.unlocated[index],
-}))
-const other = summary.pop()!
-summary.sort((a, b) => b.count - a.count).push(other)
-const most = Math.max(...summary.map(row => row.count))
+type Post = { lat: number | null, lon: number | null, category: number, at: number, text?: string }
+
+// The featured posts join the stream at the places that bring them in just before they open
+const posts: Post[] = data.stream.map(([lat, lon, category]) => ({ lat, lon, category: category as number, at: 0 }))
+const total = posts.length + data.featured.length
+data.featured.forEach((post, index) => {
+  const share = (OPENS[index] - LEAD - ARRIVE) / (ARRIVED - ARRIVE)
+  posts.splice(Math.round(total * share ** 3), 0, { ...post, at: 0 })
+})
+posts.forEach((post, index) => {
+  post.at = ARRIVE + (ARRIVED - ARRIVE) * ((index + 1) / total) ** (1 / 3)
+})
+const featured = posts.filter(post => post.text)
+
+// The side panel lists all ten categories, largest first by their final counts, so the rows keep
+// their places while the counts rise
+const finals = data.categories.map((_, index) => posts.filter(post => post.category === index).length)
+const order = data.categories.map((category, index) => ({ category, index })).sort((a, b) => finals[b.index] - finals[a.index])
+const most = Math.max(...finals)
+
+// The counts shown at the current moment of the cycle
+const shown = ref(data.categories.map(() => 0))
+const located = ref(0)
+const unlocated = ref(0)
+const opened = ref<Post>()
+const openedCategory = computed(() => data.categories[opened.value?.category ?? 0])
 
 // The map opens on Marikina itself and can be moved only within the area whose tiles are saved
 const view: [[number, number], [number, number]] = [[121.074, 14.612], [121.136, 14.684]]
 const saved: [[number, number], [number, number]] = [[data.bounds[0][1], data.bounds[0][0]], [data.bounds[1][1], data.bounds[1][0]]]
-
-// The post a staff member has opened, a request in Concepcion Dos
-const selected: [number, number] = [121.12082, 14.64059]
-const selectedCategory = 'Requests or urgent needs'
 
 setWorkerUrl(worker)
 
@@ -49,7 +80,27 @@ const root = ref<HTMLElement>()
 const container = ref<HTMLElement>()
 const card = ref<HTMLElement>()
 let map: Map | undefined
+let popup: Popup | undefined
 let observer: ResizeObserver | undefined
+let frame = 0
+
+// The cycle starts over each time the slide is shown, and pauses while another slide is shown
+const active = useIsSlideActive()
+let started = performance.now()
+onSlideEnter(() => {
+  started = performance.now()
+})
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// The list of categories fades at whichever edge has more rows beyond it
+const list = ref<HTMLElement>()
+const above = ref(false)
+const below = ref(false)
+function edges() {
+  const { scrollTop, scrollHeight, clientHeight } = list.value!
+  above.value = scrollTop > 1
+  below.value = scrollTop + clientHeight < scrollHeight - 1
+}
 
 onMounted(async () => {
   // The saved style names its tiles, fonts, and icons relative to the deck, and the map needs full URLs
@@ -59,7 +110,7 @@ onMounted(async () => {
   // The map paints on a canvas, which cannot read CSS variables, so it gets the tokens' values
   const css = getComputedStyle(root.value!)
   const token = (name: string) => css.getPropertyValue(`--app-${name}`).trim()
-  const colour = ['match', ['get', 'category'], ...data.categories.flatMap((category, index) => [index, token(slot(category))]), token('series-rest')]
+  const colour = ['match', ['get', 'category'], ...data.categories.flatMap((category, index) => [index, token(slot(category))]), token('series-10')]
 
   map = new Map({
     container: container.value!,
@@ -83,10 +134,10 @@ onMounted(async () => {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
-        features: data.posts.map(([lat, lon, category]) => ({
+        features: posts.filter(post => post.lat !== null).map(post => ({
           type: 'Feature',
-          geometry: { type: 'Point', coordinates: [lon, lat] },
-          properties: { category },
+          geometry: { type: 'Point', coordinates: [post.lon!, post.lat!] },
+          properties: { category: post.category, at: post.at },
         })),
       },
     })
@@ -95,6 +146,7 @@ onMounted(async () => {
       id: 'posts',
       type: 'circle',
       source: 'posts',
+      filter: ['<=', ['get', 'at'], 0],
       paint: {
         'circle-radius': 4,
         'circle-color': colour as never,
@@ -104,33 +156,96 @@ onMounted(async () => {
     })
 
     // The opened post stays a dot of its category's colour, drawn larger with a surface ring and a
-    // soft halo of the same colour, and its card opens below it
-    const own = token(slot(selectedCategory))
-    map!.addSource('selected', { type: 'geojson', data: { type: 'Point', coordinates: selected } })
+    // soft halo of the same colour that pulses slowly, and its card opens below it
+    map!.addSource('opened', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map!.addLayer({ id: 'opened-halo', type: 'circle', source: 'opened', paint: { 'circle-radius': 7, 'circle-opacity': 0 } })
     map!.addLayer({
-      id: 'selected-halo',
+      id: 'opened',
       type: 'circle',
-      source: 'selected',
-      paint: { 'circle-radius': 13, 'circle-color': own, 'circle-opacity': 0.25 },
+      source: 'opened',
+      paint: { 'circle-radius': 7, 'circle-stroke-color': token('surface'), 'circle-stroke-width': 2 },
     })
-    map!.addLayer({
-      id: 'selected',
-      type: 'circle',
-      source: 'selected',
-      paint: { 'circle-radius': 7, 'circle-color': own, 'circle-stroke-color': token('surface'), 'circle-stroke-width': 2 },
-    })
-    new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 16, maxWidth: '250px' })
-      .setLngLat(selected)
+    popup = new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 16, maxWidth: '250px' })
       .setDOMContent(card.value!)
-      .addTo(map!)
+
+    const show = (post: Post | undefined) => {
+      opened.value = post
+      const source = map!.getSource('opened') as GeoJSONSource
+      if (!post) {
+        source.setData({ type: 'FeatureCollection', features: [] })
+        popup!.remove()
+        return
+      }
+      const own = token(slot(data.categories[post.category]))
+      map!.setPaintProperty('opened-halo', 'circle-color', own)
+      map!.setPaintProperty('opened', 'circle-color', own)
+      source.setData({ type: 'Point', coordinates: [post.lon!, post.lat!] })
+      popup!.setLngLat([post.lon!, post.lat!]).addTo(map!)
+    }
+
+    let last: Post | undefined
+    let lastTime = -1
+    const tick = (now: number) => {
+      frame = requestAnimationFrame(tick)
+      if (!active.value)
+        return
+      // With less motion, the screen holds the end of the cycle, before the fade
+      const t = still ? CYCLE - FADE - 0.01 : ((now - started) / 1000) % CYCLE
+      const fade = Math.min(1, Math.max(0, (CYCLE - t) / FADE))
+
+      // The posts that have arrived, each new dot growing in with a slight overshoot
+      if (t !== lastTime) {
+        map!.setFilter('posts', ['<=', ['get', 'at'], t])
+        map!.setPaintProperty('posts', 'circle-radius', ['interpolate', ['linear'], ['get', 'at'], t - 0.35, 4, t - 0.15, 5.5, t, 0])
+        map!.setPaintProperty('posts', 'circle-opacity', fade)
+        map!.setPaintProperty('posts', 'circle-stroke-opacity', fade)
+        lastTime = t
+      }
+      const counts = data.categories.map(() => 0)
+      let onMap = 0
+      for (const post of posts) {
+        if (post.at > t)
+          break
+        counts[post.category]++
+        if (post.lat !== null)
+          onMap++
+      }
+      shown.value = counts.map(count => Math.round(count * fade))
+      located.value = Math.round(onMap * fade)
+      unlocated.value = Math.round((counts.reduce((sum, count) => sum + count, 0) - onMap) * fade)
+
+      // The featured post whose turn it is, opening with its dot popping up to size
+      const index = OPENS.findLastIndex(time => time <= t)
+      const post = index >= 0 ? featured[index] : undefined
+      if (post !== last) {
+        show(post)
+        last = post
+      }
+      if (post) {
+        const since = Math.min(1, (t - OPENS[index]) / 0.25)
+        map!.setPaintProperty('opened', 'circle-radius', 4 + 3 * (1 - (1 - since) ** 3))
+        map!.setPaintProperty('opened', 'circle-opacity', fade)
+        map!.setPaintProperty('opened', 'circle-stroke-opacity', fade)
+        popup!.getElement().style.opacity = String(fade)
+        const phase = still ? 0.5 : (now % 2400) / 2400
+        map!.setPaintProperty('opened-halo', 'circle-radius', 7 + 13 * (1 - (1 - phase) ** 3))
+        map!.setPaintProperty('opened-halo', 'circle-opacity', 0.4 * (1 - phase) * fade)
+      }
+    }
+    frame = requestAnimationFrame(tick)
   })
 
   // Slidev lays out a slide before it is shown, so the map redraws once its panel has a size
-  observer = new ResizeObserver(() => map?.resize())
+  observer = new ResizeObserver(() => {
+    map?.resize()
+    edges()
+  })
   observer.observe(container.value!)
+  observer.observe(list.value!)
 })
 
 onUnmounted(() => {
+  cancelAnimationFrame(frame)
   observer?.disconnect()
   map?.remove()
 })
@@ -143,17 +258,19 @@ onUnmounted(() => {
     <!-- The opened post, which the map moves into its popup -->
     <div class="hidden">
       <div ref="card" class="card">
-        <p>Need ng tubig at pagkain dito sa Brgy. Concepcion Dos, Marikina. Stranded kami sa 2nd floor</p>
-        <span class="category"><i :style="{ background: swatch(selectedCategory) }" />{{ selectedCategory }}</span>
+        <p>{{ opened?.text }}</p>
+        <span class="category"><i :style="{ background: swatch(openedCategory) }" />{{ openedCategory }}</span>
       </div>
     </div>
 
     <aside>
       <h4>Posts per category</h4>
-      <div v-for="row in summary" :key="row.category" class="bar-row">
-        <span class="label"><i :style="{ background: swatch(row.category) }" />{{ row.category }}</span>
-        <span class="bar"><span :style="{ width: `${(row.count / most) * 100}%`, background: swatch(row.category) }" /></span>
-        <span class="count">{{ row.count }}</span>
+      <div ref="list" class="list" :class="{ above, below }" @scroll="edges">
+        <div v-for="row in order" :key="row.category" class="bar-row">
+          <span class="label"><i :style="{ background: swatch(row.category) }" />{{ row.category }}</span>
+          <span class="count">{{ shown[row.index] }}</span>
+          <span class="bar"><span :style="{ width: `${(shown[row.index] / most) * 100}%`, background: swatch(row.category) }" /></span>
+        </div>
       </div>
 
       <div class="placed">
@@ -165,8 +282,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* The prototype's own tokens. It uses the system's interface font, as a web app would, and slots 1
-   to 3 of the dataviz guide's validated categorical palette */
+/* The prototype's own tokens. It uses the system's interface font, as a web app would, and the eight
+   colours of the dataviz guide's categorical palette, with its red darkened to stand apart from the
+   orange, a brown, and a neutral grey for posts that are not humanitarian */
 .app {
   --app-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --app-text-sm: 12px;
@@ -181,7 +299,13 @@ onUnmounted(() => {
   --app-series-1: #2a78d6;
   --app-series-2: #eb6834;
   --app-series-3: #1baf7a;
-  --app-series-rest: #9aa1a9;
+  --app-series-4: #eda100;
+  --app-series-5: #e87ba4;
+  --app-series-6: #008300;
+  --app-series-7: #6250d6;
+  --app-series-8: #a8233c;
+  --app-series-9: #7a5230;
+  --app-series-10: #9aa1a9;
 
   display: grid;
   grid-template-columns: 1fr 250px;
@@ -219,23 +343,60 @@ p {
   line-height: inherit;
 }
 
-/* A category's colour sits in a swatch beside its name, centred on the name's first line even when
-   the name wraps, and the name stays in the text colour */
+/* The categories scroll inside the panel, and an edge with more rows beyond it fades out */
+.list {
+  --fade: 28px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.list.below {
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--fade)), transparent);
+}
+
+.list.above {
+  mask-image: linear-gradient(to bottom, transparent, black var(--fade));
+}
+
+.list.above.below {
+  mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
+}
+
+/* Each category's name and count share a row, with its bar below. The count and the swatch sit at
+   the middle of the name, whether it takes one line or two */
+.bar-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: var(--app-text-sm);
+}
+
+/* A category's colour sits in a swatch beside its name, and the name stays in the text colour */
 .category,
 .label {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
 }
 
 i {
-  --size: 8px;
   flex: none;
-  width: var(--size);
-  height: var(--size);
-  /* The letters sit slightly above the middle of their line, so the swatch rises by as much */
-  margin-top: calc((1.4em - var(--size)) / 2 - 0.075em);
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  /* The letters sit slightly above the middle of their lines, so the swatch rises by as much */
+  transform: translateY(-0.075em);
 }
 
 .category {
@@ -246,7 +407,8 @@ i {
 aside {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  min-height: 0;
   padding: 14px 16px;
   border-left: 1px solid var(--app-border);
   background: var(--app-panel);
@@ -261,20 +423,9 @@ h4 {
   color: var(--app-text-muted);
 }
 
-.bar-row {
-  display: grid;
-  grid-template-columns: 1fr 30px;
-  gap: 2px 8px;
-  font-size: var(--app-text-sm);
-}
-
-.label {
-  grid-column: 1 / -1;
-}
-
 .bar {
-  height: 8px;
-  align-self: center;
+  grid-column: 1 / -1;
+  height: 6px;
   border-radius: 4px;
   background: var(--app-track);
 }
@@ -286,14 +437,13 @@ h4 {
 }
 
 .count {
-  text-align: right;
   color: var(--app-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .placed {
   display: grid;
   gap: 4px;
-  margin-top: auto;
   font-size: var(--app-text-sm);
 }
 
