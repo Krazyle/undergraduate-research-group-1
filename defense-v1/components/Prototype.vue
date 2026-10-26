@@ -1,113 +1,77 @@
 <script setup lang="ts">
-// A still mock-up of the prototype's main screen as DRRMO staff would see it, following the use cases
-// of Chapter 3. The feed lists the replayed posts newest first, each already labeled by the model.
-// The posts are written for this slide and are not from the dataset
+// Built by scripts/luzon_map.py, as on slide 3. The posts are an illustration placed by population,
+// not real posts
+import map from '../data/luzon-map.json'
 
-// Each post is split into plain text and entity spans, which are highlighted
-type Part = string | { text: string, type: string }
+// A still mock-up of the prototype's main screen as DRRMO staff would see it. A post goes on the map
+// only when the model finds a location in it, so the side panel also counts the posts without one.
+// Requests or urgent needs are blue, as on slide 3, and every other category is grey
+const posts = map.posts.map(([x, y, request]) => ({ x, y, request: request === 1 }))
+const mapped = posts.length
 
-const posts: { time: string, parts: Part[], category: string, urgent?: boolean, status?: string }[] = [
-  {
-    time: '10:42',
-    parts: [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' dito sa ', { text: 'Brgy. Malanday', type: 'LOCATION' }, ', stranded kami sa 2nd floor'],
-    category: 'Requests or urgent needs',
-    urgent: true,
-  },
-  {
-    time: '10:41',
-    parts: ['Nag-deploy na ng ', { text: 'rescue boats', type: 'RESCUE' }, ' ang ', { text: 'Philippine Red Cross', type: 'ORGANIZATION' }, ' sa ', { text: 'Tumana', type: 'LOCATION' }],
-    category: 'Rescue, volunteering, or donation effort',
-  },
-  {
-    time: '10:39',
-    parts: [{ text: '500 evacuees', type: 'DISPLACED' }, ' na sa covered court ng ', { text: 'San Mateo', type: 'LOCATION' }, ' dahil sa ', { text: 'Bagyong Kristine', type: 'DISASTER_TYPE' }],
-    category: 'Displaced people and evacuations',
-  },
-  {
-    time: '10:38',
-    parts: ['Bagsak ang tulay sa ', { text: 'Brgy. Banaba', type: 'LOCATION' }, ', hindi madaanan ng sasakyan'],
-    category: 'Infrastructure and utility damage',
-  },
-  {
-    time: '10:36',
-    parts: [{ text: 'Kailangan ng gamot', type: 'REQUEST' }, ' para sa mga bata sa evacuation center sa ', { text: 'Naga', type: 'LOCATION' }],
-    category: 'Requests or urgent needs',
-    urgent: true,
-    status: 'Forwarded',
-  },
-  {
-    time: '10:35',
-    parts: ['Ingat po kayong lahat, praying for everyone sa ', { text: 'Bicol', type: 'LOCATION' }],
-    category: 'Sympathy and support',
-  },
-]
-
+// The category counts cover every post, on the map or not, and are made up to match the dots
 const summary = [
-  { category: 'Requests or urgent needs', count: 38 },
-  { category: 'Sympathy and support', count: 31 },
-  { category: 'Rescue, volunteering, or donation effort', count: 24 },
-  { category: 'Displaced people and evacuations', count: 19 },
-  { category: 'Infrastructure and utility damage', count: 15 },
+  { category: 'Requests or urgent needs', count: 412, request: true },
+  { category: 'Sympathy and support', count: 351 },
+  { category: 'Rescue, volunteering, or donation effort', count: 298 },
+  { category: 'Displaced people and evacuations', count: 221 },
+  { category: 'Infrastructure and utility damage', count: 187 },
+  { category: 'Other categories', count: 227 },
 ]
+const total = summary.reduce((sum, row) => sum + row.count, 0)
 const most = Math.max(...summary.map(row => row.count))
 
-const filters = ['All posts', 'Urgent requests', 'Forwarded']
+// The post a staff member has opened, at Marikina, with its entities highlighted
+const selected = { x: 148.4, y: 297.9 }
+type Part = string | { text: string, type: string }
+const parts: Part[] = [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' dito sa ', { text: 'Brgy. Malanday', type: 'LOCATION' }, ', ', { text: 'Marikina', type: 'LOCATION' }, '. Stranded kami sa 2nd floor']
 </script>
 
 <template>
   <div class="app">
-    <header>
-      <b class="name">Typhoon Post Monitor</b>
-      <span class="live"><i class="dot" />Live, replaying posts on Bagyong Kristine</span>
-      <nav>
-        <span v-for="(filter, index) in filters" :key="filter" class="chip" :class="{ on: index === 0 }">{{ filter }}</span>
-      </nav>
-    </header>
+    <section class="map">
+      <svg viewBox="-50 0 600 504">
+        <path class="land" :d="map.land" />
+        <circle v-for="(post, index) in posts" :key="index" class="post" :class="{ request: post.request }" :cx="post.x" :cy="post.y" r="2.2" />
+        <circle class="ring" :cx="selected.x" :cy="selected.y" r="6" />
 
-    <main>
-      <section class="feed">
-        <div class="columns">
-          <span>Time</span>
-          <span>Post</span>
-          <span>Category</span>
-          <span>Status</span>
-        </div>
-        <div v-for="post in posts" :key="post.time" class="post">
-          <span class="time">{{ post.time }}</span>
-          <p>
-            <template v-for="(part, index) in post.parts" :key="index">
-              <mark v-if="typeof part !== 'string'" :title="part.type">{{ part.text }}</mark>
-              <template v-else>
-                {{ part }}
+        <!-- The opened post sits just to the right of its dot, in the map's own units -->
+        <foreignObject :x="selected.x + 14" :y="selected.y - 24" width="260" height="140">
+          <div class="card">
+            <p>
+              <template v-for="(part, index) in parts" :key="index">
+                <mark v-if="typeof part !== 'string'" :title="part.type">{{ part.text }}</mark>
+                <template v-else>
+                  {{ part }}
+                </template>
               </template>
-            </template>
-          </p>
-          <span class="category" :class="{ urgent: post.urgent }">{{ post.category }}<small>▾</small></span>
-          <span class="status">{{ post.status ?? 'New' }}</span>
-        </div>
-      </section>
+            </p>
+            <span class="category">Requests or urgent needs<small>▾</small></span>
+          </div>
+        </foreignObject>
+      </svg>
+    </section>
 
-      <aside>
-        <h4>Posts per category</h4>
-        <div v-for="row in summary" :key="row.category" class="bar-row">
-          <span class="label">{{ row.category }}</span>
-          <span class="bar"><span :style="{ width: `${(row.count / most) * 100}%` }" /></span>
-          <span class="count">{{ row.count }}</span>
-        </div>
-        <div class="corrections">12 labels corrected and saved for training</div>
-        <div class="buttons">
-          <span class="button">Export report</span>
-          <span class="button">Export corrections</span>
-        </div>
-      </aside>
-    </main>
+    <aside>
+      <h4>Posts per category</h4>
+      <div v-for="row in summary" :key="row.category" class="bar-row">
+        <span class="label">{{ row.category }}</span>
+        <span class="bar"><span :class="{ request: row.request }" :style="{ width: `${(row.count / most) * 100}%` }" /></span>
+        <span class="count">{{ row.count }}</span>
+      </div>
+
+      <div class="placed">
+        <div><span>On the map</span><b>{{ mapped.toLocaleString() }}</b></div>
+        <div><span>Without a location</span><b>{{ (total - mapped).toLocaleString() }}</b></div>
+      </div>
+    </aside>
   </div>
 </template>
 
 <style scoped>
 .app {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 250px;
   height: 456px;
   border: 1px solid var(--color-faint);
   border-radius: 8px;
@@ -117,90 +81,49 @@ const filters = ['All posts', 'Urgent requests', 'Forwarded']
   color: var(--color-ink);
 }
 
-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--color-faint);
-  background: var(--color-land);
+/* The map fills its panel without its own height stretching the screen */
+.map {
+  position: relative;
+  min-width: 0;
 }
 
-.name {
-  font-weight: 700;
+svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.live {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-subtle);
+.land {
+  fill: var(--color-land);
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-negative);
-}
-
-nav {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
-}
-
-.chip,
-.button {
-  padding: 3px 10px;
-  border: 1px solid var(--color-faint);
-  border-radius: 999px;
-  background: var(--color-surface);
-  white-space: nowrap;
-}
-
-.chip.on {
-  border-color: var(--color-ink);
-  background: var(--color-ink);
-  color: var(--color-surface);
-}
-
-main {
-  display: grid;
-  grid-template-columns: 1fr 230px;
-  min-height: 0;
-}
-
-.feed {
-  overflow: hidden;
-  /* More posts continue below the fold */
-  mask-image: linear-gradient(to bottom, black 85%, transparent);
-}
-
-.columns,
 .post {
+  fill: var(--color-ink);
+  fill-opacity: 0.3;
+}
+
+.post.request {
+  fill: var(--color-classification);
+  fill-opacity: 0.6;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+
+.card {
   display: grid;
-  grid-template-columns: 44px 1fr 150px 70px;
-  gap: 12px;
-  padding: 8px 14px;
-}
-
-.columns {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-subtle);
-  border-bottom: 1px solid var(--color-faint);
-}
-
-.post + .post {
-  border-top: 1px solid var(--color-land);
-}
-
-.time,
-.status {
-  color: var(--color-subtle);
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-faint);
+  border-radius: 6px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+  /* The map is drawn a little smaller than the screen, so the card's text is set a little larger */
+  font-size: 14px;
 }
 
 p {
@@ -217,28 +140,23 @@ mark {
 }
 
 .category {
-  align-self: start;
+  justify-self: start;
   padding: 2px 8px;
-  border: 1px solid var(--color-classification);
   border-radius: 6px;
   font-size: 12px;
-  color: var(--color-classification);
+  background: var(--color-classification);
+  color: var(--color-surface);
 }
 
 .category small {
   margin-left: 4px;
 }
 
-.category.urgent {
-  background: var(--color-classification);
-  color: var(--color-surface);
-}
-
 aside {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-left: 1px solid var(--color-faint);
 }
 
@@ -253,7 +171,7 @@ h4 {
 
 .bar-row {
   display: grid;
-  grid-template-columns: 1fr 26px;
+  grid-template-columns: 1fr 30px;
   gap: 2px 8px;
   font-size: 12px;
 }
@@ -271,7 +189,13 @@ h4 {
 .bar span {
   display: block;
   height: 100%;
+  background: var(--color-ink);
+  opacity: 0.3;
+}
+
+.bar span.request {
   background: var(--color-classification);
+  opacity: 0.6;
 }
 
 .count {
@@ -279,21 +203,21 @@ h4 {
   color: var(--color-subtle);
 }
 
-.corrections {
+.placed {
+  display: grid;
+  gap: 4px;
   margin-top: auto;
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid var(--color-faint);
   font-size: 12px;
+}
+
+.placed div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.placed span {
   color: var(--color-subtle);
-}
-
-.buttons {
-  display: grid;
-  gap: 6px;
-}
-
-.button {
-  font-size: 12px;
-  text-align: center;
 }
 </style>
