@@ -10,7 +10,7 @@ Our study is titled "Benchmarking Multi-Task Optimizers for Humanitarian Classif
 
 During typhoons, many Filipinos post about their situation on X, often in Taglish. Take this post as an example. "Baha na dito sa Marikina, need ng tubig para sa mga bata. Pls help!"
 
-Our study will give a model two tasks on posts like this. Humanitarian classification sorts the whole post by the type of report. This one falls under requests or urgent needs. Named entity recognition, or NER, picks out the key details inside the post. In this post, it marks "Marikina" as a location and "need ng tubig" as a request.
+Our study will give a model two tasks on posts like this. Humanitarian classification assigns each post one category. This one falls under requests or urgent needs. Named entity recognition, or NER, picks out the key details inside the post. In this post, it marks "Marikina" as a location and "need ng tubig" as a request.
 
 A multi-task model does both tasks at once, instead of using two separate models. This can save storage and processing time. However, the two tasks can pull the model in different directions while it learns, and this can make it worse at one of them. This problem is called negative transfer. A multi-task optimizer reduces this problem by controlling how much each task influences the model during training.
 
@@ -24,7 +24,7 @@ Isaiah will now explain why this problem matters.
 
 Thank you, Kyle. According to the WorldRiskReport 2025, the Philippines has the highest disaster risk in the world. Part of this risk comes from how often extreme weather hits the country. About eight or nine tropical cyclones cross the Philippines every year, and during each one, Filipinos post their needs and calls for help on social media. These posts arrive in such large numbers that responders cannot read them one by one. Responders therefore need a tool that can sort these posts for them.
 
-Such a tool has to tell responders what kind of report each post is and what details it gives, such as where help is needed. These are the two tasks Kyle described. Despite this, most of the Philippine papers we reviewed trained a model for only one of them. A recent system for Urdaneta City does both, but it does so by sending the posts to a large language model. Another option is a smaller model trained on labeled examples, which can sort posts about as well. However, training one for both tasks needs Taglish posts labeled for both. A dataset like this exists for English, but none of the datasets we reviewed does this for Taglish.
+Despite this, most of the Philippine papers we reviewed trained a model for only one of them. A recent system for Urdaneta City does both, but it does so by sending the posts to a large language model. Another option is a smaller model trained on labeled examples, which can sort posts about as well. However, training one for both tasks needs posts labeled for both tasks. An English dataset called HUMAID-NER, from Ali et al., has this kind of labeling, as the English post on the slide shows. None of the datasets we reviewed has it for Taglish, so the Taglish post on the slide has no labels yet.
 
 So the first step is to build that dataset. But even with it, training one model for both tasks raises a computing problem, which Yngwie will now explain.
 
