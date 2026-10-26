@@ -57,7 +57,7 @@ useClickTimeline(root, (timeline) => {
   gsap.set('.head', { y: shortReach })
   gsap.set('.pull-classification .arm', { rotation: angle, svgOrigin: '0 0' })
   gsap.set('.pull-ner .arm', { rotation: -angle, svgOrigin: '0 0' })
-  gsap.set('.midline, .name-tag, .name, .transfer-text, .benchmark-text, .harder-problem, .easier-problem, .gama, .kurin', { opacity: 0 })
+  gsap.set('.midline, .name-tag, .name, .transfer-text, .benchmark-text, .harder-problem, .easier-problem, .gama, .kurin, .model-ghost', { opacity: 0 })
   gsap.set('.chart-axis, .model', { strokeDasharray: 1, strokeDashoffset: 1 })
   gsap.set('.chart-bar', { scaleY: 0, transformOrigin: '50% 100%' })
   gsap.set('.pull', { clipPath: 'inset(0% 0% 100% 0%)' })
@@ -93,10 +93,12 @@ useClickTimeline(root, (timeline) => {
     .to('.equal .model-box', { rotation: tilt, svgOrigin: `0 ${model.middle}`, ...moveShort }, '<')
     .to('.equal .pulls', { x: pivot.x, y: pivot.y, ...moveShort }, '<')
     .to('.harder-problem, .gama', { opacity: 1, ...enter }, '<0.3')
+    .to('.equal .model-ghost', { opacity: 1, ...enter }, '<')
     .addLabel('step3')
 
   timeline
     .to('.harder-problem, .gama', { opacity: 0, ...exit })
+    .to('.equal .model-ghost', { opacity: 0, ...exit }, '<')
     .to('.pull-classification .arm', { rotation: easierAngle, svgOrigin: '0 0', ...moveShort }, '<')
     .to('.pull-ner .arm', { rotation: -easierAngle, svgOrigin: '0 0', ...moveShort }, '<')
     .to('.equal .pull-ner .shaft', { attr: { y2: shortReach - 14 }, ...moveShort }, '<')
@@ -137,6 +139,7 @@ useClickTimeline(root, (timeline) => {
         <path class="midline" d="M 0 56 V 390" />
         <text class="tag name-tag" x="0" y="36" text-anchor="middle">{{ side.name }}</text>
 
+        <rect class="model-ghost" x="-128" y="112" width="256" height="64" rx="12" pathLength="624" />
         <g class="rig">
           <g class="model-box">
             <rect class="model" x="-128" y="112" width="256" height="64" rx="12" pathLength="1" />
@@ -323,7 +326,14 @@ pattern line {
 
 .midline {
   color: var(--color-muted);
-  stroke-dasharray: 8 6;
+  stroke-dasharray: 6 6;
+}
+
+.model-ghost {
+  fill: none;
+  stroke: var(--color-negative);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
 }
 
 .model {

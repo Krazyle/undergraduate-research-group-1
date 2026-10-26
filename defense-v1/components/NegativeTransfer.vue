@@ -75,7 +75,7 @@ useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  gsap.set('.rig, .stand, .model-name, .pull .label', { opacity: 0 })
+  gsap.set('.rig, .stand, .model-name, .pull .label, .model-ghost', { opacity: 0 })
   gsap.set('.advanced, .top, .easier-problem, .harder-problem, .cost, .kurin, .gama, .pilot, .conflict, .overpower, .optimizer, .chart-text, .post-group, .counts, .zhu, .ali', { opacity: 0 })
   gsap.set('.axis', { strokeDasharray: 1, strokeDashoffset: 1 })
   gsap.set('.bar', { scaleY: 0, transformOrigin: '50% 100%' })
@@ -142,6 +142,7 @@ useClickTimeline(root, (timeline) => {
     .to('.model-box', { rotation: tilt, svgOrigin: modelOrigin, ...moveShort }, '<')
     .to('.pulls', { x: pivot.x, y: pivot.y, ...moveShort }, '<')
     .to('.overpower', { opacity: 1, ...enter }, '<0.3')
+    .to('.model-ghost', { opacity: 1, ...enter }, '<')
     .addLabel('step4')
     .to('.pull .label', { opacity: 0, ...exit })
     .to('.stand', { x: shift, ...moveLong }, '<')
@@ -167,6 +168,7 @@ useClickTimeline(root, (timeline) => {
     .set('.pull-classification .label', { x: model.x - start.x, y: model.bottom + start.y }, '<')
     .set('.pull-ner .label', { x: model.x + start.x, y: model.bottom + start.y }, '<')
     .to('.pull .label, .optimizer', { opacity: 1, ...enter }, `<${moveLong.duration - 0.2}`)
+    .to('.model-ghost', { opacity: 0, ...exit }, '<')
     .addLabel('step6')
     .to('.pull .label, .optimizer', { opacity: 0, ...exit })
     .to('.advanced', { opacity: 1, ...enter }, '<')
@@ -187,8 +189,10 @@ useClickTimeline(root, (timeline) => {
     .to('.equal .model-box', { rotation: tilt, svgOrigin: modelOrigin, ...moveShort }, '<')
     .to('.equal .pulls', { x: pivot.x, y: pivot.y, ...moveShort }, '<')
     .to('.harder-problem, .gama', { opacity: 1, ...enter }, '<0.3')
+    .to('.equal .model-ghost', { opacity: 1, ...enter }, '<')
     .addLabel('step8')
     .to('.harder-problem, .gama', { opacity: 0, ...exit })
+    .to('.equal .model-ghost', { opacity: 0, ...exit }, '<')
     .to('.midline', { attr: { d: 'M 442 56 V 362' }, ...moveShort }, '<')
     .to('.cost, .pilot', { opacity: 1, ...enter }, '>-0.2')
     .addLabel('step9')
@@ -214,6 +218,7 @@ watch($clicks, loop)
       <g v-for="side in sides" :key="side.kind" class="side" :class="side.kind">
         <g class="stand">
           <path class="midline" d="M 442 56 V 390" />
+          <rect class="model-ghost" x="314" y="112" width="256" height="64" rx="12" pathLength="624" />
           <text class="tag top" x="442" y="36" text-anchor="middle">{{ side.name }}</text>
           <text class="tag conflict" x="442" y="424" text-anchor="middle">Conflicting signals</text>
           <text class="tag overpower" x="442" y="424" text-anchor="middle">NER overpowers</text>
@@ -396,7 +401,14 @@ path {
 
 .midline {
   color: var(--color-muted);
-  stroke-dasharray: 8 6;
+  stroke-dasharray: 6 6;
+}
+
+.model-ghost {
+  fill: none;
+  stroke: var(--color-negative);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
 }
 
 .stand,
