@@ -313,8 +313,8 @@ watch($clicks, loop)
         <path v-for="[start, end] in words" :key="start" class="bracket ner" :d="bracket(start, end, 9)" />
         <path class="bracket classification" :d="bracket(0, postEnd, 27)" />
         <g class="counts">
-          <text class="sentence" :x="postEnd / 2" y="76" text-anchor="middle"><tspan class="ner">NER</tspan> decides once per word.</text>
-          <text class="sentence" :x="postEnd / 2" y="106" text-anchor="middle"><tspan class="classification">Classification</tspan> decides once per post.</text>
+          <text class="sentence" :x="postEnd / 2" y="76" text-anchor="middle"><tspan class="ner">NER</tspan> decides once per word</text>
+          <text class="sentence" :x="postEnd / 2" y="106" text-anchor="middle"><tspan class="classification">Classification</tspan> decides once per post</text>
         </g>
       </g>
     </svg>
