@@ -38,10 +38,17 @@
 
   --grid-columns: 12;
   --grid-gutter: var(--space-3);
+
+  /* The slide is 1040 by 585. Every slide keeps an 884 by 456 content area, with a wider band
+     above it for the section label */
+  --margin-x: 78px;
+  --margin-top: 81px;
+  --margin-bottom: var(--space-5);
+  --margin-section: var(--space-4);
 }
 
 .slidev-layout {
-  padding: var(--space-5);
+  padding: var(--margin-top) var(--margin-x) var(--margin-bottom);
 }
 
 h1 {

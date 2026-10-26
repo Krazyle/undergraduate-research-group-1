@@ -91,7 +91,7 @@ li {
 
 .row {
   grid-template-columns: 180px 1fr;
-  padding: 1rem 0;
+  padding: 0.875rem 0;
   font-size: var(--text-xs);
   line-height: var(--leading-list);
 }

@@ -21,9 +21,9 @@ const start = tip(reach, angle)
 const apart = tip(reach, conflictAngle)
 
 // It shares a slide with slide 4's diagram, which leaves this study's encoder 256 wide, centred at
-// x 190.33 and y 144, with an elbow arrow from its bottom to each output's swatch. The model starts
+// x 180.33 and y 144, with an elbow arrow from its bottom to each output's swatch. The model starts
 // there, drawn the same way, measured from the bottom of the box
-const encoder = { x: -48 + (980 - 256 - 393) / 3 + 256 / 2 - 442, y: 144 - 112 }
+const encoder = { x: -78 + (1040 - 256 - 393) / 3 + 256 / 2 - 442, y: 144 - 112 }
 const elbow = { drop: 22, side: 34, tip: 98 }
 
 // The model then slides left and its pulls shorten, as in slide 2's benchmark. The pulls are a

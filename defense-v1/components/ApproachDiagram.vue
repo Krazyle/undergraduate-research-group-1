@@ -50,13 +50,13 @@ function bracket(start: number, end: number, top: number) {
 }
 
 // Once only this study is left, it and the examples get equal space at the slide's left edge,
-// between them, and at the right edge. The slide is 980 wide and the diagram starts 48 in.
+// between them, and at the right edge. The slide is 1040 wide and the diagram starts 78 in.
 // The space is sized for the wider English post, so the model stays put when it appears
 const modelWidth = 256
 const examplesWidth = 393
-const space = (980 - modelWidth - examplesWidth) / 3
-const modelX = -48 + space + modelWidth / 2
-const examplesX = -48 + 2 * space + modelWidth
+const space = (1040 - modelWidth - examplesWidth) / 3
+const modelX = -78 + space + modelWidth / 2
+const examplesX = -78 + 2 * space + modelWidth
 
 // The Taglish post sits level with the model alone, then moves down to share the height
 const taglishDrop = 63

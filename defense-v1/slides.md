@@ -6,6 +6,7 @@ fonts:
   provider: none
 title: Benchmarking Multi-Task Optimizers for Humanitarian Classification and Named Entity Recognition of Taglish Typhoon Tweets
 transition: view-transition
+canvasWidth: 1040
 defaults:
   transition: slide-left
 layout: title
@@ -41,12 +42,14 @@ clicks: 13
 
 ---
 clicks: 5
+section: Background and Problem Statement
 ---
 
 <RiskMap />
 
 ---
 clicks: 15
+section: Background and Problem Statement
 ---
 
 <div class="stack">
@@ -54,6 +57,8 @@ clicks: 15
   <NegativeTransfer :first="6" />
 </div>
 
+---
+section: Background and Problem Statement
 ---
 
 <div class="quote">
@@ -64,6 +69,8 @@ How can **a multi-task model** perform <strong class="classification">humanitari
 
 </div>
 
+---
+section: Objectives and Scope
 ---
 
 <div class="quote">
@@ -76,46 +83,55 @@ The general objective is to **develop a multi-task model** that performs <strong
 
 ---
 clicks: 7
+section: Objectives and Scope
 ---
 
 <SpecificObjectives />
 
 ---
 clicks: 7
+section: Objectives and Scope
 ---
 
 <Scope />
 
 ---
 clicks: 10
+section: Literature and Baseline Algorithms
 ---
 
 <Literature />
 
 ---
 clicks: 5
+section: Expected Scientific Contribution
 ---
 
 <Contribution />
 
 ---
 clicks: 5
+section: Expected Scientific Contribution
 ---
 
 <Benefits />
 
 ---
 clicks: 7
+section: Software Artifact and System Design
 ---
 
 <SystemDiagram />
 
 ---
 clicks: 5
+section: Software Artifact and System Design
 ---
 
 <Tools />
 
+---
+section: Software Artifact and System Design
 ---
 
 <Prototype />

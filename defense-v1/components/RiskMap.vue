@@ -125,8 +125,8 @@ useClickTimeline(root, (timeline) => {
 
 /* The map runs into the slide's right and bottom margins, so the land ends at the slide's edge */
 svg {
-  width: calc(100% + var(--space-5));
-  height: calc(100% + var(--space-5));
+  width: calc(100% + var(--margin-x));
+  height: calc(100% + var(--margin-bottom));
 }
 
 .figures {
