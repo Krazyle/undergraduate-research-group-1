@@ -75,7 +75,7 @@ The general objective is to **develop a multi-task model** that performs <strong
 </div>
 
 ---
-clicks: 4
+clicks: 7
 ---
 
 <SpecificObjectives />
@@ -103,3 +103,9 @@ clicks: 5
 ---
 
 <Benefits />
+
+---
+clicks: 7
+---
+
+<SystemDiagram />
