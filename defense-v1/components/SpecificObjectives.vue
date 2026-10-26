@@ -17,8 +17,8 @@ const singlesTop = 20
 const single = { top: 116 + singlesTop, width: 116, arrowRoot: 184 + singlesTop, arrowTip: 278 + singlesTop }
 const final: Pipeline[] = [
   { x: 106, name: 'Multi-task model', width: 212, outputs: ['classification', 'ner'] },
-  { x: 272, name: 'Model', width: 96, outputs: ['classification'] },
-  { x: 384, name: 'Model', width: 96, outputs: ['ner'] },
+  { x: 284, name: 'Model', width: 92, outputs: ['classification'] },
+  { x: 398, name: 'Model', width: 92, outputs: ['ner'] },
 ]
 
 function outputX(outputs: string[], index: number) {
@@ -97,7 +97,7 @@ useClickTimeline(root, (timeline) => {
     .set('.multi', { opacity: 0 })
     .set('.copy-0', { opacity: 1 }, '<')
     .to('.copy-0 .optimizer', { opacity: 1, ...enter }, '<')
-    .to('.copy:not(.copy-0)', { opacity: 1, ...enter, stagger: 0.04 }, '<')
+    .to(copies.slice(1).map((_, index) => `.copy-${index + 1}`), { opacity: 1, ...enter, stagger: 0.04 }, '<')
     .addLabel('step3')
     .to('.item-3', ink)
     .to('.copy .optimizer, .copy .pull', { opacity: 0, ...exit }, '<')
@@ -124,7 +124,7 @@ useClickTimeline(root, (timeline) => {
       </ol>
     </section>
 
-    <svg :viewBox="`0 0 ${width} 456`" :width="width" height="456">
+    <svg :viewBox="`0 0 ${width} 472`" :width="width" height="472">
       <g class="multi">
         <path class="midline" :d="`M ${mid} ${box.top - 56} V ${box.bottom + 210}`" />
         <rect v-for="(_, index) in halves" :key="index" class="model half" :class="`half-${index}`" height="64" rx="12" />
@@ -164,17 +164,17 @@ useClickTimeline(root, (timeline) => {
       </g>
       <g class="final">
         <text class="tag final-tag" x="106" y="350" text-anchor="middle">Final model</text>
-        <text class="tag single-tag" x="328" y="350" text-anchor="middle">Single-task models</text>
+        <text class="tag single-tag" x="341" y="350" text-anchor="middle">Single-task models</text>
       </g>
 
       <g class="legend">
         <g :transform="`translate(${mid - 172} 0)`">
-          <rect class="swatch classification" x="0" y="400" width="14" height="14" rx="3" />
-          <text class="tag" x="22" y="413">Humanitarian classification</text>
+          <rect class="swatch classification" x="0" y="416" width="14" height="14" rx="3" />
+          <text class="tag" x="22" y="429">Humanitarian classification</text>
         </g>
         <g :transform="`translate(${mid - 157} 0)`">
-          <rect class="swatch ner" x="0" y="428" width="14" height="14" rx="3" />
-          <text class="tag" x="22" y="441">Named entity recognition</text>
+          <rect class="swatch ner" x="0" y="444" width="14" height="14" rx="3" />
+          <text class="tag" x="22" y="457">Named entity recognition</text>
         </g>
       </g>
 
@@ -197,7 +197,7 @@ useClickTimeline(root, (timeline) => {
   display: flex;
   align-items: center;
   gap: 56px;
-  height: 456px;
+  height: 472px;
 }
 
 section {
@@ -219,6 +219,7 @@ ol {
 
 li {
   display: grid;
+  font-size: var(--text-sm);
   grid-template-columns: 2rem 1fr;
   line-height: var(--leading-list);
 }
