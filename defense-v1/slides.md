@@ -135,3 +135,95 @@ section: Software Artifact and System Design
 ---
 
 <Prototype />
+
+---
+clicks: 8
+section: Testing Method and Metrics
+---
+
+<DatasetSplit />
+
+---
+clicks: 4
+section: Testing Method and Metrics
+---
+
+<LabelCheck />
+
+---
+clicks: 7
+section: Testing Method and Metrics
+---
+
+<MeasuresPanel />
+
+---
+clicks: 5
+section: Testing Method and Metrics
+---
+
+<OptimizerGates />
+
+---
+clicks: 3
+section: Testing Method and Metrics
+---
+
+<FinalComparison />
+
+---
+clicks: 2
+section: Testing Method and Metrics
+---
+
+<PrototypeTests />
+
+---
+clicks: 6
+section: Development and Testing Schedule
+---
+
+<ScheduleGantt />
+
+---
+clicks: 3
+section: Immediate Next Steps
+---
+
+<NextSteps />
+
+---
+clicks: 3
+section: Immediate Next Steps
+---
+
+<LabelingMilestones />
+
+---
+clicks: 5
+section: Technical Risks and Backup Plans
+---
+
+<RiskCards />
+
+---
+
+<div class="quote">
+
+### In summary
+
+One model that <strong class="classification">sorts Taglish typhoon posts by type of report</strong> and <strong class="ner">picks out their key details</strong>, with the optimizer that best reduces **negative transfer** without needing too much training time or memory
+
+</div>
+
+---
+section: References
+---
+
+<ReferenceList :page="1" />
+
+---
+section: References
+---
+
+<ReferenceList :page="2" />
