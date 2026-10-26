@@ -2,264 +2,256 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
-import { enter, exit, draw, pop } from '../shared/motion'
+import { draw, enter, exit, moveShort, pop } from '../shared/motion'
 
-const dim = 0.3
+// Placeholder results until training is done. One classification F1-score per seed for each model,
+// and the five NER gaps (final model minus single-task).
+const single = [0.720, 0.701, 0.739, 0.708, 0.731]
+const multi = [0.735, 0.709, 0.747, 0.720, 0.742]
+const nerGaps = [0.006, -0.012, 0.004, -0.009, -0.008]
 
-const steps = [
-  { name: 'Same test posts', question: 'Final model vs single-task models' },
-  { name: 'Five random seeds', question: 'Every run has a matching run' },
-  { name: 'Paired t-test', question: 'Do the mean F1-scores differ?' },
-  { name: '95% confidence interval', question: 'The likely size of each difference' },
-]
+// The paired chart on the left.
+const chart = { top: 100, bottom: 404, low: 0.68, high: 0.76 }
+const y = (score: number) => chart.bottom - (score - chart.low) * (chart.bottom - chart.top) / (chart.high - chart.low)
+const x = { single: 110, multi: 300 }
 
-const x = { single: 56, multi: 246, difference: 390 }
-const panelHeight = 116
-const range = 0.04
+const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
+// The mean gap and the half-width of its 95% confidence interval. 2.776 is the t value for 4 degrees of freedom.
+const interval = (gaps: number[]) => {
+  const centre = mean(gaps)
+  const spread = Math.sqrt(gaps.reduce((sum, gap) => sum + (gap - centre) ** 2, 0) / (gaps.length - 1))
+  return { centre, half: 2.776 * spread / Math.sqrt(gaps.length) }
+}
 
-const tasks = [
-  { key: 'classification', name: 'Classification', top: 150, low: 0.695, high: 0.755, single: [0.72, 0.70, 0.74, 0.71, 0.73], multi: [0.73, 0.71, 0.75, 0.70, 0.74] },
-  { key: 'ner', name: 'NER', top: 316, low: 0.565, high: 0.635, single: [0.61, 0.60, 0.63, 0.59, 0.62], multi: [0.58, 0.59, 0.60, 0.57, 0.61] },
-].map((task) => {
-  const y = (value: number) => task.top + panelHeight * (task.high - value) / (task.high - task.low)
-  const yDifference = (value: number) => task.top + panelHeight / 2 - (panelHeight / 2) * value / range
-  const differences = task.multi.map((score, run) => score - task.single[run])
-  const mean = differences.reduce((sum, value) => sum + value, 0) / differences.length
-  const spread = Math.sqrt(differences.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (differences.length - 1))
-  const margin = 2.776 * spread / Math.sqrt(differences.length)
-  const average = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
-  const pairs = task.single.map((score, run) => {
-    const y1 = y(score)
-    const y2 = y(task.multi[run])
-    return { run, y1, y2, higher: task.multi[run] > score, length: Math.hypot(x.multi - x.single, y2 - y1) }
-  })
+const runs = single.map((score, run) => ({
+  run,
+  y1: y(score),
+  y2: y(multi[run]),
+  gap: multi[run] - score,
+  length: Math.hypot(x.multi - x.single, y(multi[run]) - y(score)),
+}))
+
+// The gap line on the right. 0 sits in the middle, and the final model is better to the right.
+const line = { left: 440, right: 884, perPoint: 9000 }
+const zero = (line.left + line.right) / 2
+const gapX = (gap: number) => zero + gap * line.perPoint
+
+const rows = [
+  { key: 'classification', name: 'Classification', y: 180, gaps: runs.map(run => run.gap) },
+  { key: 'ner', name: 'NER', y: 300, gaps: nerGaps },
+].map((row) => {
+  const { centre, half } = interval(row.gaps)
+  const clear = centre - half > 0 || centre + half < 0
   return {
-    ...task,
-    pairs,
-    meanSingle: y(average(task.single)),
-    meanMulti: y(average(task.multi)),
-    zero: yDifference(0),
-    dots: differences.map(yDifference),
-    mean: yDifference(mean),
-    ciHigh: yDifference(mean + margin),
-    ciLow: yDifference(mean - margin),
+    ...row,
+    centre: gapX(centre),
+    from: gapX(centre - half),
+    to: gapX(centre + half),
+    verdict: clear ? 'Clear difference' : 'No clear difference',
+    clear,
   }
 })
 
-const root = ref<HTMLElement>()
+const sign = (gap: number) => `${gap >= 0 ? '+' : '−'}${Math.abs(gap).toFixed(3)}`
+const faded = 0.3
+const root = ref<SVGSVGElement>()
 
 useClickTimeline(root, (timeline) => {
-  const css = getComputedStyle(root.value!)
-  const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
-
-  gsap.set('.item, .item .question', { color: colour('faint') })
-  gsap.set('.item-0', { color: colour('ink') })
-  gsap.set('.item-0 .question', { color: colour('muted') })
-  gsap.set('.pair .link', { strokeDashoffset: (_: number, element: Element) => Number(element.getAttribute('data-length')) })
-  gsap.set('.pair circle, .difference-axis, .difference-dot, .note', { opacity: 0 })
-  gsap.set('.mean-mark', { scaleX: 0, transformOrigin: '50% 50%' })
-  gsap.set('.mean-difference', { scale: 0, transformOrigin: '50% 50%' })
-  gsap.set('.interval', { scaleY: 0, transformOrigin: '50% 50%' })
-
-  let previous = 0
-  const focus = (index: number) => {
-    timeline
-      .to(`.item-${previous}, .item-${previous} .question`, { color: colour('faint'), ...exit })
-      .to(`.item-${index}`, { color: colour('ink'), ...enter }, '<')
-      .to(`.item-${index} .question`, { color: colour('muted'), ...enter }, '<')
-    previous = index
-  }
+  gsap.set('.runs, .gap-label, .scale, .row, .average, .average-label, .test-text, .interval, .interval-dot, .verdict, .interval-note, .placeholder', { opacity: 0 })
+  gsap.set('.link', { strokeDashoffset: (_: number, element: Element) => Number(element.getAttribute('data-length')) })
+  gsap.set('.average', { scale: 0, transformOrigin: '50% 50%' })
+  gsap.set('.interval', { scaleX: 0, transformOrigin: '50% 50%' })
+  runs.forEach(run => gsap.set(`.row-0 .gap-dot[data-run="${run.run}"]`, { attr: { cx: x.multi, cy: run.y2 } }))
 
   timeline.addLabel('step0')
 
-  focus(1)
+  // Click 1. Each seed gives one run of each model. A line joins the two runs, and the gap is written beside it.
   timeline
-    .to('.pair .single-dot', { opacity: 1, ...enter }, '<')
-  for (let run = 0; run < 5; run++) {
+    .to('.pill', { opacity: faded, ...exit })
+    .to('.runs, .placeholder', { opacity: 1, duration: 0 }, '<')
+    .fromTo('.single-dot', { opacity: 0 }, { opacity: 1, ...enter, stagger: 0.05 }, '<')
+  runs.forEach((run) => {
     timeline
-      .to(`.pair[data-run="${run}"] .link`, { strokeDashoffset: 0, ...draw }, run === 0 ? '>' : '<0.12')
-      .to(`.pair[data-run="${run}"] .multi-dot`, { opacity: 1, ...enter }, '>-0.15')
-  }
-  timeline
-    .to('.note.pairs', { opacity: 1, ...enter }, '<')
-    .addLabel('step1')
+      .to(`.link[data-run="${run.run}"]`, { strokeDashoffset: 0, ...draw }, run.run ? '<0.12' : '>')
+      .fromTo(`.multi-dot[data-run="${run.run}"]`, { opacity: 0 }, { opacity: 1, ...enter }, '>-0.15')
+      .to(`.gap-label[data-run="${run.run}"]`, { opacity: 1, ...enter }, '<')
+  })
+  timeline.addLabel('step1')
 
-  focus(2)
+  // Click 2. Each pair becomes one gap on the number line, and the average gap is marked.
+    .to('.paired', { opacity: faded, ...exit })
+    .to('.gap-label', { opacity: 0, ...exit }, '<')
+    .to('.scale, .row-0', { opacity: 1, ...enter }, '<0.1')
+  runs.forEach((run) => {
+    timeline.to(`.row-0 .gap-dot[data-run="${run.run}"]`, { attr: { cx: gapX(run.gap), cy: rows[0].y }, ...moveShort }, run.run ? '<0.08' : '>')
+  })
   timeline
-    .to('.note.pairs', { opacity: 0, ...exit }, '<')
-    .to('.pair', { opacity: dim, ...exit }, '<')
-    .to('.mean-mark', { scaleX: 1, ...draw }, '>')
-    .to('.difference-axis', { opacity: 1, ...enter }, '<')
-    .to('.difference-dot', { opacity: 1, ...enter, stagger: 0.05 }, '>')
-    .to('.mean-difference', { scale: 1, ...pop }, '>')
-    .to('.note.means', { opacity: 1, ...enter }, '<')
+    .to('.row-0 .average', { opacity: 1, scale: 1, ...pop }, '>')
+    .to('.average-label, .test-text', { opacity: 1, ...enter }, '<0.1')
     .addLabel('step2')
 
-  focus(3)
-  timeline
-    .to('.note.means', { opacity: 0, ...exit }, '<')
-    .to('.interval', { scaleY: 1, ...draw }, '<0.1')
-    .to('.note.interval-note', { opacity: 1, ...enter }, '<')
+  // Click 3. Each bar shows the 95% confidence interval. A bar that does not touch 0 means a clear difference.
+    .to('.average-label, .test-text', { opacity: 0, ...exit })
+    .to('.row-0 .average', { opacity: 0, duration: 0 }, '>')
+    .to('.row-0 .interval, .row-0 .interval-dot', { opacity: 1, duration: 0 }, '<')
+    .to('.row-0 .interval', { scaleX: 1, ...draw }, '<')
+    .to('.row-0 .verdict, .interval-note', { opacity: 1, ...enter }, '>-0.1')
+    .to('.row-1', { opacity: 1, ...enter }, '>0.2')
+    .to('.row-1 .interval, .row-1 .interval-dot', { opacity: 1, duration: 0 }, '>')
+    .to('.row-1 .interval', { scaleX: 1, ...draw }, '<')
+    .to('.row-1 .verdict', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step3')
 })
 </script>
 
 <template>
-  <div ref="root" class="comparison">
-    <section>
-      <h3>Comparing the models</h3>
-      <ol>
-        <li v-for="(step, index) in steps" :key="step.name" class="item" :class="`item-${index}`">
-          <b>{{ index + 1 }}</b>
-          <div>
-            <p class="name">{{ step.name }}</p>
-            <p class="question">{{ step.question }}</p>
-          </div>
-        </li>
-      </ol>
-    </section>
+  <svg ref="root" viewBox="0 0 884 456" width="884" height="456">
+    <defs>
+      <marker id="comparison-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path class="head" d="M 0 0 L 10 5 L 0 10 z" />
+      </marker>
+    </defs>
 
-    <svg viewBox="0 0 440 456" width="440" height="456">
-      <g :transform="`translate(${x.single} 0)`">
-        <rect class="encoder" x="-60" y="0" width="56" height="24" rx="5" />
-        <rect class="encoder" x="4" y="0" width="56" height="24" rx="5" />
-        <rect class="head classification" x="-60" y="30" width="56" height="16" rx="4" />
-        <rect class="head ner" x="4" y="30" width="56" height="16" rx="4" />
-        <text class="column-name" y="74" text-anchor="middle">Single-task</text>
+    <g class="paired">
+      <g class="pill">
+        <rect class="pill-box" :x="(x.single + x.multi) / 2 - 56" y="0" width="112" height="28" rx="14" />
+        <text class="pill-text" :x="(x.single + x.multi) / 2" y="19" text-anchor="middle">Test posts</text>
       </g>
-      <g :transform="`translate(${x.multi} 0)`">
-        <rect class="encoder" x="-50" y="0" width="100" height="24" rx="5" />
-        <rect class="head classification" x="-50" y="30" width="46" height="16" rx="4" />
-        <rect class="head ner" x="4" y="30" width="46" height="16" rx="4" />
-        <text class="column-name" y="74" text-anchor="middle">Multi-task</text>
-      </g>
-      <rect class="pill" :x="(x.single + x.multi) / 2 - 52" y="88" width="104" height="24" rx="12" />
-      <text class="pill-text" :x="(x.single + x.multi) / 2" y="105" text-anchor="middle">Test posts</text>
-      <text class="column-name difference-axis" :x="x.difference" y="74" text-anchor="middle">Difference</text>
+      <text class="column-name" :x="x.single" y="60" text-anchor="middle">Single-task</text>
+      <text class="column-name" :x="x.multi" y="60" text-anchor="middle">Final model</text>
+      <text class="axis-name" x="0" y="88">F1-score</text>
+      <path class="column-line" :d="`M ${x.single} ${chart.top} V ${chart.bottom} M ${x.multi} ${chart.top} V ${chart.bottom}`" />
 
-      <g v-for="task in tasks" :key="task.key">
-        <text class="task" :class="task.key" x="0" :y="task.top - 12">{{ task.name }}</text>
-        <path class="column-line" :d="`M ${x.single} ${task.top} V ${task.top + panelHeight} M ${x.multi} ${task.top} V ${task.top + panelHeight}`" />
-
-        <g v-for="pair in task.pairs" :key="pair.run" class="pair" :data-run="pair.run">
-          <path
-            class="link" :class="{ lower: !pair.higher }" :d="`M ${x.single} ${pair.y1} L ${x.multi} ${pair.y2}`"
-            :data-length="pair.length" :style="{ strokeDasharray: pair.length }"
-          />
-          <circle class="single-dot" :cx="x.single" :cy="pair.y1" r="6" />
-          <circle class="multi-dot" :cx="x.multi" :cy="pair.y2" r="6" />
+      <g class="runs">
+        <g v-for="run in runs" :key="run.run">
+          <path class="link" :data-run="run.run" :data-length="run.length" :style="{ strokeDasharray: run.length }" :d="`M ${x.single} ${run.y1} L ${x.multi} ${run.y2}`" />
+          <circle class="single-dot" :cx="x.single" :cy="run.y1" r="7" />
+          <circle class="multi-dot" :data-run="run.run" :cx="x.multi" :cy="run.y2" r="7" />
+          <text class="seed" :x="x.single - 16" :y="run.y1 + 5" text-anchor="end">Seed {{ run.run + 1 }}</text>
         </g>
-
-        <path class="mean-mark" :class="task.key" :d="`M ${x.single - 18} ${task.meanSingle} H ${x.single + 18}`" />
-        <path class="mean-mark" :class="task.key" :d="`M ${x.multi - 18} ${task.meanMulti} H ${x.multi + 18}`" />
-
-        <g class="difference-axis">
-          <path class="column-line dark" :d="`M ${x.difference} ${task.top} V ${task.top + panelHeight}`" />
-          <path class="zero" :d="`M ${x.difference - 22} ${task.zero} H ${x.difference + 22}`" />
-          <text class="zero-text" :x="x.difference + 28" :y="task.zero + 5">0</text>
-        </g>
-        <circle v-for="(dot, run) in task.dots" :key="run" class="difference-dot" :cx="x.difference - 30" :cy="dot" r="4" />
-        <path
-          class="interval" :class="task.key"
-          :d="`M ${x.difference} ${task.ciHigh} V ${task.ciLow} M ${x.difference - 9} ${task.ciHigh} H ${x.difference + 9} M ${x.difference - 9} ${task.ciLow} H ${x.difference + 9}`"
-          :style="{ transformOrigin: `${x.difference}px ${task.mean}px` }"
-        />
-        <circle class="mean-difference" :class="task.key" :cx="x.difference" :cy="task.mean" r="8" />
       </g>
+    </g>
+    <text v-for="run in runs" :key="`gap-${run.run}`" class="gap-label" :data-run="run.run" :x="x.multi + 16" :y="run.y2 + 5">{{ sign(run.gap) }}</text>
 
-      <text class="note pairs" :x="(x.single + x.multi) / 2" y="452" text-anchor="middle">One line for each matching pair of runs</text>
-      <text class="note means" x="440" y="452" text-anchor="end">Mean difference, for each task</text>
-      <text class="note interval-note" x="440" y="452" text-anchor="end">Bar shows the 95% confidence interval</text>
-    </svg>
+    <g class="scale">
+      <path class="zero" :d="`M ${zero} 90 V 380`" />
+      <text class="zero-text" :x="zero" y="402" text-anchor="middle">0</text>
+      <text class="side" :x="zero" y="420" text-anchor="middle">no difference</text>
+      <text class="side strong" :x="zero + 14" y="70">Final model better</text>
+      <path class="side-arrow" :d="`M ${line.right - 60} 66 H ${line.right}`" marker-end="url(#comparison-head)" />
+      <text class="side strong" :x="zero - 14" y="70" text-anchor="end">Single-task better</text>
+      <path class="side-arrow" :d="`M ${line.left + 60} 66 H ${line.left}`" marker-end="url(#comparison-head)" />
+    </g>
 
-  </div>
+    <g v-for="(row, index) in rows" :key="row.key" class="row" :class="`row-${index}`">
+      <text class="task" :class="row.key" :x="line.left" :y="row.y - 34">{{ row.name }}</text>
+      <path class="gap-line" :d="`M ${line.left} ${row.y} H ${line.right}`" />
+      <circle v-for="(gap, run) in row.gaps" :key="run" class="gap-dot" :data-run="run" :cx="gapX(gap)" :cy="row.y" r="6" />
+      <path
+        class="interval" :class="row.key"
+        :d="`M ${row.from} ${row.y} H ${row.to} M ${row.from} ${row.y - 10} V ${row.y + 10} M ${row.to} ${row.y - 10} V ${row.y + 10}`"
+        :style="{ transformOrigin: `${row.centre}px ${row.y}px` }"
+      />
+      <circle class="average" :class="row.key" :cx="row.centre" :cy="row.y" r="10" />
+      <circle class="interval-dot" :class="row.key" :cx="row.centre" :cy="row.y" r="10" />
+      <text class="verdict" :class="{ clear: row.clear }" :x="line.right" :y="row.y + 36" text-anchor="end">{{ row.verdict }}</text>
+    </g>
+    <text class="average-label" :x="rows[0].centre" :y="rows[0].y - 18" text-anchor="middle">Average gap</text>
+
+    <text class="test-text title" :x="line.left" y="432">Paired t-test</text>
+    <text class="test-text" :x="line.left" y="452">Is the average gap clearly away from 0?</text>
+    <text class="interval-note" :x="line.left" y="446">Each bar shows the 95% confidence interval</text>
+
+    <text class="placeholder" x="0" y="452">Placeholder values until training is done</text>
+  </svg>
 </template>
 
 <style scoped>
-.comparison {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 456px;
-}
-
-section {
-  flex: none;
-  width: 390px;
-}
-
-h3 {
-  margin-bottom: var(--space-2);
-}
-
-ol {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-li {
-  display: grid;
-  grid-template-columns: 2rem 1fr;
-  line-height: var(--leading-list);
-}
-
-li b {
-  font-weight: 700;
-}
-
-.name {
-  margin: 0;
-  font-weight: 700;
-  line-height: var(--leading-list);
-}
-
-.question {
-  margin: 0;
-  font-size: var(--text-2xs);
-  line-height: var(--leading-list);
-}
-
 svg {
-  flex: none;
   overflow: visible;
 }
 
-.encoder {
-  fill: var(--color-surface);
-  stroke: var(--color-ink);
-  stroke-width: 2;
+.head {
+  fill: var(--color-subtle);
 }
 
-.head.classification {
-  fill: color-mix(in srgb, var(--color-classification) 20%, var(--color-surface));
-  stroke: var(--color-classification);
-  stroke-width: 1.5;
-}
-
-.head.ner {
-  fill: color-mix(in srgb, var(--color-ner) 20%, var(--color-surface));
-  stroke: var(--color-ner);
-  stroke-width: 1.5;
-}
-
-.column-name {
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  fill: var(--color-ink);
-}
-
-.pill {
+.pill-box {
   fill: var(--color-land);
 }
 
 .pill-text {
-  font-size: var(--text-2xs);
+  font-size: 0.9rem;
   font-weight: 600;
   fill: var(--color-ink);
+}
+
+.column-name {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  fill: var(--color-ink);
+}
+
+.axis-name {
+  font-size: 0.85rem;
+  fill: var(--color-subtle);
+}
+
+.column-line {
+  stroke: var(--color-faint);
+  stroke-width: 2;
+}
+
+.link {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+
+.single-dot {
+  fill: var(--color-subtle);
+}
+
+.multi-dot {
+  fill: var(--color-ink);
+}
+
+.seed {
+  font-size: 0.75rem;
+  fill: var(--color-subtle);
+}
+
+.gap-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  fill: var(--color-positive);
+}
+
+.zero {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+
+.zero-text {
+  font-size: 0.9rem;
+  font-weight: 700;
+  fill: var(--color-muted);
+}
+
+.side {
+  font-size: 0.8rem;
+  fill: var(--color-subtle);
+}
+
+.side.strong {
+  font-weight: 600;
+}
+
+.side-arrow {
+  fill: none;
+  stroke: var(--color-subtle);
+  stroke-width: 1.5;
 }
 
 .task {
@@ -275,82 +267,77 @@ svg {
   fill: var(--color-ner);
 }
 
-.column-line {
+.gap-line {
   stroke: var(--color-faint);
   stroke-width: 2;
 }
 
-.column-line.dark {
-  stroke: var(--color-subtle);
+.gap-dot {
+  fill: var(--color-faint);
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
 }
 
-.link {
-  fill: none;
-  stroke: var(--color-ink);
-  stroke-width: 2;
-}
-
-.link.lower {
-  stroke: var(--color-negative);
-}
-
-.single-dot {
-  fill: var(--color-subtle);
-}
-
-.multi-dot {
-  fill: var(--color-ink);
-}
-
-.mean-mark,
 .interval {
   fill: none;
   stroke-width: 5;
   stroke-linecap: round;
 }
 
-.interval {
-  stroke-width: 4;
-}
-
-.mean-mark.classification,
 .interval.classification {
   stroke: var(--color-classification);
 }
 
-.mean-mark.ner,
 .interval.ner {
   stroke: var(--color-ner);
 }
 
-.mean-difference.classification {
+.average.classification,
+.interval-dot.classification {
+  fill: var(--color-classification);
+  stroke: none;
+}
+
+.average.ner,
+.interval-dot.ner {
+  fill: var(--color-ner);
+  stroke: none;
+}
+
+.average-label {
+  font-size: 0.8rem;
+  font-weight: 700;
   fill: var(--color-classification);
 }
 
-.mean-difference.ner {
-  fill: var(--color-ner);
+.verdict {
+  font-size: 0.85rem;
+  font-weight: 700;
+  fill: var(--color-subtle);
 }
 
-.zero {
-  stroke: var(--color-ink);
-  stroke-width: 2;
-  stroke-dasharray: 4 4;
+.verdict.clear {
+  fill: var(--color-positive);
 }
 
-.zero-text {
-  font-size: var(--text-2xs);
-  font-weight: 600;
+.test-text {
+  font-size: 0.85rem;
   fill: var(--color-muted);
 }
 
-.difference-dot {
-  fill: var(--color-faint);
-}
-
-.note {
-  font-size: var(--text-2xs);
-  font-weight: 600;
+.test-text.title {
+  font-size: 0.95rem;
+  font-weight: 700;
   fill: var(--color-ink);
 }
 
+.interval-note {
+  font-size: 0.85rem;
+  fill: var(--color-muted);
+}
+
+.placeholder {
+  font-size: 0.75rem;
+  fill: var(--color-subtle);
+}
 </style>
