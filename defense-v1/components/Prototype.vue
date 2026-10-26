@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Map, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
+import { Map, Marker, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 // Vite moves the map library when it bundles it, so the library cannot find its worker beside itself
 import worker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
@@ -8,10 +8,20 @@ import { onMounted, onUnmounted, ref } from 'vue'
 // centre, not real posts
 import data from '../data/marikina-posts.json'
 
-// A still mock-up of the prototype's main screen as DRRMO staff in Marikina would see it. A post goes
-// on the map only when the model finds a location in it, so the side panel also counts the posts
-// without one. Requests or urgent needs are blue, as on slide 3, and every other category is grey
-const REQUESTS = 0
+// A mock-up of the prototype's main screen as DRRMO staff in Marikina would see it. A post goes on the
+// map only when the model finds a location in it, so the side panel also counts the posts without one.
+// The prototype is its own app, so it has its own tokens instead of the slides' ones
+
+// Dots on a map can sit beside any other colour, so only three categories, the ones a response team
+// acts on, get their own colour and the rest share a grey. The three pass the colour-vision checks
+// against the map's background for every pair, and the side panel names each colour
+const SLOTS: Record<string, string> = {
+  'Requests or urgent needs': 'series-1',
+  'Infrastructure and utility damage': 'series-2',
+  'Displaced people and evacuations': 'series-3',
+}
+const slot = (category: string) => SLOTS[category] ?? 'series-rest'
+const swatch = (category: string) => `var(--app-${slot(category)})`
 
 const located = data.posts.length
 const unlocated = data.unlocated.reduce((sum, count) => sum + count, 0)
@@ -20,7 +30,6 @@ const unlocated = data.unlocated.reduce((sum, count) => sum + count, 0)
 const summary = data.categories.map((category, index) => ({
   category,
   count: data.posts.filter(post => post[2] === index).length + data.unlocated[index],
-  request: index === REQUESTS,
 }))
 const other = summary.pop()!
 summary.sort((a, b) => b.count - a.count).push(other)
@@ -35,6 +44,7 @@ const selected: [number, number] = [121.12082, 14.64059]
 
 setWorkerUrl(worker)
 
+const root = ref<HTMLElement>()
 const container = ref<HTMLElement>()
 const card = ref<HTMLElement>()
 let map: Map | undefined
@@ -45,8 +55,10 @@ onMounted(async () => {
   const base = new URL(import.meta.env.BASE_URL, location.href).href
   const style = JSON.parse((await (await fetch(`${base}map/style.json`)).text()).replaceAll('{base}', base))
 
-  const css = getComputedStyle(container.value!)
-  const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
+  // The map paints on a canvas, which cannot read CSS variables, so it gets the tokens' values
+  const css = getComputedStyle(root.value!)
+  const token = (name: string) => css.getPropertyValue(`--app-${name}`).trim()
+  const colour = ['match', ['get', 'category'], ...data.categories.flatMap((category, index) => [index, token(slot(category))]), token('series-rest')]
 
   map = new Map({
     container: container.value!,
@@ -73,30 +85,28 @@ onMounted(async () => {
         features: data.posts.map(([lat, lon, category]) => ({
           type: 'Feature',
           geometry: { type: 'Point', coordinates: [lon, lat] },
-          properties: { request: category === REQUESTS },
+          properties: { category },
         })),
       },
     })
+    // Each dot has a thin ring of the surface colour, so dots that overlap stay apart
     map!.addLayer({
       id: 'posts',
       type: 'circle',
       source: 'posts',
       paint: {
-        'circle-radius': 3.5,
-        'circle-color': ['case', ['get', 'request'], colour('classification'), colour('ink')],
-        'circle-opacity': ['case', ['get', 'request'], 0.7, 0.35],
+        'circle-radius': 4,
+        'circle-color': colour as never,
+        'circle-stroke-color': token('surface'),
+        'circle-stroke-width': 1,
       },
     })
-    map!.addSource('selected', { type: 'geojson', data: { type: 'Point', coordinates: selected } })
-    map!.addLayer({
-      id: 'selected',
-      type: 'circle',
-      source: 'selected',
-      paint: { 'circle-radius': 6, 'circle-color': colour('classification'), 'circle-stroke-color': colour('ink'), 'circle-stroke-width': 2 },
-    })
 
-    // The card opens below its dot, over the hills where fewer posts sit
-    new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 12, maxWidth: '250px' })
+    // The opened post is marked with the map's standard pin, and its card opens below it
+    new Marker({ color: token('pin') })
+      .setLngLat(selected)
+      .addTo(map!)
+    new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 8, maxWidth: '250px' })
       .setLngLat(selected)
       .setDOMContent(card.value!)
       .addTo(map!)
@@ -114,22 +124,22 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app">
+  <div ref="root" class="app">
     <section ref="container" class="map" />
 
     <!-- The opened post, which the map moves into its popup -->
     <div class="hidden">
       <div ref="card" class="card">
         <p>Need ng tubig at pagkain dito sa Brgy. Concepcion Dos, Marikina. Stranded kami sa 2nd floor</p>
-        <span class="category">Requests or urgent needs</span>
+        <span class="category"><i :style="{ background: swatch('Requests or urgent needs') }" />Requests or urgent needs</span>
       </div>
     </div>
 
     <aside>
       <h4>Posts per category</h4>
       <div v-for="row in summary" :key="row.category" class="bar-row">
-        <span class="label">{{ row.category }}</span>
-        <span class="bar"><span :class="{ request: row.request }" :style="{ width: `${(row.count / most) * 100}%` }" /></span>
+        <span class="label"><i :style="{ background: swatch(row.category) }" />{{ row.category }}</span>
+        <span class="bar"><span :style="{ width: `${(row.count / most) * 100}%`, background: swatch(row.category) }" /></span>
         <span class="count">{{ row.count }}</span>
       </div>
 
@@ -142,16 +152,36 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* The prototype's own tokens. It uses the system's interface font, as a web app would, and slots 1
+   to 3 of the dataviz guide's validated categorical palette */
 .app {
+  --app-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --app-text-sm: 12px;
+  --app-text-md: 13px;
+  --app-radius: 6px;
+  --app-surface: #ffffff;
+  --app-panel: #f6f7f9;
+  --app-border: #d8dce1;
+  --app-text: #1f2328;
+  --app-text-muted: #5c6670;
+  --app-track: #e6e9ed;
+  --app-pin: #1f2328;
+  --app-series-1: #2a78d6;
+  --app-series-2: #eb6834;
+  --app-series-3: #1baf7a;
+  --app-series-rest: #9aa1a9;
+
   display: grid;
   grid-template-columns: 1fr 250px;
   height: 456px;
-  border: 1px solid var(--color-faint);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
-  font-size: 13px;
-  line-height: 1.35;
-  color: var(--color-ink);
+  font-family: var(--app-font);
+  font-size: var(--app-text-md);
+  line-height: 1.4;
+  color: var(--app-text);
+  background: var(--app-surface);
 }
 
 .map {
@@ -165,10 +195,10 @@ onUnmounted(() => {
 .card {
   display: grid;
   gap: 8px;
-  font-family: Inter, sans-serif;
-  font-size: 13px;
-  line-height: 1.35;
-  color: var(--color-ink);
+  font-family: var(--app-font);
+  font-size: var(--app-text-md);
+  line-height: 1.4;
+  color: var(--app-text);
 }
 
 p {
@@ -177,10 +207,19 @@ p {
   line-height: inherit;
 }
 
+/* A category's colour sits in a swatch beside its name, and the name stays in the text colour */
+i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+
 .category {
-  font-size: 12px;
+  font-size: var(--app-text-sm);
   font-weight: 600;
-  color: var(--color-classification);
 }
 
 aside {
@@ -188,23 +227,24 @@ aside {
   flex-direction: column;
   gap: 8px;
   padding: 14px 16px;
-  border-left: 1px solid var(--color-faint);
+  border-left: 1px solid var(--app-border);
+  background: var(--app-panel);
 }
 
 h4 {
   margin: 0;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-subtle);
+  color: var(--app-text-muted);
 }
 
 .bar-row {
   display: grid;
   grid-template-columns: 1fr 30px;
   gap: 2px 8px;
-  font-size: 12px;
+  font-size: var(--app-text-sm);
 }
 
 .label {
@@ -214,31 +254,26 @@ h4 {
 .bar {
   height: 8px;
   align-self: center;
-  background: var(--color-land);
+  border-radius: 4px;
+  background: var(--app-track);
 }
 
 .bar span {
   display: block;
   height: 100%;
-  background: var(--color-ink);
-  opacity: 0.35;
-}
-
-.bar span.request {
-  background: var(--color-classification);
-  opacity: 0.7;
+  border-radius: 4px;
 }
 
 .count {
   text-align: right;
-  color: var(--color-subtle);
+  color: var(--app-text-muted);
 }
 
 .placed {
   display: grid;
   gap: 4px;
   margin-top: auto;
-  font-size: 12px;
+  font-size: var(--app-text-sm);
 }
 
 .placed div {
@@ -247,17 +282,18 @@ h4 {
 }
 
 .placed span {
-  color: var(--color-subtle);
+  color: var(--app-text-muted);
 }
 
 .map :deep(.maplibregl-ctrl-attrib) {
+  font-family: var(--app-font);
   font-size: 10px;
 }
 
 /* The popup is drawn by the map outside the component's own elements, so its frame is styled through it */
 .map :deep(.maplibregl-popup-content) {
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: var(--app-radius);
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
 }
 </style>
