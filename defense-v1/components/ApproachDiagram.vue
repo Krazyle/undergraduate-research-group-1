@@ -35,17 +35,13 @@ function place(index: number, count: number) {
   return (width * (index + 0.5)) / count
 }
 
-const examples = [
-  { kind: 'english', title: 'English post', text: 'Flooding in Houston, we need water!', entities: [[125, 216], [266, 387]], end: 393 },
-  { kind: 'taglish', title: 'Taglish post', text: 'Baha na sa Marikina, need ng tubig!', entities: [[125, 217], [229, 378]], end: 384 },
-]
-
 function bracket(start: number, end: number, top: number) {
   return `M ${start} ${top} V ${top + 6} H ${end} V ${top}`
 }
 
+const exampleShift = 63
 
-const taglishDrop = 63
+const examplesY = 186
 
 const dash = 12
 
@@ -58,6 +54,7 @@ const root = ref<HTMLElement>()
 
 useClickTimeline(root, (timeline) => {
   gsap.set('.panel, .legend, .example, .english-source', { opacity: 0 })
+  gsap.set('.taglish .post, .taglish .bracket', { filter: 'grayscale(0)' })
   panels.forEach((_, index) => gsap.set(`.panel-${index}`, { x: place(index, index + 1) }))
 
   timeline
@@ -75,10 +72,12 @@ useClickTimeline(root, (timeline) => {
     .to('.panel-2', { x: width / 2, ...moveShort }, '<0.1')
     .addLabel('step4')
     .to('.panel-2', { x: modelX, ...moveShort })
-    .to('.taglish', { opacity: 1, ...enter }, '>-0.1')
-    .fromTo('.taglish .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
+    .to('.english, .english-source', { opacity: 1, ...enter }, '>-0.1')
+    .fromTo('.english .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step5')
-    .to('.taglish', { y: taglishDrop, ...moveShort })
+    .to('.taglish', { opacity: 1, ...enter })
+    .to('.taglish', { y: `+=${exampleShift}`, ...moveShort }, '<')
+    .to('.english', { y: `-=${exampleShift}`, ...moveShort }, '<')
     .fromTo('.taglish .bracket', {
       strokeDasharray: (_: number, path: SVGPathElement) => `${period(path)} 0`,
       strokeDashoffset: (_: number, path: SVGPathElement) => (period(path) - dash) / 2,
@@ -87,12 +86,12 @@ useClickTimeline(root, (timeline) => {
       strokeDashoffset: 0,
       ...draw,
     }, '<0.2')
-    .to('.english, .english-source', { opacity: 1, ...enter }, '<')
-    .fromTo('.english .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step6')
+    .to('.taglish .post, .taglish .bracket', { opacity: 0.5, filter: 'grayscale(1)', ...enter })
+    .addLabel('step7')
     .set('.panel-2 .model, .panel-2 .name, .panel-2 .classification, .panel-2 .ner', { opacity: 0 }, '+=0.01')
     .to('.example, .legend, .english-source, .panel-2 .post, .panel-2 .input, .panel-2 .tag', { opacity: 0, ...exit })
-    .addLabel('step7')
+    .addLabel('step8')
 })
 </script>
 
@@ -121,13 +120,19 @@ useClickTimeline(root, (timeline) => {
       </g>
 
       <g :transform="`translate(${examplesX} 0)`">
-        <g v-for="(example, row) in examples" :key="example.kind" class="example" :class="example.kind">
-          <g :transform="`translate(0 ${147 + row * taglishDrop})`">
-            <text class="tag" y="-40">{{ example.title }}</text>
-            <text class="post">{{ example.text }}</text>
-            <path v-for="[start, end] in example.entities" :key="start" class="bracket ner" :d="bracket(start, end, 9)" />
-            <path class="bracket classification" :d="bracket(0, example.end, 27)" />
-          </g>
+        <g class="example english" :transform="`translate(0 ${examplesY})`">
+          <text class="tag" y="-40">English post</text>
+          <text class="post">Flooding in Houston, we need water!</text>
+          <path class="bracket ner" :d="bracket(125, 216, 9)" />
+          <path class="bracket ner" :d="bracket(266, 387, 9)" />
+          <path class="bracket classification" :d="bracket(0, 393, 27)" />
+        </g>
+        <g class="example taglish" :transform="`translate(0 ${examplesY})`">
+          <text class="tag" y="-40">Taglish post</text>
+          <text class="post">Baha na sa Marikina, need ng tubig!</text>
+          <path class="bracket ner" :d="bracket(125, 217, 9)" />
+          <path class="bracket ner" :d="bracket(229, 378, 9)" />
+          <path class="bracket classification" :d="bracket(0, 384, 27)" />
         </g>
       </g>
 

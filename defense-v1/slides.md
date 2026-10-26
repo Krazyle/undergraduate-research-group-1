@@ -48,13 +48,13 @@ section: Background and Problem Statement
 <RiskMap />
 
 ---
-clicks: 15
+clicks: 16
 section: Background and Problem Statement
 ---
 
 <div class="stack">
   <ApproachDiagram />
-  <NegativeTransfer :first="6" />
+  <NegativeTransfer :first="7" />
 </div>
 
 ---
