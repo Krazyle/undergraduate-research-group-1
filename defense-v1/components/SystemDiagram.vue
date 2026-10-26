@@ -9,15 +9,15 @@ import { useClickTimeline } from '../composables/useClickTimeline'
 // the name of its step, since Chapter 3 gives the details. Each part names the click it appears on,
 // in the order Prinz describes them
 type Kind = 'box'
-interface Node { kind: Kind, step: number, x: number, y: number, width: number, height: number, label: string }
+interface Node { id: string, kind: Kind, step: number, x: number, y: number, width: number, height: number, label: string }
 
 // The slide's content area is 884 wide: three 268-wide columns with two 40-wide gutters
 const columns = [134, 442, 750]
 const [left, middle, right] = columns
 const width = 220
 const height = 34
-const box = (step: number, x: number, y: number, label: string, size = { width, height }) =>
-  ({ kind: 'box' as const, step, x, y, label, ...size })
+const box = (id: string, step: number, x: number, y: number, label: string, size = { width, height }) =>
+  ({ id, kind: 'box' as const, step, x, y, label, ...size })
 const fork = { width: 124, height: 50 }
 
 // The boxes in each column are 36 apart, room for an arrow that reads as a line and not just a
@@ -33,23 +33,23 @@ const finalTop = below(evaluation)
 const bottom = finalTop + height
 
 const nodes: Node[] = [
-  box(2, left, row(0), 'Posts'),
-  box(2, left, row(1), 'Cleaning'),
-  box(2, left, row(2), 'Labeling'),
-  box(2, left, row(3), 'Splitting'),
-  box(2, left, row(4), 'Labeled dataset'),
+  box('posts', 2, left, row(0), 'Posts'),
+  box('cleaning', 2, left, row(1), 'Cleaning'),
+  box('labeling', 2, left, row(2), 'Labeling'),
+  box('splitting', 2, left, row(3), 'Splitting'),
+  box('dataset', 2, left, row(4), 'Labeled dataset'),
 
-  box(3, middle, row(0), 'Fine-tuning'),
-  box(3, middle - 68, row(1), 'Single-task\nmodels', fork),
-  box(3, middle + 68, row(1), 'Candidate\nmodels', fork),
-  box(3, middle, saved, 'Saved models'),
-  box(4, middle, selection, 'Optimizer selection'),
-  box(4, middle, evaluation, 'Final evaluation'),
+  box('tuning', 3, middle, row(0), 'Fine-tuning'),
+  box('single', 3, middle - 68, row(1), 'Single-task\nmodels', fork),
+  box('candidates', 3, middle + 68, row(1), 'Candidate\nmodels', fork),
+  box('saved', 3, middle, saved, 'Saved models'),
+  box('selection', 4, middle, selection, 'Optimizer selection'),
+  box('evaluation', 4, middle, evaluation, 'Final evaluation'),
 
-  box(5, right, row(0), 'Database'),
-  box(5, right, row(1), 'API server'),
-  box(5, right, row(2), 'Web interface'),
-  box(5, right, row(3), 'Sorted posts\nfor DRRMO staff', { width, height: 50 }),
+  box('database', 5, right, row(0), 'Database'),
+  box('api', 5, right, row(1), 'API server'),
+  box('web', 5, right, row(2), 'Web interface'),
+  box('sorted', 5, right, row(3), 'Sorted posts\nfor DRRMO staff', { width, height: 50 }),
 ]
 
 const captions = [
@@ -58,30 +58,32 @@ const captions = [
   { step: 1, x: right, lines: ['Prototype web', 'application'] },
 ]
 
-// Each arrow runs through its points and ends in a head, or a head at both ends. The arrows between
-// columns run down the middle of the gutters, and fine-tuning splits in two and joins again with
-// slide 4's elbows
+// Each arrow runs through its points from one box to the next and ends in a head, or a head at both
+// ends. The arrows between columns run down the middle of the gutters, and fine-tuning splits in two
+// and joins again with slide 4's elbows. The arrows of a click are listed in the order they draw,
+// and the arrow from the API server up to the database draws from its end
 const down = (x: number, from: number, to: number) => [[x, from], [x, to]]
 const split = top + height + gap / 2
 // The final model keeps slide 2's proportions at the height of the other boxes
 const finalWidth = (256 * height) / 64
-const arrows = [
-  { step: 2, points: down(left, row(0) + height, row(1)) },
-  { step: 2, points: down(left, row(1) + height, row(2)) },
-  { step: 2, points: down(left, row(2) + height, row(3)) },
-  { step: 2, points: down(left, row(3) + height, row(4)) },
-  { step: 3, points: [[left + width / 2, row(4) + height / 2], [288, row(4) + height / 2], [288, top + height / 2], [middle - width / 2, top + height / 2]] },
-  { step: 3, points: [[middle, top + height], [middle, split], [middle - 68, split], [middle - 68, row(1)]] },
-  { step: 3, points: [[middle, top + height], [middle, split], [middle + 68, split], [middle + 68, row(1)]] },
-  { step: 3, points: [[middle - 68, row(1) + fork.height], [middle - 68, saved - gap / 2], [middle, saved - gap / 2], [middle, saved]] },
-  { step: 3, points: [[middle + 68, row(1) + fork.height], [middle + 68, saved - gap / 2], [middle, saved - gap / 2], [middle, saved]] },
-  { step: 4, points: down(middle, saved + height, selection) },
-  { step: 4, points: down(middle, selection + height, evaluation) },
-  { step: 4, points: down(middle, evaluation + height, finalTop) },
-  { step: 5, points: [[middle + finalWidth / 2, finalTop + height / 2], [596, finalTop + height / 2], [596, row(1) + height / 2], [right - width / 2, row(1) + height / 2]] },
-  { step: 5, points: down(right, row(0) + height, row(1)), both: true },
-  { step: 5, points: down(right, row(1) + height, row(2)), both: true },
-  { step: 5, points: down(right, row(2) + height, row(3)) },
+interface Arrow { step: number, from: string, to: string, points: number[][], both?: boolean, backward?: boolean }
+const arrows: Arrow[] = [
+  { step: 2, from: 'posts', to: 'cleaning', points: down(left, row(0) + height, row(1)) },
+  { step: 2, from: 'cleaning', to: 'labeling', points: down(left, row(1) + height, row(2)) },
+  { step: 2, from: 'labeling', to: 'splitting', points: down(left, row(2) + height, row(3)) },
+  { step: 2, from: 'splitting', to: 'dataset', points: down(left, row(3) + height, row(4)) },
+  { step: 3, from: 'dataset', to: 'tuning', points: [[left + width / 2, row(4) + height / 2], [288, row(4) + height / 2], [288, top + height / 2], [middle - width / 2, top + height / 2]] },
+  { step: 3, from: 'tuning', to: 'single', points: [[middle, top + height], [middle, split], [middle - 68, split], [middle - 68, row(1)]] },
+  { step: 3, from: 'tuning', to: 'candidates', points: [[middle, top + height], [middle, split], [middle + 68, split], [middle + 68, row(1)]] },
+  { step: 3, from: 'single', to: 'saved', points: [[middle - 68, row(1) + fork.height], [middle - 68, saved - gap / 2], [middle, saved - gap / 2], [middle, saved]] },
+  { step: 3, from: 'candidates', to: 'saved', points: [[middle + 68, row(1) + fork.height], [middle + 68, saved - gap / 2], [middle, saved - gap / 2], [middle, saved]] },
+  { step: 4, from: 'saved', to: 'selection', points: down(middle, saved + height, selection) },
+  { step: 4, from: 'selection', to: 'evaluation', points: down(middle, selection + height, evaluation) },
+  { step: 4, from: 'evaluation', to: 'final', points: down(middle, evaluation + height, finalTop) },
+  { step: 5, from: 'final', to: 'api', points: [[middle + finalWidth / 2, finalTop + height / 2], [596, finalTop + height / 2], [596, row(1) + height / 2], [right - width / 2, row(1) + height / 2]] },
+  { step: 5, from: 'api', to: 'database', points: down(right, row(0) + height, row(1)), both: true, backward: true },
+  { step: 5, from: 'api', to: 'web', points: down(right, row(1) + height, row(2)), both: true },
+  { step: 5, from: 'web', to: 'sorted', points: down(right, row(2) + height, row(3)) },
 ]
 
 // The deck's arrowhead, 14 wide and 12 long, turned to the line's last direction
@@ -95,15 +97,18 @@ function shorten(from: number[], to: number[]) {
   const k = (length - headLength) / length
   return [from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k]
 }
+// Every arrow draws at the same speed, so a long elbow takes longer than a short step down
+const speed = 600
 const drawn = arrows.map((arrow) => {
   const points = arrow.points.map(point => [...point])
+  const length = points.slice(1).reduce((sum, point, index) => sum + Math.hypot(point[0] - points[index][0], point[1] - points[index][1]), 0)
   const ends = [{ from: points[points.length - 2], to: points[points.length - 1] }]
   points[points.length - 1] = shorten(points[points.length - 2], points[points.length - 1])
   if (arrow.both) {
     ends.push({ from: points[1], to: points[0] })
     points[0] = shorten(points[1], points[0])
   }
-  return { ...arrow, d: `M ${points.map(point => point.join(' ')).join(' L ')}`, heads: ends.map(end => head(end.from, end.to)) }
+  return { ...arrow, d: `M ${points.map(point => point.join(' ')).join(' L ')}`, heads: ends.map(end => head(end.from, end.to)), duration: Math.min(Math.max(length / speed, 0.2), 0.6) }
 })
 
 // The final model is the multi-task model of slides 2 and 4, its two task heads pulling at slide 2's
@@ -144,6 +149,7 @@ const root = ref<HTMLElement>()
 useClickTimeline(root, (timeline) => {
   gsap.set('.part, .head, .short-name, .input', { opacity: 0 })
   gsap.set('.line', { strokeDasharray: 1, strokeDashoffset: 1 })
+  gsap.set('.backward .line', { strokeDashoffset: -1 })
   gsap.set('.final', { svgOrigin: `${model.x} ${model.y}` })
 
   timeline
@@ -155,14 +161,39 @@ useClickTimeline(root, (timeline) => {
     .to('.caption', { opacity: 1, stagger: 0.08, ...enter }, '<0.2')
     .addLabel('step1')
 
-  // Each phase brings in its boxes in reading order, and draws the arrows between them
+  // Each phase builds along its arrows. A box fades in, the arrow leaving it draws, and the box it
+  // points to fades in as the arrow arrives. A box with no arrow into it, or one shown on an earlier
+  // click, starts the chain
+  const lead = 0.15
   for (let step = 2; step <= 5; step++) {
-    timeline
-      .to(`.node.step-${step}`, { opacity: 1, stagger: 0.08, ...enter })
-      .to(`.arrow.step-${step}`, { opacity: 1, duration: 0 }, '<')
-      .to(`.arrow.step-${step} .line`, { strokeDashoffset: 0, stagger: 0.08, ...draw }, '<0.1')
-      .to(`.arrow.step-${step} .head`, { opacity: 1, stagger: 0.08, ...enter }, '<0.3')
-      .addLabel(`step${step}`)
+    const start = timeline.duration()
+    const shown: Record<string, number> = {}
+    for (const node of nodes) {
+      if (node.step < step)
+        shown[node.id] = -lead
+      else if (node.step === step && !drawn.some(arrow => arrow.step === step && arrow.to === node.id))
+        shown[node.id] = 0
+    }
+    shown.final = -lead
+    drawn.forEach((arrow, index) => {
+      if (arrow.step !== step)
+        return
+      const begin = start + shown[arrow.from] + lead
+      const end = begin + arrow.duration
+      timeline
+        .to(`.arrow-${index}`, { opacity: 1, duration: 0 }, begin)
+        .to(`.arrow-${index} .line`, { strokeDashoffset: 0, duration: arrow.duration, ease: draw.ease }, begin)
+      // A head shows once the line reaches it, so the head at the start of a backward arrow shows last
+      arrow.heads.forEach((_, slot) => {
+        const arrives = (slot === 0) !== Boolean(arrow.backward)
+        timeline.to(`.arrow-${index} .head-${slot}`, { opacity: 1, duration: 0.1, ease: enter.ease }, arrives ? end - 0.05 : begin)
+      })
+      if (arrow.to !== 'final')
+        shown[arrow.to] = Math.max(shown[arrow.to] ?? 0, end - start - 0.05)
+    })
+    for (const node of nodes.filter(node => node.step === step))
+      timeline.to(`.node-${node.id}`, { opacity: 1, ...enter }, start + shown[node.id])
+    timeline.addLabel(`step${step}`)
   }
 
   timeline
@@ -180,7 +211,7 @@ useClickTimeline(root, (timeline) => {
     .fromTo('.pull', { opacity: 1, clipPath: 'inset(0% 0% 100% 0%)' }, { opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', immediateRender: false, ...draw }, '+=0.01')
     .to('.pull-name', { opacity: 1, ...enter }, '<0.3')
     .addLabel('step7')
-})
+}, 0, true)
 </script>
 
 <template>
@@ -191,12 +222,12 @@ useClickTimeline(root, (timeline) => {
           <tspan v-for="(line, row) in caption.lines" :key="row" :x="caption.x" :y="18 + row * 22">{{ line }}</tspan>
         </text>
 
-        <g v-for="(arrow, index) in drawn" :key="index" class="part arrow" :class="`step-${arrow.step}`">
+        <g v-for="(arrow, index) in drawn" :key="index" class="part arrow" :class="[`step-${arrow.step}`, `arrow-${index}`, { backward: arrow.backward }]">
           <path class="line" :d="arrow.d" pathLength="1" />
-          <path v-for="(transform, end) in arrow.heads" :key="end" class="head" d="M 0 0 l -7 -12 h 14 z" :transform="transform" />
+          <path v-for="(transform, end) in arrow.heads" :key="end" class="head" :class="`head-${end}`" d="M 0 0 l -7 -12 h 14 z" :transform="transform" />
         </g>
 
-        <g v-for="node in nodes" :key="node.label" class="part node" :class="`step-${node.step}`">
+        <g v-for="node in nodes" :key="node.id" class="part node" :class="[`step-${node.step}`, `node-${node.id}`]">
           <rect v-if="node.kind === 'box'" class="model" :x="node.x - node.width / 2" :y="node.y" :width="node.width" :height="node.height" rx="12" />
           <foreignObject :x="node.x - node.width / 2" :y="node.y" :width="node.width" :height="node.height">
             <div class="label" :class="node.kind">{{ node.label }}</div>
