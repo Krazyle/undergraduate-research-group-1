@@ -36,6 +36,13 @@
   --color-ner: #b45309;
   --color-negative: #b91c1c;
   --color-positive: #15803d;
+  --color-data: #0f766e;
+  --color-data-light: #7fbcb5;
+  --color-data-tint: #e7f3f1;
+  --color-removed: #a3a3a3;
+  --color-coding: #6d28d9;
+  --color-testing: #a78bfa;
+  --color-testing-tint: #f3efff;
 
   --grid-columns: 12;
   --grid-gutter: var(--space-3);

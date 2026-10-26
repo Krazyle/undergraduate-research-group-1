@@ -136,7 +136,7 @@ section: Software Artifact and System Design
 <Prototype />
 
 ---
-clicks: 8
+clicks: 7
 section: Testing Method and Metrics
 ---
 
@@ -151,6 +151,13 @@ section: Testing Method and Metrics
 
 ---
 clicks: 7
+section: Testing Method and Metrics
+---
+
+<F1Score />
+
+---
+clicks: 5
 section: Testing Method and Metrics
 ---
 
@@ -186,34 +193,45 @@ section: Development and Testing Schedule
 
 ---
 clicks: 3
+section: Development and Testing Schedule
+---
+
+<Feasibility />
+
+---
+clicks: 4
 section: Immediate Next Steps
 ---
 
-<NextSteps />
+<Revision />
+
+---
+clicks: 4
+section: Immediate Next Steps
+---
+
+<XApiAccess />
 
 ---
 clicks: 3
 section: Immediate Next Steps
 ---
 
-<LabelingCheckpoints />
+<LabelingPrep />
 
 ---
 clicks: 5
+section: Immediate Next Steps
+---
+
+<LabelingCheckpoints />
+
+---
+clicks: 8
 section: Technical Risks and Backup Plans
 ---
 
 <Risks />
-
----
-
-<div class="quote">
-
-### In summary
-
-One model that <strong class="classification">sorts Taglish typhoon posts by type of report</strong> and <strong class="ner">picks out their key details</strong>, with the optimizer that best reduces **negative transfer** without needing too much training time or memory
-
-</div>
 
 ---
 section: References
