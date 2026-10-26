@@ -5,7 +5,6 @@ fonts:
   sans: Inter
   provider: none
 title: Benchmarking Multi-Task Optimizers for Humanitarian Classification and Named Entity Recognition of Taglish Typhoon Tweets
-transition: view-transition
 canvasWidth: 1040
 defaults:
   transition: slide-left
@@ -35,7 +34,7 @@ Engr. Ma Christina A. Florentino
 October 27, 2026
 
 ---
-clicks: 13
+clicks: 11
 ---
 
 <Overview />
