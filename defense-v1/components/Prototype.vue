@@ -1,56 +1,129 @@
 <script setup lang="ts">
-// Built by scripts/luzon_map.py, as on slide 3. The posts are an illustration placed by population,
-// not real posts
-import map from '../data/luzon-map.json'
+import { Map, Popup, setWorkerUrl } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
+// Vite moves the map library when it bundles it, so the library cannot find its worker beside itself
+import worker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+import { onMounted, onUnmounted, ref } from 'vue'
+// Built by scripts/marikina_posts.py. The posts are an illustration placed around each barangay's
+// centre, not real posts
+import data from '../data/marikina-posts.json'
 
-// A still mock-up of the prototype's main screen as DRRMO staff would see it. A post goes on the map
-// only when the model finds a location in it, so the side panel also counts the posts without one.
-// Requests or urgent needs are blue, as on slide 3, and every other category is grey
-const posts = map.posts.map(([x, y, request]) => ({ x, y, request: request === 1 }))
-const mapped = posts.length
+// A still mock-up of the prototype's main screen as DRRMO staff in Marikina would see it. A post goes
+// on the map only when the model finds a location in it, so the side panel also counts the posts
+// without one. Requests or urgent needs are blue, as on slide 3, and every other category is grey
+const REQUESTS = 0
 
-// The category counts cover every post, on the map or not, and are made up to match the dots
-const summary = [
-  { category: 'Requests or urgent needs', count: 412, request: true },
-  { category: 'Sympathy and support', count: 351 },
-  { category: 'Rescue, volunteering, or donation effort', count: 298 },
-  { category: 'Displaced people and evacuations', count: 221 },
-  { category: 'Infrastructure and utility damage', count: 187 },
-  { category: 'Other categories', count: 227 },
-]
-const total = summary.reduce((sum, row) => sum + row.count, 0)
+const located = data.posts.length
+const unlocated = data.unlocated.reduce((sum, count) => sum + count, 0)
+
+// Every post counts in the side panel, on the map or not, largest first with the remainder last
+const summary = data.categories.map((category, index) => ({
+  category,
+  count: data.posts.filter(post => post[2] === index).length + data.unlocated[index],
+  request: index === REQUESTS,
+}))
+const other = summary.pop()!
+summary.sort((a, b) => b.count - a.count).push(other)
 const most = Math.max(...summary.map(row => row.count))
 
-// The post a staff member has opened, at Marikina, with its entities highlighted
-const selected = { x: 148.4, y: 297.9 }
+// The map frames Marikina itself, inside the larger area whose tiles are saved
+const view: [[number, number], [number, number]] = [[121.074, 14.612], [121.136, 14.684]]
+
+// The post a staff member has opened, in Concepcion Dos, with its entities highlighted
+const selected: [number, number] = [121.12082, 14.64059]
 type Part = string | { text: string, type: string }
-const parts: Part[] = [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' dito sa ', { text: 'Brgy. Malanday', type: 'LOCATION' }, ', ', { text: 'Marikina', type: 'LOCATION' }, '. Stranded kami sa 2nd floor']
+const parts: Part[] = [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' dito sa ', { text: 'Brgy. Concepcion Dos', type: 'LOCATION' }, ', ', { text: 'Marikina', type: 'LOCATION' }, '. Stranded kami sa 2nd floor']
+
+setWorkerUrl(worker)
+
+const container = ref<HTMLElement>()
+const card = ref<HTMLElement>()
+let map: Map | undefined
+let observer: ResizeObserver | undefined
+
+onMounted(async () => {
+  // The saved style names its tiles, fonts, and icons relative to the deck, and the map needs full URLs
+  const base = new URL(import.meta.env.BASE_URL, location.href).href
+  const style = JSON.parse((await (await fetch(`${base}map/style.json`)).text()).replaceAll('{base}', base))
+
+  const css = getComputedStyle(container.value!)
+  const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
+
+  map = new Map({
+    container: container.value!,
+    style,
+    bounds: view,
+    // The slide is a still screen, so the map does not move under the presenter's keys or mouse
+    interactive: false,
+    attributionControl: { compact: false },
+  })
+
+  map.on('load', () => {
+    map!.addSource('posts', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: data.posts.map(([lat, lon, category]) => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          properties: { request: category === REQUESTS },
+        })),
+      },
+    })
+    map!.addLayer({
+      id: 'posts',
+      type: 'circle',
+      source: 'posts',
+      paint: {
+        'circle-radius': 3.5,
+        'circle-color': ['case', ['get', 'request'], colour('classification'), colour('ink')],
+        'circle-opacity': ['case', ['get', 'request'], 0.7, 0.35],
+      },
+    })
+    map!.addSource('selected', { type: 'geojson', data: { type: 'Point', coordinates: selected } })
+    map!.addLayer({
+      id: 'selected',
+      type: 'circle',
+      source: 'selected',
+      paint: { 'circle-radius': 6, 'circle-color': colour('classification'), 'circle-stroke-color': colour('ink'), 'circle-stroke-width': 2 },
+    })
+
+    // The card opens below its dot, over the hills where fewer posts sit
+    new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 12, maxWidth: '250px' })
+      .setLngLat(selected)
+      .setDOMContent(card.value!)
+      .addTo(map!)
+  })
+
+  // Slidev lays out a slide before it is shown, so the map redraws once its panel has a size
+  observer = new ResizeObserver(() => map?.resize())
+  observer.observe(container.value!)
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+  map?.remove()
+})
 </script>
 
 <template>
   <div class="app">
-    <section class="map">
-      <svg viewBox="-50 0 600 504">
-        <path class="land" :d="map.land" />
-        <circle v-for="(post, index) in posts" :key="index" class="post" :class="{ request: post.request }" :cx="post.x" :cy="post.y" r="2.2" />
-        <circle class="ring" :cx="selected.x" :cy="selected.y" r="6" />
+    <section ref="container" class="map" />
 
-        <!-- The opened post sits just to the right of its dot, in the map's own units -->
-        <foreignObject :x="selected.x + 14" :y="selected.y - 24" width="260" height="140">
-          <div class="card">
-            <p>
-              <template v-for="(part, index) in parts" :key="index">
-                <mark v-if="typeof part !== 'string'" :title="part.type">{{ part.text }}</mark>
-                <template v-else>
-                  {{ part }}
-                </template>
-              </template>
-            </p>
-            <span class="category">Requests or urgent needs<small>▾</small></span>
-          </div>
-        </foreignObject>
-      </svg>
-    </section>
+    <!-- The opened post, which the map moves into its popup -->
+    <div class="hidden">
+      <div ref="card" class="card">
+        <p>
+          <template v-for="(part, index) in parts" :key="index">
+            <mark v-if="typeof part !== 'string'" :title="part.type">{{ part.text }}</mark>
+            <template v-else>
+              {{ part }}
+            </template>
+          </template>
+        </p>
+        <span class="category">Requests or urgent needs<small>▾</small></span>
+      </div>
+    </div>
 
     <aside>
       <h4>Posts per category</h4>
@@ -61,8 +134,8 @@ const parts: Part[] = [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' 
       </div>
 
       <div class="placed">
-        <div><span>On the map</span><b>{{ mapped.toLocaleString() }}</b></div>
-        <div><span>Without a location</span><b>{{ (total - mapped).toLocaleString() }}</b></div>
+        <div><span>On the map</span><b>{{ located }}</b></div>
+        <div><span>Without a location</span><b>{{ unlocated }}</b></div>
       </div>
     </aside>
   </div>
@@ -81,49 +154,21 @@ const parts: Part[] = [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' 
   color: var(--color-ink);
 }
 
-/* The map fills its panel without its own height stretching the screen */
 .map {
-  position: relative;
   min-width: 0;
 }
 
-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.land {
-  fill: var(--color-land);
-}
-
-.post {
-  fill: var(--color-ink);
-  fill-opacity: 0.3;
-}
-
-.post.request {
-  fill: var(--color-classification);
-  fill-opacity: 0.6;
-}
-
-.ring {
-  fill: none;
-  stroke: var(--color-ink);
-  stroke-width: 1.5;
+.hidden {
+  display: none;
 }
 
 .card {
   display: grid;
   gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--color-faint);
-  border-radius: 6px;
-  background: var(--color-surface);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
-  /* The map is drawn a little smaller than the screen, so the card's text is set a little larger */
-  font-size: 14px;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--color-ink);
 }
 
 p {
@@ -190,12 +235,12 @@ h4 {
   display: block;
   height: 100%;
   background: var(--color-ink);
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
 .bar span.request {
   background: var(--color-classification);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .count {
@@ -207,8 +252,6 @@ h4 {
   display: grid;
   gap: 4px;
   margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-faint);
   font-size: 12px;
 }
 
@@ -219,5 +262,16 @@ h4 {
 
 .placed span {
   color: var(--color-subtle);
+}
+
+.map :deep(.maplibregl-ctrl-attrib) {
+  font-size: 10px;
+}
+
+/* The popup is drawn by the map outside the component's own elements, so its frame is styled through it */
+.map :deep(.maplibregl-popup-content) {
+  padding: 10px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
 }
 </style>
