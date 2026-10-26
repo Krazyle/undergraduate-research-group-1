@@ -114,3 +114,174 @@ li {
 .quote .ner {
   color: var(--color-ner);
 }
+
+ph-cursor-fill,
+.laser-pointer {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .slidev-presenter > div:first-child,
+  .slidev-presenter .grid-section.main,
+  .slidev-presenter .grid-section.next,
+  .slidev-presenter .grid-section.note,
+  .slidev-presenter .notes-vertical-resizer,
+  .slidev-presenter .notes-vertical-resizer-left,
+  .slidev-presenter .notes-resizer,
+  .slidev-presenter .notes-row-resizer,
+  .slidev-presenter [role="separator"],
+  .slidev-presenter .drawing-controls,
+  .slidev-presenter #slidev-goto,
+  .slidev-presenter .slidev-context-menu,
+  .slidev-presenter .grid-section.bottom > div:last-child {
+    display: none !important;
+  }
+
+  .slidev-presenter {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    width: 100vw !important;
+    background-color: #09090b !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  .slidev-presenter .grid-container {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .slidev-presenter .grid-section.bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    background: transparent !important;
+    box-sizing: border-box !important;
+    gap: 16px !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav > div {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    height: 100% !important;
+    width: 100% !important;
+    gap: 16px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav > div > *:not(button[title*="previous" i]):not(button[title*="next" i]) {
+    display: none !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="previous" i],
+  .slidev-presenter .grid-section.bottom nav button[title*="next" i] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    border-radius: 24px !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    transition: transform 0.1s ease, filter 0.1s ease !important;
+    box-sizing: border-box !important;
+    gap: 16px !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="previous" i] > *,
+  .slidev-presenter .grid-section.bottom nav button[title*="next" i] > * {
+    display: none !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="previous" i]::before {
+    content: "" !important;
+    display: inline-block !important;
+    width: 3.75rem !important;
+    height: 3.75rem !important;
+    background-color: currentColor !important;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='12' x2='5' y2='12'%3E%3C/line%3E%3Cpolyline points='12 19 5 12 12 5'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='12' x2='5' y2='12'%3E%3C/line%3E%3Cpolyline points='12 19 5 12 12 5'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
+    flex-shrink: 0 !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="previous" i] {
+    flex: 1 1 35% !important;
+    min-height: 120px !important;
+    background-color: #27272a !important;
+    border: 2px solid #3f3f46 !important;
+    color: #e4e4e7 !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="previous" i]::after {
+    content: "PREV" !important;
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="next" i]::before {
+    content: "NEXT" !important;
+    font-size: 2.25rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="next" i]::after {
+    content: "" !important;
+    display: inline-block !important;
+    width: 4.5rem !important;
+    height: 4.5rem !important;
+    background-color: currentColor !important;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
+    flex-shrink: 0 !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="next" i] {
+    flex: 2 1 65% !important;
+    min-height: 200px !important;
+    background-color: #2563eb !important;
+    border: 2px solid #3b82f6 !important;
+    color: #ffffff !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="previous" i]:active {
+    transform: scale(0.97) !important;
+    background-color: #18181b !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[title*="next" i]:active {
+    transform: scale(0.97) !important;
+    background-color: #1d4ed8 !important;
+  }
+
+  .slidev-presenter .grid-section.bottom nav button[disabled] {
+    opacity: 0.3 !important;
+    filter: grayscale(1) !important;
+    cursor: not-allowed !important;
+  }
+}
