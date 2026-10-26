@@ -2,10 +2,7 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
-
-// The same motion tokens as slide 2
-const enter = { duration: 0.3, ease: 'power1.out' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
+import { enter, pop } from '../shared/motion'
 
 const root = ref<HTMLElement>()
 
@@ -15,10 +12,8 @@ useClickTimeline(root, (timeline) => {
 
   timeline
     .addLabel('step0')
-    // Each test case states an input and the expected result
     .to('.fill', { opacity: 1, ...enter, stagger: 0.15 })
     .addLabel('step1')
-    // It passes only if the actual result matches in every case
     .to('.actual', { opacity: 1, ...enter })
     .to('.pass', { opacity: 1, scale: 1, ...pop }, '<0.2')
     .to('.rule', { opacity: 1, ...enter }, '<0.2')
@@ -59,7 +54,6 @@ useClickTimeline(root, (timeline) => {
 </template>
 
 <style scoped>
-/* The full height of a slide with no heading, with the card and rule centred in it */
 .prototype {
   position: relative;
   display: flex;
@@ -96,8 +90,7 @@ useClickTimeline(root, (timeline) => {
   font-size: var(--text-xs);
   font-weight: 700;
   color: var(--color-surface);
-  /* The same green as the passed checks on the other slides */
-  background: #15803d;
+  background: var(--color-positive);
   border-radius: 16px;
   padding: 4px 14px 4px 8px;
 }

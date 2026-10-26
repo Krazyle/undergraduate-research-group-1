@@ -38,7 +38,7 @@ October 27, 2026
 clicks: 13
 ---
 
-<ModelDiagram />
+<Overview />
 
 ---
 clicks: 5
@@ -82,7 +82,7 @@ The general objective is to **develop a multi-task model** that performs <strong
 </div>
 
 ---
-clicks: 7
+clicks: 4
 section: Objectives and Scope
 ---
 
@@ -141,28 +141,28 @@ clicks: 8
 section: Testing Method and Metrics
 ---
 
-<DatasetSplit />
+<Dataset />
 
 ---
 clicks: 4
 section: Testing Method and Metrics
 ---
 
-<LabelCheck />
+<AnnotatorAgreement />
 
 ---
 clicks: 7
 section: Testing Method and Metrics
 ---
 
-<MeasuresPanel />
+<Measures />
 
 ---
 clicks: 5
 section: Testing Method and Metrics
 ---
 
-<OptimizerGates />
+<OptimizerSelection />
 
 ---
 clicks: 3
@@ -183,7 +183,7 @@ clicks: 6
 section: Development and Testing Schedule
 ---
 
-<ScheduleGantt />
+<Schedule />
 
 ---
 clicks: 3
@@ -197,14 +197,14 @@ clicks: 3
 section: Immediate Next Steps
 ---
 
-<LabelingMilestones />
+<LabelingCheckpoints />
 
 ---
 clicks: 5
 section: Technical Risks and Backup Plans
 ---
 
-<RiskCards />
+<Risks />
 
 ---
 

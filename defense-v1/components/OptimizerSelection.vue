@@ -2,21 +2,9 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter, exit, draw, pop } from '../shared/motion'
 
-// Laid out like the specific objectives slide, with slide 2's chart of the 13 optimizers on the
-// right. Each step of the choice fills in on the left as the chart shows it
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
-
-// Equal weighting fades back while it is not being compared. An optimizer that is out of the
-// running leaves the chart, so only the ones still in the running are shown
 const dim = 0.3
-// Marks the choice, the same green as on the schedule and checkpoint slides
-const chosen = '#15803d'
 
 const steps = [
   { name: 'Analysis of variance', question: 'Do the 13 differ at all?' },
@@ -26,20 +14,22 @@ const steps = [
   { name: 'If none qualifies', question: 'Keep equal weighting, at no extra cost' },
 ]
 
-// Illustration only. Which optimizers pass is not known until the benchmark runs.
-// Heights are fractions of the chart. Optimizer 1 is equal weighting, first in Chapter 2's table
 const chart = { left: 30, width: 410, top: 104, base: 368 }
 const span = chart.base - chart.top
 const heights = [0.60, 0.70, 0.35, 0.55, 0.20, 0.80, 0.58, 0.30, 0.65, 0.62, 0.25, 0.50, 0.90]
 const mean = heights.reduce((sum, value) => sum + value, 0) / heights.length
-// Clearly under equal weighting, so the difference is more than chance
-const passed = [2, 4, 7, 10]
-// Optimizer 5 lowers the NER score, so it does not qualify
-const lowers: Record<number, string> = { 4: 'ner' }
-const qualified = passed.filter(index => !(index in lowers))
-// Training time of the ones that qualify, as fractions of the chart
-const time: Record<number, number> = { 2: 0.70, 7: 0.40, 10: 0.85 }
-const fastest = Number(Object.keys(time).reduce((a, b) => (time[Number(a)] < time[Number(b)] ? a : b)))
+type Passed = { index: number, lowers: 'classification' | 'ner' } | { index: number, time: number }
+const dunnett: Passed[] = [
+  { index: 2, time: 0.70 },
+  { index: 4, lowers: 'ner' },
+  { index: 7, time: 0.40 },
+  { index: 10, time: 0.85 },
+]
+const passed = dunnett.map(item => item.index)
+const lowers: Record<number, string> = Object.fromEntries(dunnett.flatMap(item => 'lowers' in item ? [[item.index, item.lowers]] : []))
+const qualified = dunnett.flatMap(item => 'time' in item ? [item] : [])
+const time: Record<number, number> = Object.fromEntries(qualified.map(item => [item.index, item.time]))
+const fastest = qualified.reduce((a, b) => (a.time < b.time ? a : b)).index
 
 const columns = heights.map((height, index) => ({
   index,
@@ -57,7 +47,6 @@ useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  // The steps wait in a faint grey until their turn
   gsap.set('.item, .item .question', { color: colour('faint') })
   gsap.set('.bar', { scaleY: 0, transformOrigin: '50% 100%' })
   gsap.set('.time-bar', { scaleY: 0, transformOrigin: '50% 100%' })
@@ -76,7 +65,6 @@ useClickTimeline(root, (timeline) => {
 
   timeline.addLabel('step0')
 
-  // Analysis of variance. The bars rise to one level, then spread out to their own heights
   focus(0)
   timeline
     .to('.bar', { scaleY: (index: number) => mean / heights[index], ...draw }, '<')
@@ -84,7 +72,6 @@ useClickTimeline(root, (timeline) => {
     .to('.mean-line, .note.differ', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step1')
 
-  // Dunnett's test. Each optimizer against equal weighting. Only the ones clearly below its line stay
   focus(1)
   timeline
     .to('.mean-line, .note.differ', { opacity: 0, ...exit }, '<')
@@ -95,8 +82,6 @@ useClickTimeline(root, (timeline) => {
     .to('.note.below', { opacity: 1, ...enter }, '<')
     .addLabel('step2')
 
-  // Both task scores. A mark for each task. The one that lowers a task fades back, so its cross
-  // can still be read, and leaves the chart on the next step
   focus(2)
   timeline
     .to('.badge.pass, .note.below', { opacity: 0, ...exit }, '<')
@@ -106,7 +91,6 @@ useClickTimeline(root, (timeline) => {
     .to('.note.both', { opacity: 1, ...enter }, '<')
     .addLabel('step3')
 
-  // Training time of the ones that qualify. The fastest becomes the final optimizer
   focus(3)
   timeline
     .to('.badge.task, .task-key, .note.both, .ew-line, .ew-label, .loss-legend', { opacity: 0, ...exit }, '<')
@@ -115,11 +99,10 @@ useClickTimeline(root, (timeline) => {
     .to('.column[data-index="0"]', { opacity: dim, ...exit }, '<')
     .to('.time-legend', { opacity: 1, ...enter }, '>')
     .to('.time-bar', { scaleY: 1, ...draw, stagger: 0.08 }, '<')
-    .to(`.time-bar[data-index="${fastest}"]`, { fill: chosen, ...enter }, '>')
+    .to(`.time-bar[data-index="${fastest}"]`, { fill: colour('positive'), ...enter }, '>')
     .to('.final-label, .note.qualify', { opacity: 1, ...enter }, '<')
     .addLabel('step4')
 
-  // If none qualifies, equal weighting is kept. It is the only optimizer left on the chart
   focus(4)
   timeline
     .to('.time-bar, .final-label, .note.qualify, .time-legend', { opacity: 0, ...exit }, '<')
@@ -127,7 +110,7 @@ useClickTimeline(root, (timeline) => {
     .to('.loss-legend', { opacity: 1, ...enter }, '>')
     .to('.bar[data-index="0"]', { scaleY: 1, ...draw }, '<')
     .to('.column[data-index="0"]', { opacity: 1, ...enter }, '<')
-    .to('.bar[data-index="0"]', { fill: chosen, ...enter }, '<')
+    .to('.bar[data-index="0"]', { fill: colour('positive'), ...enter }, '<')
     .to('.note.kept', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step5')
 })
@@ -173,7 +156,6 @@ useClickTimeline(root, (timeline) => {
         <text class="number" :x="column.x" :y="chart.base + 28" text-anchor="middle">{{ column.index + 1 }}</text>
       </g>
 
-      <!-- Marks above the bars, a pass for Dunnett's test, then one for each task -->
       <g v-for="index in passed" :key="index">
         <g class="badge pass" :data-index="index" :transform="`translate(${columns[index].x} ${chart.base - columns[index].height - 22})`">
           <circle class="ok" r="11" />
@@ -303,7 +285,7 @@ svg {
 }
 
 .badge .ok {
-  fill: #15803d;
+  fill: var(--color-positive);
 }
 
 .badge .classification,
@@ -336,7 +318,7 @@ circle.ner {
 
 .note-text.good,
 .final-label {
-  fill: #15803d;
+  fill: var(--color-positive);
 }
 
 .final-label {

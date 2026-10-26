@@ -19,7 +19,6 @@
   align-content: center;
   column-gap: var(--grid-gutter);
   height: 100%;
-  /* The title slide has no section label, so its content is centred on the whole slide */
   padding-top: var(--margin-bottom);
 }
 

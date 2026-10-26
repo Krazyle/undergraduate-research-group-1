@@ -19,15 +19,11 @@ ROOT = Path(__file__).parent.parent
 OUTPUT = ROOT / "data" / "marikina-posts.json"
 MAP = ROOT / "public" / "map"
 
-# OpenFreeMap's Positron style, a light map from OpenStreetMap data. The slide shows the whole city,
-# which needs tiles only up to zoom 13
 STYLE_URL = "https://tiles.openfreemap.org/styles/positron"
 ZOOMS = range(11, 14)
 GLYPH_RANGES = ("0-255", "256-511", "8192-8447")
 WEST, SOUTH, EAST, NORTH = 121.05, 14.595, 121.15, 14.695
 
-# The centre of each barangay, from OpenStreetMap's Nominatim search, with a weight for its share of
-# the posts. The barangays along the Marikina River, which flood first, post the most
 BARANGAYS = {
     "Barangka": (14.63279, 121.08221, 1.5),
     "Calumpang": (14.62413, 121.09325, 1.5),
@@ -47,8 +43,6 @@ BARANGAYS = {
     "Tumana": (14.66041, 121.10078, 3),
 }
 
-# The ten humanitarian categories of HumAID, as in Chapter 3, each with a made-up share of the posts and
-# the share of its posts that name a place. Sympathy and non-humanitarian posts seldom say where they are
 CATEGORIES = [
     ("Caution and advice", 0.12, 0.5),
     ("Displaced people and evacuations", 0.11, 0.9),
@@ -63,7 +57,6 @@ CATEGORIES = [
 ]
 POSTS = 640
 
-# A post is placed about 250 m around its barangay's centre
 SPREAD = 0.0022
 
 
@@ -74,7 +67,6 @@ def tile(lon, lat, zoom):
     return int(x), int(y)
 
 
-# The posts that the slide opens in turn, written for the slide, each at its barangay's centre
 FEATURED = [
     ("Displaced people and evacuations", "Nangka", "Mahigit 200 pamilya na ang nasa evacuation center sa Nangka Elementary School"),
     ("Infrastructure and utility damage", "Tumana", "Bagsak ang tulay sa Brgy. Tumana, hindi madaanan ng sasakyan"),
@@ -83,7 +75,6 @@ FEATURED = [
     ("Requests or urgent needs", "Concepcion Dos", "Need ng tubig at pagkain dito sa Brgy. Concepcion Dos, Marikina. Stranded kami sa 2nd floor"),
 ]
 
-# The posts in the order the simulated stream replays them. A post without a location has no place
 generator = random.Random(7)
 names = list(BARANGAYS)
 weights = [BARANGAYS[name][2] for name in names]
@@ -121,7 +112,6 @@ def save(url, path):
         time.sleep(0.05)
 
 
-# The style points at the saved copies, with {base} filled in by the slide, since the map needs full URLs
 style = json.loads(fetch(STYLE_URL))
 tiles = json.loads(fetch(style["sources"]["openmaptiles"]["url"]))["tiles"][0]
 fonts = {font for layer in style["layers"] for font in layer.get("layout", {}).get("text-font", [])}

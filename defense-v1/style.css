@@ -35,12 +35,11 @@
   --color-classification: #1f5fbf;
   --color-ner: #b45309;
   --color-negative: #b91c1c;
+  --color-positive: #15803d;
 
   --grid-columns: 12;
   --grid-gutter: var(--space-3);
 
-  /* The slide is 1040 by 585. Every slide keeps an 884 by 456 content area, with a wider band
-     above it for the section label */
   --margin-x: 78px;
   --margin-top: 81px;
   --margin-bottom: var(--space-5);
@@ -75,7 +74,6 @@ li {
   line-height: var(--leading-body);
 }
 
-/* Diagrams that share a slide sit on top of each other, each taking over from the last */
 .stack {
   display: grid;
 }
@@ -84,8 +82,6 @@ li {
   grid-area: 1 / 1;
 }
 
-/* Statements taken from the manuscript, set in a serif to mark them as quoted. The
-   block sits in the middle of the slide, its lines aligned left */
 .slidev-layout:has(> .quote) {
   height: 100%;
 }

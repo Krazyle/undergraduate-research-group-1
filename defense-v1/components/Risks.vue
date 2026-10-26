@@ -2,18 +2,7 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
-
-// Laid out like the specific objectives slide. The risks fill in one per click on the left,
-// and each brings a drawing of its backup plan on the right
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
-
-// Marks a passed check and the buffer month, the same green as on the schedule slide
-const safe = '#15803d'
+import { enter, exit, draw, pop } from '../shared/motion'
 
 const risks = [
   { key: 'bugs', name: 'Bugs in the code', plan: 'Each part is tested first, then the whole pipeline' },
@@ -24,7 +13,6 @@ const risks = [
 
 const width = 444
 
-// An arrow from one point to another, as a shaft and a head
 function arrow(x1: number, y1: number, x2: number, y2: number) {
   const angle = Math.atan2(y2 - y1, x2 - x1)
   const back = { x: x2 - 12 * Math.cos(angle), y: y2 - 12 * Math.sin(angle) }
@@ -35,19 +23,15 @@ function arrow(x1: number, y1: number, x2: number, y2: number) {
   }
 }
 
-// Risk 1. Each part on small examples, then the whole pipeline on a small sample
 const parts = ['Data', 'Model', '13 optimizers'].map((name, index) => ({ name, x: 6 + index * 148 }))
 const bugArrows = [arrow(222, 150, 222, 206), arrow(222, 338, 222, 368)]
 
-// Risk 2. Illustration only. Peak memory of each of the 13 optimizers in the pilot, in pixels
-// above the base. Four go over the 8 GB line, and freezing the embedding layer brings all under it
 const chart = { base: 396, limit: 200 }
 const bars = [
   [150, 136], [172, 156], [244, 180], [140, 128], [186, 166], [264, 188], [158, 142],
   [232, 172], [130, 118], [176, 158], [280, 192], [164, 148], [190, 170],
 ].map(([before, after], index) => ({ before, after, x: 6 + index * 33.6, over: before > chart.limit }))
 
-// Risk 3. Test, fix, and test again, centred in the panel
 const loop = [
   { name: 'Test', x: 0 },
   { name: 'Fix', x: 160 },
@@ -56,7 +40,6 @@ const loop = [
 const loopY = 200
 const loopArrows = [arrow(126, loopY + 28, 156, loopY + 28), arrow(286, loopY + 28, 316, loopY + 28)]
 
-// Risk 4. The fallbacks for posts, then the month of buffer
 const fallbacks = [
   { name: 'X API', y: 62, last: false },
   { name: 'Public Facebook posts', y: 156, last: false },
@@ -71,7 +54,6 @@ useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  // The risks wait in a faint grey until their turn
   gsap.set('.item, .item .plan', { color: colour('faint') })
   gsap.set('.panel, .check, .reveal, .before, .fixed-note', { opacity: 0 })
   gsap.set('.check', { scale: 0.4, transformOrigin: '50% 50%' })
@@ -93,7 +75,6 @@ useClickTimeline(root, (timeline) => {
 
   timeline.addLabel('step0')
 
-  // Bugs. Each part passes on small examples, then the whole pipeline, then training starts
   focus(0)
   timeline
     .to('.bugs .part-check', { opacity: 1, scale: 1, ...pop, stagger: 0.2 }, '>0.1')
@@ -101,33 +82,28 @@ useClickTimeline(root, (timeline) => {
     .to('.bugs .whole-check', { opacity: 1, scale: 1, ...pop }, '<0.2')
     .addLabel('step1')
 
-  // Memory. Four optimizers went over the 8 GB graphics card in the pilot
   focus(1)
   timeline
     .to('.memory-bar', { attr: { y: (index: number) => chart.base - bars[index].before, height: (index: number) => bars[index].before }, ...draw, stagger: 0.03 }, '<0.1')
     .addLabel('step2')
 
-  // Freezing the embedding layer brings every optimizer under the line.
-  // Where the four were before stays as a dashed outline
     .to('.found', { opacity: 0, ...exit })
     .to('.before', { opacity: 1, ...enter }, '<')
     .to('.memory-bar', { attr: { y: (index: number) => chart.base - bars[index].after, height: (index: number) => bars[index].after }, fill: colour('subtle'), ...draw }, '<')
     .to('.fixed-note', { opacity: 1, ...enter, stagger: 0.15 }, '<0.2')
     .addLabel('step3')
 
-  // Prototype. A failed use case is fixed and tested again
   focus(2)
   timeline
     .to('.prototype .reveal', { opacity: 1, ...enter, stagger: 0.15 }, '>0.1')
     .to('.prototype .check', { opacity: 1, scale: 1, ...pop }, '>')
     .addLabel('step4')
 
-  // Data and delays. The fallbacks for posts, then the month of buffer
   focus(3)
   timeline
     .to('.data .reveal', { opacity: 1, ...enter, stagger: 0.2 }, '>0.1')
-    .to('.buffer', { fill: safe, fillOpacity: 0.16, stroke: safe, ...enter })
-    .to('.buffer-text', { fill: safe, fontWeight: 700, ...enter }, '<')
+    .to('.buffer', { fill: colour('positive'), fillOpacity: 0.16, stroke: colour('positive'), ...enter })
+    .to('.buffer-text', { fill: colour('positive'), fontWeight: 700, ...enter }, '<')
     .addLabel('step5')
 })
 </script>
@@ -148,7 +124,6 @@ useClickTimeline(root, (timeline) => {
     </section>
 
     <svg :viewBox="`0 0 ${width} 456`" :width="width" height="456">
-      <!-- Risk 1. Bugs in the code -->
       <g class="panel bugs">
         <text class="tag" :x="width / 2" y="40" text-anchor="middle">Small examples with known answers</text>
         <g v-for="part in parts" :key="part.name">
@@ -180,7 +155,6 @@ useClickTimeline(root, (timeline) => {
         </g>
       </g>
 
-      <!-- Risk 2. Not enough memory -->
       <g class="panel memory">
         <text class="tag" x="0" y="40">Memory of each optimizer in the pilot</text>
         <path class="axis" :d="`M 0 ${chart.base} H ${width}`" />
@@ -205,7 +179,6 @@ useClickTimeline(root, (timeline) => {
         <text class="small fixed-note" x="0" y="432">All fit now</text>
       </g>
 
-      <!-- Risk 3. Prototype failures -->
       <g class="panel prototype">
         <text class="tag" x="0" :y="loopY - 24">A use case fails</text>
         <g v-for="(step, index) in loop" :key="step.name" class="reveal">
@@ -222,7 +195,6 @@ useClickTimeline(root, (timeline) => {
         </g>
       </g>
 
-      <!-- Risk 4. Too few posts, or delays -->
       <g class="panel data">
         <text class="tag" x="0" y="40">If there are too few Taglish posts</text>
         <g v-for="(fallback, index) in fallbacks" :key="fallback.name" class="reveal">
@@ -354,7 +326,7 @@ svg {
 }
 
 .check circle {
-  fill: #15803d;
+  fill: var(--color-positive);
 }
 
 .check path {
@@ -408,6 +380,6 @@ svg {
 .buffer-label {
   font-size: var(--text-2xs);
   font-weight: 700;
-  fill: #15803d;
+  fill: var(--color-positive);
 }
 </style>

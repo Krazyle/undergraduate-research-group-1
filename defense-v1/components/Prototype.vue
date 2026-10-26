@@ -2,22 +2,10 @@
 import { onSlideEnter, useIsSlideActive } from '@slidev/client'
 import { type GeoJSONSource, Map, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-// Vite moves the map library when it bundles it, so the library cannot find its worker beside itself
 import worker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-// Built by scripts/marikina_posts.py. The posts are an illustration placed around each barangay's
-// centre, not real posts
 import data from '../data/marikina-posts.json'
 
-// A mock-up of the prototype's main screen as DRRMO staff in Marikina would see it, playing in a loop.
-// Posts arrive from the simulated stream, a few at first and then many, and the counts rise with them.
-// A post goes on the map only when the model finds a location in it, so the side panel also counts the
-// posts without one. Every few seconds, a post that has just arrived is opened. The prototype is its
-// own app, so it has its own tokens instead of the slides' ones
-
-// Every category has its own colour, the clearest ones going to the categories a response team acts on
-// first. Ten colours cannot all stay apart when any two dots can sit side by side, so some pairs look
-// alike, above all to colour-blind viewers, and the side panel's names serve as the key
 const SLOTS: Record<string, string> = {
   'Requests or urgent needs': 'series-1',
   'Infrastructure and utility damage': 'series-2',
@@ -33,44 +21,36 @@ const SLOTS: Record<string, string> = {
 const slot = (category: string) => SLOTS[category]
 const swatch = (category: string) => `var(--app-${slot(category)})`
 
-// One cycle, in seconds. Posts arrive between ARRIVE and ARRIVED, the posts arriving by time t
-// growing with t³, the screen holds, and everything fades out in the last FADE seconds
 const CYCLE = 20
 const ARRIVE = 0.5
 const ARRIVED = 15
 const FADE = 1
-// When each featured post is opened. Each one arrives just before its turn, and the last stays open
 const OPENS = [3.5, 6.5, 9.5, 12.5, 15.2]
 const LEAD = 0.4
 
 type Post = { lat: number | null, lon: number | null, category: number, at: number, text?: string }
 
-// The featured posts join the stream at the places that bring them in just before they open
-const posts: Post[] = data.stream.map(([lat, lon, category]) => ({ lat, lon, category: category as number, at: 0 }))
-const total = posts.length + data.featured.length
-data.featured.forEach((post, index) => {
-  const share = (OPENS[index] - LEAD - ARRIVE) / (ARRIVED - ARRIVE)
-  posts.splice(Math.round(total * share ** 3), 0, { ...post, at: 0 })
-})
-posts.forEach((post, index) => {
-  post.at = ARRIVE + (ARRIVED - ARRIVE) * ((index + 1) / total) ** (1 / 3)
-})
+const posts: Post[] = [
+  ...data.stream.map(([lat, lon, category], index) => ({
+    lat,
+    lon,
+    category: category as number,
+    at: ARRIVE + (ARRIVED - ARRIVE) * ((index + 1) / data.stream.length) ** (1 / 3),
+  })),
+  ...data.featured.map((post, index) => ({ ...post, at: OPENS[index] - LEAD })),
+].sort((a, b) => a.at - b.at)
 const featured = posts.filter(post => post.text)
 
-// The side panel lists all ten categories, largest first by their final counts, so the rows keep
-// their places while the counts rise
 const finals = data.categories.map((_, index) => posts.filter(post => post.category === index).length)
 const order = data.categories.map((category, index) => ({ category, index })).sort((a, b) => finals[b.index] - finals[a.index])
 const most = Math.max(...finals)
 
-// The counts shown at the current moment of the cycle
 const shown = ref(data.categories.map(() => 0))
 const located = ref(0)
 const unlocated = ref(0)
 const opened = ref<Post>()
 const openedCategory = computed(() => data.categories[opened.value?.category ?? 0])
 
-// The map opens on Marikina itself and can be moved only within the area whose tiles are saved
 const view: [[number, number], [number, number]] = [[121.074, 14.612], [121.136, 14.684]]
 const saved: [[number, number], [number, number]] = [[data.bounds[0][1], data.bounds[0][0]], [data.bounds[1][1], data.bounds[1][0]]]
 
@@ -84,7 +64,6 @@ let popup: Popup | undefined
 let observer: ResizeObserver | undefined
 let frame = 0
 
-// The cycle starts over each time the slide is shown, and pauses while another slide is shown
 const active = useIsSlideActive()
 let started = performance.now()
 onSlideEnter(() => {
@@ -92,7 +71,6 @@ onSlideEnter(() => {
 })
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// The list of categories fades at whichever edge has more rows beyond it
 const list = ref<HTMLElement>()
 const above = ref(false)
 const below = ref(false)
@@ -103,11 +81,9 @@ function edges() {
 }
 
 onMounted(async () => {
-  // The saved style names its tiles, fonts, and icons relative to the deck, and the map needs full URLs
   const base = new URL(import.meta.env.BASE_URL, location.href).href
   const style = JSON.parse((await (await fetch(`${base}map/style.json`)).text()).replaceAll('{base}', base))
 
-  // The map paints on a canvas, which cannot read CSS variables, so it gets the tokens' values
   const css = getComputedStyle(root.value!)
   const token = (name: string) => css.getPropertyValue(`--app-${name}`).trim()
   const colour = ['match', ['get', 'category'], ...data.categories.flatMap((category, index) => [index, token(slot(category))]), token('series-10')]
@@ -117,9 +93,7 @@ onMounted(async () => {
     style,
     bounds: view,
     maxBounds: saved,
-    // The saved tiles stop at zoom 13, and the map draws them larger up to street level
     maxZoom: 16,
-    // The arrow keys stay with Slidev for changing slides, and a city map has no need to turn or tilt
     keyboard: false,
     dragRotate: false,
     pitchWithRotate: false,
@@ -141,7 +115,6 @@ onMounted(async () => {
         })),
       },
     })
-    // Each dot has a thin ring of the surface colour, so dots that overlap stay apart
     map!.addLayer({
       id: 'posts',
       type: 'circle',
@@ -155,8 +128,6 @@ onMounted(async () => {
       },
     })
 
-    // The opened post stays a dot of its category's colour, drawn larger with a surface ring and a
-    // soft halo of the same colour that pulses slowly, and its card opens below it
     map!.addSource('opened', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
     map!.addLayer({ id: 'opened-halo', type: 'circle', source: 'opened', paint: { 'circle-radius': 7, 'circle-opacity': 0 } })
     map!.addLayer({
@@ -189,11 +160,9 @@ onMounted(async () => {
       frame = requestAnimationFrame(tick)
       if (!active.value)
         return
-      // With less motion, the screen holds the end of the cycle, before the fade
       const t = still ? CYCLE - FADE - 0.01 : ((now - started) / 1000) % CYCLE
       const fade = Math.min(1, Math.max(0, (CYCLE - t) / FADE))
 
-      // The posts that have arrived, each new dot growing in with a slight overshoot
       if (t !== lastTime) {
         map!.setFilter('posts', ['<=', ['get', 'at'], t])
         map!.setPaintProperty('posts', 'circle-radius', ['interpolate', ['linear'], ['get', 'at'], t - 0.35, 4, t - 0.15, 5.5, t, 0])
@@ -214,7 +183,6 @@ onMounted(async () => {
       located.value = Math.round(onMap * fade)
       unlocated.value = Math.round((counts.reduce((sum, count) => sum + count, 0) - onMap) * fade)
 
-      // The featured post whose turn it is, opening with its dot popping up to size
       const index = OPENS.findLastIndex(time => time <= t)
       const post = index >= 0 ? featured[index] : undefined
       if (post !== last) {
@@ -235,7 +203,6 @@ onMounted(async () => {
     frame = requestAnimationFrame(tick)
   })
 
-  // Slidev lays out a slide before it is shown, so the map redraws once its panel has a size
   observer = new ResizeObserver(() => {
     map?.resize()
     edges()
@@ -255,7 +222,6 @@ onUnmounted(() => {
   <div ref="root" class="app">
     <section ref="container" class="map" />
 
-    <!-- The opened post, which the map moves into its popup -->
     <div class="hidden">
       <div ref="card" class="card">
         <p>{{ opened?.text }}</p>
@@ -282,9 +248,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* The prototype's own tokens. It uses the system's interface font, as a web app would, and the eight
-   colours of the dataviz guide's categorical palette, with its red darkened to stand apart from the
-   orange, a brown, and a neutral grey for posts that are not humanitarian */
 .app {
   --app-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --app-text-sm: 12px;
@@ -343,7 +306,6 @@ p {
   line-height: inherit;
 }
 
-/* The categories scroll inside the panel, and an edge with more rows beyond it fades out */
 .list {
   --fade: 28px;
   display: grid;
@@ -372,8 +334,6 @@ p {
   mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
 }
 
-/* Each category's name and count share a row, with its bar below. The count and the swatch sit at
-   the middle of the name, whether it takes one line or two */
 .bar-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -382,7 +342,6 @@ p {
   font-size: var(--app-text-sm);
 }
 
-/* A category's colour sits in a swatch beside its name, and the name stays in the text colour */
 .category,
 .label {
   display: flex;
@@ -395,7 +354,6 @@ i {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  /* The letters sit slightly above the middle of their lines, so the swatch rises by as much */
   transform: translateY(-0.075em);
 }
 
@@ -461,7 +419,6 @@ h4 {
   font-size: 10px;
 }
 
-/* The popup is drawn by the map outside the component's own elements, so its frame is styled through it */
 .map :deep(.maplibregl-popup-content) {
   padding: 10px 12px;
   border-radius: var(--app-radius);

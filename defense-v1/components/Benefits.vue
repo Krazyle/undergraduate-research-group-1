@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ref } from 'vue'
-import { useClickTimeline } from '../composables/useClickTimeline'
+import { addStep, useClickTimeline } from '../composables/useClickTimeline'
+import { enter } from '../shared/motion'
 
-// The three groups the study benefits, the main one first, laid out as rows like the literature
-// slide. Each benefit inks in the order Isaiah names it, and a group's name inks with its first benefit
 const groups = [
   {
     name: 'LGUs and disaster offices',
@@ -24,15 +23,10 @@ const groups = [
   },
 ]
 
-let next = 0
-const rows = groups.map((group) => {
-  const first = next
-  next += group.benefits.length
-  return { ...group, first }
-})
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
+const rows = groups.map((group, index) => ({
+  ...group,
+  first: groups.slice(0, index).reduce((sum, earlier) => sum + earlier.benefits.length, 0),
+}))
 
 const root = ref<HTMLElement>()
 
@@ -40,15 +34,13 @@ useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  // Every cell waits in a faint grey until its turn
   gsap.set('.cell', { color: colour('faint') })
 
   timeline.addLabel('step0')
-  for (let index = 0; index < next; index++) {
-    const row = rows.findIndex(group => group.first === index)
-    timeline.to(row >= 0 ? `.benefit-${index}, .group-${row} .name-cell` : `.benefit-${index}`, { color: colour('ink'), ...enter })
-    timeline.addLabel(`step${index + 1}`)
-  }
+  rows.forEach((row, index) => row.benefits.forEach((_, slot) => {
+    timeline.to(slot === 0 ? `.benefit-${row.first}, .group-${index} .name-cell` : `.benefit-${row.first + slot}`, { color: colour('ink'), ...enter })
+    addStep(timeline)
+  }))
 })
 </script>
 

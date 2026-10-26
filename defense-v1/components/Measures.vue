@@ -2,27 +2,16 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter, exit, draw, pop } from '../shared/motion'
 
-// The same motion tokens as slide 2
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
-
-// One made-up Taglish post on three lines. Each piece is a word or phrase. The answer key marks
-// the three real details, and the model marks two of them and one word that is not a detail
 const lines = [['Baha', 'sa', 'Marikina,'], ['need ng tubig', 'para', 'sa'], ['mga bata!']]
 const real = new Set(['Marikina,', 'need ng tubig', 'mga bata!'])
 const answers = new Set(['Baha', 'Marikina,', 'need ng tubig'])
 
-// The side not being discussed fades back but stays readable
 const dim = 0.35
 
-// Illustration only. How much of the bar the multi-task model lost. Words stand in for the score,
-// since the panel is not expected to read it
 const lost = 14
 
-// Training on the left and labeling on the right, each with its time measure, then its memory measure
 const phases = [
   {
     key: 'training', x: 210, input: 'Training posts', model: 'Model learns',
@@ -45,7 +34,6 @@ const root = ref<HTMLElement>()
 useClickTimeline(root, (timeline) => {
   gsap.set('.model-side, .count-row, .check, .not-found, .marks-legend, .scene.transfer, .scene.cost, .diagram, .measure, .transfer-part', { opacity: 0 })
   gsap.set('.check', { scale: 0.4, transformOrigin: '50% 50%' })
-  // The multi-task bar starts as long as the single-task bar, then falls short of it
   gsap.set('.multi', { width: '100%' })
   gsap.set('.drop, .dot-value', { opacity: 0 })
   gsap.set('.dot-wrap', { y: 0 })
@@ -53,13 +41,10 @@ useClickTimeline(root, (timeline) => {
 
   timeline
     .addLabel('step0')
-    // The model's answers on the right, and how many of them are correct
     .to('.key-side', { opacity: dim, ...exit })
     .to('.model-side', { opacity: 1, ...enter }, '<')
     .to('.count-row.correct, .marks-legend', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step1')
-    // Back on the key, which stays correct, the details the model found are checked.
-    // Then how many it found, and the F1-score that balances the two
     .to('.model-side .answers', { opacity: dim, ...exit })
     .to('.key-side', { opacity: 1, ...enter }, '<')
     .to('.check', { opacity: 1, scale: 1, ...pop, stagger: 0.15 }, '>')
@@ -67,34 +52,27 @@ useClickTimeline(root, (timeline) => {
     .to('.count-row.found', { opacity: 1, ...enter }, '>0.1')
     .to('.count-row.f1', { opacity: 1, ...enter }, '>0.3')
     .addLabel('step2')
-    // Negative transfer
     .to('.scene.f1', { opacity: 0, ...exit })
     .to('.scene.transfer', { opacity: 1, ...enter })
     .to('.transfer-part.bars', { opacity: 1, ...enter }, '<0.1')
     .to('.multi', { width: `${100 - lost}%`, ...draw })
     .to('.drop', { opacity: 1, ...enter }, '<0.2')
-    // The same loss on the axis. The dot drops from 0 to below it
     .to('.transfer-part.axis', { opacity: 1, ...enter }, '<')
     .to('.dot-wrap', { y: 38, ...draw }, '<0.2')
     .to('.fall', { scaleY: 1, ...draw }, '<')
     .to('.dot-value', { opacity: 1, ...enter }, '>-0.1')
     .to('.transfer-part.result', { opacity: 1, ...enter }, '<0.2')
     .addLabel('step3')
-    // One measure per click, in the order the script names them. Each side's diagram appears
-    // with its first measure. Training time, with the training side
     .to('.scene.transfer', { opacity: 0, ...exit })
     .to('.scene.cost', { opacity: 1, ...enter })
     .to('.diagram.training', { opacity: 1, ...enter }, '<')
     .to('.measure.time.training', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step4')
-    // Time to label each post, with the labeling side
     .to('.diagram.labeling', { opacity: 1, ...enter })
     .to('.measure.time.labeling', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step5')
-    // Peak memory during training
     .to('.measure.memory.training', { opacity: 1, ...enter })
     .addLabel('step6')
-    // Size of the saved model
     .to('.measure.memory.labeling', { opacity: 1, ...enter })
     .addLabel('step7')
 })
@@ -135,7 +113,6 @@ useClickTimeline(root, (timeline) => {
             </div>
           </div>
           <div class="counts">
-            <!-- Plain statements instead of scores, since the panel is not expected to read fractions -->
             <div class="count-row correct"><b>Most are right</b><span>Of its answers, one is wrong</span></div>
             <div class="count-row found"><b>Most are found</b><span>Of the correct answers, one is missed</span></div>
             <div class="count-row f1"><b>F1-score</b><span>Balances the two</span></div>
@@ -158,7 +135,6 @@ useClickTimeline(root, (timeline) => {
             <span class="who-label">Multi-task model</span>
             <div class="long track">
               <div class="multi" />
-              <!-- The part of the single-task score that the multi-task model lost -->
               <div class="drop" :style="{ width: `${lost}%` }"><span class="drop-label">Lost accuracy</span></div>
             </div>
           </div>
@@ -175,11 +151,9 @@ useClickTimeline(root, (timeline) => {
           <span class="axis-label loss">Below the line, a loss</span>
         </div>
       </div>
-      <!-- Red text is kept for the words "negative transfer" only -->
       <p class="transfer-part result">The multi-task model scored lower, so this is <strong class="negative">negative transfer</strong></p>
     </section>
 
-    <!-- Each measure sits under the moment it is measured, while training or once labeling new posts -->
     <section class="scene cost">
       <svg viewBox="0 0 884 456" width="884" height="456">
         <path class="divider" d="M 442 0 V 456" />
@@ -222,7 +196,6 @@ useClickTimeline(root, (timeline) => {
   margin-bottom: var(--space-1);
 }
 
-/* The answer key on the left, the model's answers and its score on the right */
 .sides {
   display: grid;
   grid-template-columns: 380px 380px;
@@ -244,7 +217,6 @@ useClickTimeline(root, (timeline) => {
 
 .piece {
   position: relative;
-  /* Keeps each box behind its word but in front of the slide */
   isolation: isolate;
   display: inline-block;
   padding: 0 7px;
@@ -271,7 +243,6 @@ useClickTimeline(root, (timeline) => {
   border: 2px solid var(--color-negative);
 }
 
-/* A detail of the key that the model also marked */
 .check {
   position: absolute;
   right: -11px;
@@ -279,7 +250,7 @@ useClickTimeline(root, (timeline) => {
 }
 
 .check circle {
-  fill: #15803d;
+  fill: var(--color-positive);
 }
 
 .check path {
@@ -320,7 +291,6 @@ useClickTimeline(root, (timeline) => {
   color: var(--color-muted);
 }
 
-/* The F1-score sits on one line, with its meaning beside it */
 .count-row.f1 {
   flex-direction: row;
   align-items: baseline;
@@ -399,7 +369,6 @@ useClickTimeline(root, (timeline) => {
   background: var(--color-ink);
 }
 
-/* An empty, dashed outline where the lost score would have been */
 .drop {
   position: absolute;
   right: 0;
@@ -452,7 +421,6 @@ useClickTimeline(root, (timeline) => {
   color: var(--color-muted);
 }
 
-/* The red line the dot leaves as it drops below 0 */
 .fall {
   position: absolute;
   left: calc(50% - 2px);

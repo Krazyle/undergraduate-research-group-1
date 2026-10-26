@@ -2,57 +2,29 @@
 import { useSlideContext } from '@slidev/client'
 import gsap from 'gsap'
 import { ref, watch } from 'vue'
-import { useClickTimeline } from '../composables/useClickTimeline'
+import { stepCount, useClickTimeline } from '../composables/useClickTimeline'
+import { benchmarkChart as chart, benchmarkColumns as columns, benchmarkReach as shortReach, benchmarkX } from '../shared/benchmark'
+import { angle, model, modelOrigin, pivot, reach, tilt, tip } from '../shared/model'
+import { enter, exit, draw, moveShort, moveLong } from '../shared/motion'
 
-// The brackets and their labels are placed by this exact wording, set in Inter at --text-base
 const post = 'Baha na dito sa Marikina, need ng tubig para sa mga bata. Pls help!'
 
-const angle = 60
-const reach = 200
 const strongerReach = 320
-
-function tip(length: number) {
-  const radians = (angle * Math.PI) / 180
-  return { x: length * Math.sin(radians), y: length * Math.cos(radians) }
-}
 
 const start = tip(reach)
 const stronger = tip(strongerReach)
 
-const tilt = 5
 const lean = tip(36)
-const pivot = { x: -32 * Math.sin((tilt * Math.PI) / 180), y: 32 * Math.cos((tilt * Math.PI) / 180) - 32 }
-
-// The diagram slides left and its pulls shorten to make room for the benchmark chart
-const shift = 150 - 442
-const shortReach = 150
-
-// Placeholder heights until the benchmark is run, as fractions of the chart's height
-const negativeTransfer = [0.15, 0.7, 0.35, 0.55, 0.1, 0.8, 0.25, 0.6, 0.3, 0.9, 0.2, 0.65, 0.4]
-const cost = [0.15, 0.35, 0.5, 0.3, 0.85, 0.4, 0.95, 0.25, 0.6, 0.45, 0.9, 0.55, 0.7]
-
-const chart = { left: 350, width: 510, top: 104, base: 368 }
-const columns = negativeTransfer.map((loss, index) => ({
-  x: chart.left + (chart.width / negativeTransfer.length) * (index + 0.5),
-  loss: loss * (chart.base - chart.top),
-  cost: cost[index] * (chart.base - chart.top),
-}))
-
-// Motion tokens: things that enter settle in, things that leave speed away,
-// and things that move on screen ease in and out, taking longer the farther they go
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const moveShort = { duration: 0.5, ease: 'power2.inOut' }
-const moveLong = { duration: 0.7, ease: 'power2.inOut' }
+const shift = benchmarkX - model.x
 
 const svg = ref<SVGSVGElement>()
 const { $clicks } = useSlideContext()
 
 let decline: gsap.core.Tween | undefined
+let declineFrom = 0
 
 function loopDecline(step: number) {
-  if (step >= 7)
+  if (step >= declineFrom)
     decline?.play()
   else
     decline?.pause(0)
@@ -92,19 +64,21 @@ useClickTimeline(svg, (timeline) => {
     .to('.midline', { opacity: 1, ...enter })
     .to('.pull-ner .shaft', { attr: { y2: strongerReach - 14 }, ...moveShort }, '<')
     .to('.pull-ner .head', { y: strongerReach, ...moveShort }, '<')
-    .to('.pull-ner .tag', { x: 442 + stronger.x, y: 176 + stronger.y, ...moveShort }, '<')
+    .to('.pull-ner .tag', { x: model.x + stronger.x, y: model.bottom + stronger.y, ...moveShort }, '<')
     .to('.rig', { x: lean.x, y: lean.y, ...moveShort }, '<')
-    .to('.model-box', { rotation: tilt, svgOrigin: '442 144', ...moveShort }, '<')
+    .to('.model-box', { rotation: tilt, svgOrigin: modelOrigin, ...moveShort }, '<')
     .to('.pulls', { x: pivot.x, y: pivot.y, ...moveShort }, '<')
     .addLabel('step6')
     .to('.decline > *', { opacity: 1, ...enter })
     .addLabel('step7')
+  declineFrom = stepCount(timeline) - 1
+  timeline
     .to('.decline > *', { opacity: 0, ...exit })
     .to('.pull-ner .shaft', { attr: { y2: reach - 14 }, ...moveShort }, '<')
     .to('.pull-ner .head', { y: reach, ...moveShort }, '<')
-    .to('.pull-ner .tag', { x: 442 + start.x, y: 176 + start.y, ...moveShort }, '<')
+    .to('.pull-ner .tag', { x: model.x + start.x, y: model.bottom + start.y, ...moveShort }, '<')
     .to('.rig', { x: 0, y: 0, ...moveShort }, '<')
-    .to('.model-box', { rotation: 0, svgOrigin: '442 144', ...moveShort }, '<')
+    .to('.model-box', { rotation: 0, svgOrigin: modelOrigin, ...moveShort }, '<')
     .to('.pulls', { x: 0, y: 0, ...moveShort }, '<')
     .to('.optimizer', { opacity: 1, ...enter }, '<0.2')
     .addLabel('step8')
@@ -115,7 +89,7 @@ useClickTimeline(svg, (timeline) => {
     .to('.shaft', { attr: { y2: shortReach - 14 }, ...moveLong }, '<')
     .to('.pull .head', { y: shortReach, ...moveLong }, '<')
     .to('.tick', { y: (shortReach - reach) / 2, ...moveLong }, '<')
-    .to('.optimizer', { x: chart.left + chart.width / 2 - 442, ...moveLong }, '<')
+    .to('.optimizer', { x: chart.left + chart.width / 2 - model.x, ...moveLong }, '<')
     .to('.axis', { strokeDashoffset: 0, ...draw }, '<0.5')
     .to('.chart text, .chart .swatch', { opacity: 1, ...enter }, '<0.2')
     .addLabel('step10')
@@ -143,7 +117,6 @@ watch($clicks, loopDecline)
     </g>
 
     <path class="midline" d="M 442 56 V 390" />
-    <!-- Negative transfer sits at the foot of the line, and the optimizer that reduces it takes its place -->
     <g class="decline">
       <path class="marker" d="M 311 410 h 18 l -9 16 z" />
       <text class="tag" x="442" y="424" text-anchor="middle">Negative transfer</text>
@@ -165,7 +138,7 @@ watch($clicks, loopDecline)
             <line class="tick" x1="-9" :y1="reach / 2 + 5" x2="9" :y2="reach / 2 + 5" />
             <path class="head" :transform="`translate(0 ${reach})`" d="M 0 0 l -6 -16 h 12 z" />
           </g>
-          <text class="tag" text-anchor="middle" :transform="`translate(${442 - start.x} ${176 + start.y})`">
+          <text class="tag" text-anchor="middle" :transform="`translate(${model.x - start.x} ${model.bottom + start.y})`">
             <tspan x="0" y="34">Humanitarian</tspan>
             <tspan x="0" y="56">classification</tspan>
           </text>
@@ -178,7 +151,7 @@ watch($clicks, loopDecline)
             <line class="tick" x1="-9" :y1="reach / 2 + 5" x2="9" :y2="reach / 2 + 5" />
             <path class="head" :transform="`translate(0 ${reach})`" d="M 0 0 l -6 -16 h 12 z" />
           </g>
-          <text class="tag" text-anchor="middle" :transform="`translate(${442 + start.x} ${176 + start.y})`">
+          <text class="tag" text-anchor="middle" :transform="`translate(${model.x + start.x} ${model.bottom + start.y})`">
             <tspan x="0" y="34">Named entity</tspan>
             <tspan x="0" y="56">recognition</tspan>
           </text>

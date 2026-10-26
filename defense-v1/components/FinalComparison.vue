@@ -2,18 +2,8 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter, exit, draw, pop } from '../shared/motion'
 
-// Laid out like the optimizer slide. The steps sit on the left, and a paired estimation plot
-// (Gardner and Altman) builds up on the right. One line joins the two runs that share a seed,
-// then the mean difference and its 95% confidence interval go on their own axis
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
-
-// Lines fade back but stay readable once the means take over
 const dim = 0.3
 
 const steps = [
@@ -23,13 +13,10 @@ const steps = [
   { name: '95% confidence interval', question: 'The likely size of each difference' },
 ]
 
-// Columns for the single-task runs, the multi-task runs and the differences
 const x = { single: 56, multi: 246, difference: 390 }
 const panelHeight = 116
-// The difference axis runs from -.04 to +.04
 const range = 0.04
 
-// Made-up F1-scores for five runs. Run k of both models uses seed k
 const tasks = [
   { key: 'classification', name: 'Classification', top: 150, low: 0.695, high: 0.755, single: [0.72, 0.70, 0.74, 0.71, 0.73], multi: [0.73, 0.71, 0.75, 0.70, 0.74] },
   { key: 'ner', name: 'NER', top: 316, low: 0.565, high: 0.635, single: [0.61, 0.60, 0.63, 0.59, 0.62], multi: [0.58, 0.59, 0.60, 0.57, 0.61] },
@@ -39,7 +26,6 @@ const tasks = [
   const differences = task.multi.map((score, run) => score - task.single[run])
   const mean = differences.reduce((sum, value) => sum + value, 0) / differences.length
   const spread = Math.sqrt(differences.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (differences.length - 1))
-  // The paired t-test's 95% confidence interval, with the t value for four degrees of freedom
   const margin = 2.776 * spread / Math.sqrt(differences.length)
   const average = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
   const pairs = task.single.map((score, run) => {
@@ -66,7 +52,6 @@ useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  // Step 1 is on from the start, the others wait in a faint grey
   gsap.set('.item, .item .question', { color: colour('faint') })
   gsap.set('.item-0', { color: colour('ink') })
   gsap.set('.item-0 .question', { color: colour('muted') })
@@ -87,7 +72,6 @@ useClickTimeline(root, (timeline) => {
 
   timeline.addLabel('step0')
 
-  // Five seeds. Each line joins the two runs that started the same way
   focus(1)
   timeline
     .to('.pair .single-dot', { opacity: 1, ...enter }, '<')
@@ -100,7 +84,6 @@ useClickTimeline(root, (timeline) => {
     .to('.note.pairs', { opacity: 1, ...enter }, '<')
     .addLabel('step1')
 
-  // The paired t-test. The means of each column, and the gap between them on its own axis
   focus(2)
   timeline
     .to('.note.pairs', { opacity: 0, ...exit }, '<')
@@ -112,7 +95,6 @@ useClickTimeline(root, (timeline) => {
     .to('.note.means', { opacity: 1, ...enter }, '<')
     .addLabel('step2')
 
-  // The 95% confidence interval grows around each mean difference
   focus(3)
   timeline
     .to('.note.means', { opacity: 0, ...exit }, '<')
@@ -138,7 +120,6 @@ useClickTimeline(root, (timeline) => {
     </section>
 
     <svg viewBox="0 0 440 456" width="440" height="456">
-      <!-- The two models head their columns, the same boxes as on the model slide -->
       <g :transform="`translate(${x.single} 0)`">
         <rect class="encoder" x="-60" y="0" width="56" height="24" rx="5" />
         <rect class="encoder" x="4" y="0" width="56" height="24" rx="5" />
@@ -160,7 +141,6 @@ useClickTimeline(root, (timeline) => {
         <text class="task" :class="task.key" x="0" :y="task.top - 12">{{ task.name }}</text>
         <path class="column-line" :d="`M ${x.single} ${task.top} V ${task.top + panelHeight} M ${x.multi} ${task.top} V ${task.top + panelHeight}`" />
 
-        <!-- One line for each seed. Dark if the multi-task run scored higher, red if lower -->
         <g v-for="pair in task.pairs" :key="pair.run" class="pair" :data-run="pair.run">
           <path
             class="link" :class="{ lower: !pair.higher }" :d="`M ${x.single} ${pair.y1} L ${x.multi} ${pair.y2}`"
@@ -173,7 +153,6 @@ useClickTimeline(root, (timeline) => {
         <path class="mean-mark" :class="task.key" :d="`M ${x.single - 18} ${task.meanSingle} H ${x.single + 18}`" />
         <path class="mean-mark" :class="task.key" :d="`M ${x.multi - 18} ${task.meanMulti} H ${x.multi + 18}`" />
 
-        <!-- The difference axis, with 0 where the two models score the same -->
         <g class="difference-axis">
           <path class="column-line dark" :d="`M ${x.difference} ${task.top} V ${task.top + panelHeight}`" />
           <path class="zero" :d="`M ${x.difference - 22} ${task.zero} H ${x.difference + 22}`" />

@@ -2,11 +2,11 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { approachExamplesX as examplesX, approachModelX as modelX } from '../shared/model'
+import { enter, exit, draw, moveShort } from '../shared/motion'
 
 const width = 884
 
-// Each panel is drawn around x = 0 and slides into place. A pipeline is one post, one model,
-// and the outputs that model gives
 const panels = [
   {
     caption: ['Earlier Philippine', 'studies'],
@@ -25,21 +25,16 @@ const panels = [
   },
 ]
 
-// A model with two outputs branches its arrow to two swatches this far either side
 const spread = 34
 
 function outputX(outputs: string[], index: number) {
   return outputs.length === 1 ? 0 : (index === 0 ? -spread : spread)
 }
 
-// Where each panel sits when the first n panels share the width evenly
 function place(index: number, count: number) {
   return (width * (index + 0.5)) / count
 }
 
-// Example posts labeled the way slide 2 labels them. The brackets are placed by this exact
-// wording, set in Inter at --text-base: entity brackets under their words, measured from the
-// start of the post, and one classification bracket under the whole post
 const examples = [
   { kind: 'english', title: 'English post', text: 'Flooding in Houston, we need water!', entities: [[125, 216], [266, 387]], end: 393 },
   { kind: 'taglish', title: 'Taglish post', text: 'Baha na sa Marikina, need ng tubig!', entities: [[125, 217], [229, 378]], end: 384 },
@@ -49,32 +44,15 @@ function bracket(start: number, end: number, top: number) {
   return `M ${start} ${top} V ${top + 6} H ${end} V ${top}`
 }
 
-// Once only this study is left, it and the examples get equal space at the slide's left edge,
-// between them, and at the right edge. The slide is 1040 wide and the diagram starts 78 in.
-// The space is sized for the wider English post, so the model stays put when it appears
-const modelWidth = 256
-const examplesWidth = 393
-const space = (1040 - modelWidth - examplesWidth) / 3
-const modelX = -78 + space + modelWidth / 2
-const examplesX = -78 + 2 * space + modelWidth
 
-// The Taglish post sits level with the model alone, then moves down to share the height
 const taglishDrop = 63
 
-// The Taglish labels turn dashed by opening gaps in place. A 12 px dash is centred on each corner,
-// so it bends around the corner and covers the end tick, and whole periods fit between the corners
 const dash = 12
 
 function period(path: SVGPathElement) {
   const length = path.getTotalLength()
   return (length - dash) / Math.round((length - dash) / (dash + 6))
 }
-
-// The same motion tokens as slides 2 and 3
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const moveShort = { duration: 0.5, ease: 'power2.inOut' }
 
 const root = ref<HTMLElement>()
 
@@ -100,9 +78,7 @@ useClickTimeline(root, (timeline) => {
     .to('.taglish', { opacity: 1, ...enter }, '>-0.1')
     .fromTo('.taglish .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step5')
-    // The Taglish labels turn dashed: needed, but no dataset has them yet
     .to('.taglish', { y: taglishDrop, ...moveShort })
-    // Each dash shrinks around its own centre, from a full period with no gap down to 12 px
     .fromTo('.taglish .bracket', {
       strokeDasharray: (_: number, path: SVGPathElement) => `${period(path)} 0`,
       strokeDashoffset: (_: number, path: SVGPathElement) => (period(path) - dash) / 2,
@@ -114,9 +90,6 @@ useClickTimeline(root, (timeline) => {
     .to('.english, .english-source', { opacity: 1, ...enter }, '<')
     .fromTo('.english .bracket', { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step6')
-    // The next diagram takes over this study's encoder and its outputs, drawn in the same place, and
-    // morphs them into the multi-task model. Everything else leaves where it stands. The hand-over
-    // comes just after the label, so seeking to step6 does not hide the encoder
     .set('.panel-2 .model, .panel-2 .name, .panel-2 .classification, .panel-2 .ner', { opacity: 0 }, '+=0.01')
     .to('.example, .legend, .english-source, .panel-2 .post, .panel-2 .input, .panel-2 .tag', { opacity: 0, ...exit })
     .addLabel('step7')
@@ -158,7 +131,6 @@ useClickTimeline(root, (timeline) => {
         </g>
       </g>
 
-      <!-- Placed by this exact wording, set in Inter at --text-2xs, so the legend is centred -->
       <g class="legend">
         <rect class="swatch classification" x="93" y="430" width="14" height="14" rx="3" />
         <text class="tag" x="115" y="443">Humanitarian classification</text>
@@ -167,7 +139,6 @@ useClickTimeline(root, (timeline) => {
       </g>
     </svg>
 
-    <!-- The sources follow what is on screen: the earlier studies leave with their panels -->
     <footer class="earlier-sources">Sources: Ermino et al. (2022), Somido &amp; Reyes (2023), Yute et al. (2021), Caoile &amp; Aviles (2025)</footer>
     <footer class="english-source">Source: Ali et al. (2026)</footer>
   </div>
@@ -229,7 +200,6 @@ path {
   stroke-width: 2.5;
 }
 
-/* The sources sit below the diagram, in the slide's bottom margin */
 footer {
   position: absolute;
   left: 0;

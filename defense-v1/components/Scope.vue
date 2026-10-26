@@ -2,8 +2,8 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter } from '../shared/motion'
 
-// What the study covers and what it leaves out, each item inked in the order Prinz names it
 const covered = [
   'Taglish typhoon posts, 2020–2026, mainly from X',
   'About 3,900 posts labeled for both tasks',
@@ -20,15 +20,12 @@ const lists = [
   { heading: 'Not covered', items: excluded, first: covered.length },
 ]
 
-const enter = { duration: 0.3, ease: 'power1.out' }
-
 const root = ref<HTMLElement>()
 
 useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  // Every item waits in a faint grey until its turn
   gsap.set('.item', { color: colour('faint') })
 
   timeline.addLabel('step0')

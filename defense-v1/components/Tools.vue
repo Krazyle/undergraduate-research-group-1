@@ -2,9 +2,8 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter } from '../shared/motion'
 
-// The study's tools by use, from the software and hardware tables of Chapter 3, laid out as rows like
-// the benefits slide. Each row inks as Carlo names it, its roles in a lighter grey
 const groups = [
   {
     name: 'Training',
@@ -35,16 +34,12 @@ const groups = [
   },
 ]
 
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-
 const root = ref<HTMLElement>()
 
 useClickTimeline(root, (timeline) => {
   const css = getComputedStyle(root.value!)
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
-  // Every row waits in a faint grey until its turn
   gsap.set('.cell', { color: colour('faint') })
 
   timeline.addLabel('step0')
@@ -96,7 +91,6 @@ li {
   line-height: var(--leading-list);
 }
 
-/* A tool and its role share the row's two right-hand columns */
 li {
   grid-template-columns: 1.3fr 1fr;
 }

@@ -2,26 +2,19 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { angle, model, reach, tip } from '../shared/model'
+import { enter, exit, draw, moveLong } from '../shared/motion'
 
-// Part 1: Figure 3.1 of Chapter 3, with the same steps, stores, arrows and phases, drawn the way the
-// deck draws its diagrams rather than as on paper. Its three phases become three equal columns under
-// captions, and every part, the posts going in and out included, is a box like the deck's model box. Each label is cut down to
-// the name of its step, since Chapter 3 gives the details. Each part names the click it appears on,
-// in the order Prinz describes them
-type Kind = 'box'
-interface Node { id: string, kind: Kind, step: number, x: number, y: number, width: number, height: number, label: string }
+interface Node { id: string, step: number, x: number, y: number, width: number, height: number, label: string }
 
-// The slide's content area is 884 wide: three 268-wide columns with two 40-wide gutters
 const columns = [134, 442, 750]
 const [left, middle, right] = columns
 const width = 220
 const height = 34
 const box = (id: string, step: number, x: number, y: number, label: string, size = { width, height }) =>
-  ({ id, kind: 'box' as const, step, x, y, label, ...size })
+  ({ id, step, x, y, label, ...size })
 const fork = { width: 124, height: 50 }
 
-// The boxes in each column are 36 apart, room for an arrow that reads as a line and not just a
-// head. Each column starts under the captions, and the middle one, the longest, sets the height
 const gap = 36
 const top = 64
 const row = (index: number) => top + index * (height + gap)
@@ -58,13 +51,8 @@ const captions = [
   { step: 1, x: right, lines: ['Prototype web', 'application'] },
 ]
 
-// Each arrow runs through its points from one box to the next and ends in a head, or a head at both
-// ends. The arrows between columns run down the middle of the gutters, and fine-tuning splits in two
-// and joins again with slide 4's elbows. The arrows of a click are listed in the order they draw,
-// and the arrow from the API server up to the database draws from its end
 const down = (x: number, from: number, to: number) => [[x, from], [x, to]]
 const split = top + height + gap / 2
-// The final model keeps slide 2's proportions at the height of the other boxes
 const finalWidth = (256 * height) / 64
 interface Arrow { step: number, from: string, to: string, points: number[][], both?: boolean, backward?: boolean }
 const arrows: Arrow[] = [
@@ -72,7 +60,7 @@ const arrows: Arrow[] = [
   { step: 2, from: 'cleaning', to: 'labeling', points: down(left, row(1) + height, row(2)) },
   { step: 2, from: 'labeling', to: 'splitting', points: down(left, row(2) + height, row(3)) },
   { step: 2, from: 'splitting', to: 'dataset', points: down(left, row(3) + height, row(4)) },
-  { step: 3, from: 'dataset', to: 'tuning', points: [[left + width / 2, row(4) + height / 2], [288, row(4) + height / 2], [288, top + height / 2], [middle - width / 2, top + height / 2]] },
+  { step: 3, from: 'dataset', to: 'tuning', points: [[left + width / 2, row(4) + height / 2], [(left + middle) / 2, row(4) + height / 2], [(left + middle) / 2, top + height / 2], [middle - width / 2, top + height / 2]] },
   { step: 3, from: 'tuning', to: 'single', points: [[middle, top + height], [middle, split], [middle - 68, split], [middle - 68, row(1)]] },
   { step: 3, from: 'tuning', to: 'candidates', points: [[middle, top + height], [middle, split], [middle + 68, split], [middle + 68, row(1)]] },
   { step: 3, from: 'single', to: 'saved', points: [[middle - 68, row(1) + fork.height], [middle - 68, saved - gap / 2], [middle, saved - gap / 2], [middle, saved]] },
@@ -80,13 +68,12 @@ const arrows: Arrow[] = [
   { step: 4, from: 'saved', to: 'selection', points: down(middle, saved + height, selection) },
   { step: 4, from: 'selection', to: 'evaluation', points: down(middle, selection + height, evaluation) },
   { step: 4, from: 'evaluation', to: 'final', points: down(middle, evaluation + height, finalTop) },
-  { step: 5, from: 'final', to: 'api', points: [[middle + finalWidth / 2, finalTop + height / 2], [596, finalTop + height / 2], [596, row(1) + height / 2], [right - width / 2, row(1) + height / 2]] },
+  { step: 5, from: 'final', to: 'api', points: [[middle + finalWidth / 2, finalTop + height / 2], [(middle + right) / 2, finalTop + height / 2], [(middle + right) / 2, row(1) + height / 2], [right - width / 2, row(1) + height / 2]] },
   { step: 5, from: 'api', to: 'database', points: down(right, row(0) + height, row(1)), both: true, backward: true },
   { step: 5, from: 'api', to: 'web', points: down(right, row(1) + height, row(2)), both: true },
   { step: 5, from: 'web', to: 'sorted', points: down(right, row(2) + height, row(3)) },
 ]
 
-// The deck's arrowhead, 14 wide and 12 long, turned to the line's last direction
 const headLength = 12
 function head(from: number[], to: number[]) {
   const angle = (Math.atan2(to[1] - from[1], to[0] - from[0]) * 180) / Math.PI - 90
@@ -97,7 +84,6 @@ function shorten(from: number[], to: number[]) {
   const k = (length - headLength) / length
   return [from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k]
 }
-// Every arrow draws at the same speed, so a long elbow takes longer than a short step down
 const speed = 600
 const drawn = arrows.map((arrow) => {
   const points = arrow.points.map(point => [...point])
@@ -111,13 +97,6 @@ const drawn = arrows.map((arrow) => {
   return { ...arrow, d: `M ${points.map(point => point.join(' ')).join(' L ')}`, heads: ends.map(end => head(end.from, end.to)), duration: Math.min(Math.max(length / speed, 0.2), 0.6) }
 })
 
-// The final model is the multi-task model of slides 2 and 4, its two task heads pulling at slide 2's
-// angle, drawn where slide 2 draws it. It shrinks into the foot of the training column, leaving its
-// task heads behind until part 2, where it grows back and they draw in again
-const model = { x: 442, y: 144 }
-// The figure is drawn from y = 0 to its bottom box, then shrunk a little and centred on the slide's
-// content area, so it has room above and below. The final model lands on its place in the shrunk
-// figure, as tall as its boxes
 const figureScale = 0.92
 const drawnCentre = { x: 442, y: bottom / 2 }
 const centre = { x: 442, y: 228 }
@@ -127,22 +106,13 @@ const small = {
   y: centre.y + (finalTop + height / 2 - drawnCentre.y) * figureScale,
   scale: (height / 64) * figureScale,
 }
-const angle = 60
-const reach = 200
-const start = { x: reach * Math.sin((angle * Math.PI) / 180), y: reach * Math.cos((angle * Math.PI) / 180) }
+const start = tip(reach)
 const pulls = [
   { kind: 'classification', rotate: angle, x: model.x - start.x, lines: ['Humanitarian', 'classification'] },
   { kind: 'ner', rotate: -angle, x: model.x + start.x, lines: ['Named entity', 'recognition'] },
 ]
 
-// Part 2: the model itself, reading slide 2's post once. The optimizer is not drawn, as Prinz says
 const post = 'Baha na dito sa Marikina, need ng tubig para sa mga bata. Pls help!'
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const moveLong = { duration: 0.7, ease: 'power2.inOut' }
 
 const root = ref<HTMLElement>()
 
@@ -150,20 +120,16 @@ useClickTimeline(root, (timeline) => {
   gsap.set('.part, .head, .short-name, .input', { opacity: 0 })
   gsap.set('.line', { strokeDasharray: 1, strokeDashoffset: 1 })
   gsap.set('.backward .line', { strokeDashoffset: -1 })
-  gsap.set('.final', { svgOrigin: `${model.x} ${model.y}` })
+  gsap.set('.final', { svgOrigin: `${model.x} ${model.middle}` })
 
   timeline
     .addLabel('step0')
-    // The model moves to its place in the figure, and the figure's three phases are named
-    .to('.final', { x: small.x - model.x, y: small.y - model.y, scale: small.scale, ...moveLong })
+    .to('.final', { x: small.x - model.x, y: small.y - model.middle, scale: small.scale, ...moveLong })
     .to('.long-name, .pull, .pull-name', { opacity: 0, ...exit }, '<')
     .to('.short-name', { opacity: 1, ...enter }, '<0.3')
     .to('.caption', { opacity: 1, stagger: 0.08, ...enter }, '<0.2')
     .addLabel('step1')
 
-  // Each phase builds along its arrows. A box fades in, the arrow leaving it draws, and the box it
-  // points to fades in as the arrow arrives. A box with no arrow into it, or one shown on an earlier
-  // click, starts the chain
   const lead = 0.15
   for (let step = 2; step <= 5; step++) {
     const start = timeline.duration()
@@ -183,7 +149,6 @@ useClickTimeline(root, (timeline) => {
       timeline
         .to(`.arrow-${index}`, { opacity: 1, duration: 0 }, begin)
         .to(`.arrow-${index} .line`, { strokeDashoffset: 0, duration: arrow.duration, ease: draw.ease }, begin)
-      // A head shows once the line reaches it, so the head at the start of a backward arrow shows last
       arrow.heads.forEach((_, slot) => {
         const arrives = (slot === 0) !== Boolean(arrow.backward)
         timeline.to(`.arrow-${index} .head-${slot}`, { opacity: 1, duration: 0.1, ease: enter.ease }, arrives ? end - 0.05 : begin)
@@ -197,8 +162,6 @@ useClickTimeline(root, (timeline) => {
   }
 
   timeline
-    // The figure leaves, and the final model grows back to the size and place it has on slide 2,
-    // reading the post
     .to('.part', { opacity: 0, ...exit })
     .to('.final', { x: 0, y: 0, scale: 1, ...moveLong }, '<0.1')
     .to('.short-name', { opacity: 0, ...exit }, '<')
@@ -206,8 +169,6 @@ useClickTimeline(root, (timeline) => {
     .to('.input', { opacity: 1, ...enter }, '>-0.1')
     .fromTo('.arrow-in', { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '<0.2')
     .addLabel('step6')
-    // Its two task heads, one for each task, draw in as they first did on slide 2. They start just
-    // after the label, so seeking to step6 leaves them hidden
     .fromTo('.pull', { opacity: 1, clipPath: 'inset(0% 0% 100% 0%)' }, { opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', immediateRender: false, ...draw }, '+=0.01')
     .to('.pull-name', { opacity: 1, ...enter }, '<0.3')
     .addLabel('step7')
@@ -228,7 +189,7 @@ useClickTimeline(root, (timeline) => {
         </g>
 
         <g v-for="node in nodes" :key="node.id" class="part node" :class="[`step-${node.step}`, `node-${node.id}`]">
-          <rect v-if="node.kind === 'box'" class="model" :x="node.x - node.width / 2" :y="node.y" :width="node.width" :height="node.height" rx="12" />
+          <rect class="model" :x="node.x - node.width / 2" :y="node.y" :width="node.width" :height="node.height" rx="12" />
           <foreignObject :x="node.x - node.width / 2" :y="node.y" :width="node.width" :height="node.height">
             <div class="label" :class="node.kind">{{ node.label }}</div>
           </foreignObject>
@@ -236,21 +197,18 @@ useClickTimeline(root, (timeline) => {
 
       </g>
 
-      <!-- Part 2, drawn with slide 2's measurements -->
       <text class="post input" x="81" y="36">{{ post }}</text>
       <g class="input arrow-in">
         <path class="plain" d="M 442 52 V 90" />
         <path class="tip" d="M 442 102 l -7 -12 h 14 z" />
       </g>
-      <!-- The final model, the model of slides 2 and 4. Its short name is set so it reads at --text-xs,
-           in the weight of the steps, once the model has shrunk into the figure -->
       <g class="final">
         <g v-for="pull in pulls" :key="pull.kind" :class="pull.kind">
-          <g class="pull" :transform="`translate(${model.x} 176) rotate(${pull.rotate})`">
+          <g class="pull" :transform="`translate(${model.x} ${model.bottom}) rotate(${pull.rotate})`">
             <line class="shaft" x1="0" y1="0" x2="0" :y2="reach - 14" />
             <path class="pull-head" :transform="`translate(0 ${reach})`" d="M 0 0 l -6 -16 h 12 z" />
           </g>
-          <text class="tag pull-name" text-anchor="middle" :transform="`translate(${pull.x} ${176 + start.y})`">
+          <text class="tag pull-name" text-anchor="middle" :transform="`translate(${pull.x} ${model.bottom + start.y})`">
             <tspan v-for="(line, row) in pull.lines" :key="row" x="0" :y="34 + row * 22">{{ line }}</tspan>
           </text>
         </g>

@@ -2,18 +2,15 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { benchmarkChart as benchmark, benchmarkColumns as columns, benchmarkReach, benchmarkX } from '../shared/benchmark'
+import { angle, conflictAngle, easierAngle, harderAngle, model, pivot, reach, shortReach, sideX, strongerReach as fullStrongerReach, tilt, tip } from '../shared/model'
+import { enter, exit, draw, moveShort, moveLong } from '../shared/motion'
 
-// Part 1: slide 4's chart of each task's score, trained alone and together, across the slide's width.
-// Each multi-task score is drawn as a share of its single-task score. Zhu et al. (2025), Table 2,
-// MiniLM, as on slide 4; Zou et al. (2025), Table 4, models 1 and 2 (F1). The axis runs from 95% to
-// 101% of the single-task score, so Zou et al.'s gain on place names fits
 const transfer = { left: 24, width: 860, top: 64, base: 380 }
 const low = 0.95
 const high = 1.01
 const scoreY = (share: number) => transfer.base - ((transfer.base - transfer.top) * (share - low)) / (high - low)
 
-// Each group names its dataset and the study behind it, since the earlier results differ by dataset.
-// Nothing is measured on Taglish posts yet, not even the single-task models
 const groups = [
   {
     lines: ['English', 'text'],
@@ -31,16 +28,13 @@ const groups = [
   x: transfer.left + 30 + ((transfer.width - 30) * (index + 0.5)) / 3,
 }))
 
-// Within a group, each task's pair of bars sits this far either side of the group's centre
 const spread = 50
 const barWidth = 42
 
-// The axis breaks between two parallel slashes near its foot, as on slide 4
 const gap = { top: transfer.base - 34, bottom: transfer.base - 24 }
 const transferAxis = `M ${transfer.left} ${transfer.top} V ${gap.top} M ${transfer.left} ${gap.bottom} V ${transfer.base} H ${transfer.left + transfer.width}`
 const slashes = [gap.top, gap.bottom].map(y => `M ${transfer.left - 8} ${y + 4} L ${transfer.left + 8} ${y - 4}`).join(' ')
 
-// The legend's hatched swatch, as on slide 4
 const swatch = 14
 const stripes = [0.5, 1, 1.5].map((at) => {
   const c = swatch * at
@@ -48,52 +42,13 @@ const stripes = [0.5, 1, 1.5].map((at) => {
 }).join(' ')
 const taskLegendX = transfer.left + 280
 
-// Part 2: slide 4's two models, one trained with equal weighting and one with an advanced optimizer,
-// each centred in its half of the slide and drawn with slides 2 and 4's measurements around x = 0.
-// They draw in as slide 2's model first did, with their pulls at slide 2's angle
-const angle = 60
-const shortReach = 130
 const sides = [
-  { kind: 'equal', name: 'Equal weighting', x: 221 },
-  { kind: 'advanced', name: 'Advanced optimizer', x: 663 },
+  { kind: 'equal', name: 'Equal weighting', x: sideX.equal },
+  { kind: 'advanced', name: 'Advanced optimizer', x: sideX.advanced },
 ]
 
-// If an advanced optimizer does better, the tasks behave like slide 4's harder problem: the pulls
-// swing apart, and with equal weighting NER overpowers and tips the model. If none does, they behave
-// like its easier problem, and both models hang level. The angles stand for Gama and Grassi's (2026)
-// cosines of about 0.45 and 0.7, as on slide 4
-const harderAngle = (Math.acos(0.45) * 180) / Math.PI
-const easierAngle = (Math.acos(0.7) * 180) / Math.PI
-const strongerReach = (shortReach * 300) / 200
-
-function tip(length: number, degrees: number) {
-  const radians = (degrees * Math.PI) / 180
-  return { x: length * Math.sin(radians), y: length * Math.cos(radians) }
-}
-
-const tilt = 5
-const lean = tip(36, 78)
-const pivot = { x: -32 * Math.sin((tilt * Math.PI) / 180), y: 32 * Math.cos((tilt * Math.PI) / 180) - 32 }
-
-// Part 3: the two models merge back into one, which slides left as on slide 2, and slide 2's
-// benchmark chart draws in beside it, with its placeholder heights as fractions of the chart's height
-const benchmarkX = 150
-const benchmarkReach = 150
-const benchmark = { left: 350, width: 510, top: 104, base: 368 }
-const negativeTransfer = [0.15, 0.7, 0.35, 0.55, 0.1, 0.8, 0.25, 0.6, 0.3, 0.9, 0.2, 0.65, 0.4]
-const cost = [0.15, 0.35, 0.5, 0.3, 0.85, 0.4, 0.95, 0.25, 0.6, 0.45, 0.9, 0.55, 0.7]
-const columns = negativeTransfer.map((loss, index) => ({
-  x: benchmark.left + (benchmark.width / negativeTransfer.length) * (index + 0.5),
-  loss: loss * (benchmark.base - benchmark.top),
-  cost: cost[index] * (benchmark.base - benchmark.top),
-}))
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const moveShort = { duration: 0.5, ease: 'power2.inOut' }
-const moveLong = { duration: 0.7, ease: 'power2.inOut' }
+const strongerReach = (shortReach * fullStrongerReach) / reach
+const lean = tip(36, conflictAngle)
 
 const root = ref<HTMLElement>()
 
@@ -107,7 +62,6 @@ useClickTimeline(root, (timeline) => {
   gsap.set('.chart-bar', { scaleY: 0, transformOrigin: '50% 100%' })
   gsap.set('.pull', { clipPath: 'inset(0% 0% 100% 0%)' })
 
-  // Each pull returns to slide 2's angle at the given length
   const settle = (length: number, move: gsap.TweenVars) => {
     timeline
       .to('.pull-classification .arm', { rotation: angle, svgOrigin: '0 0', ...move }, '<')
@@ -116,7 +70,6 @@ useClickTimeline(root, (timeline) => {
       .to('.head', { y: length, ...move }, '<')
   }
 
-  // The chart draws in as slide 4's does
   timeline
     .addLabel('step0')
     .to('.transfer .chart-axis', { strokeDashoffset: 0, ...draw })
@@ -124,7 +77,6 @@ useClickTimeline(root, (timeline) => {
     .to('.transfer .chart-bar', { scaleY: 1, ...draw, stagger: 0.08 }, '<')
     .addLabel('step1')
 
-  // The chart leaves, and the two models draw in as slide 2's model did: the box, then its pulls
   timeline
     .to('.transfer-text, .transfer .chart-bar, .transfer .chart-axis', { opacity: 0, ...exit })
     .to('.model', { strokeDashoffset: 0, ...draw }, '>')
@@ -132,19 +84,17 @@ useClickTimeline(root, (timeline) => {
     .fromTo('.pull', { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ...draw }, '>-0.1')
     .addLabel('step2')
 
-  // If an advanced optimizer does better: the harder problem
   timeline
     .to('.pull-classification .arm', { rotation: harderAngle, svgOrigin: '0 0', ...moveShort })
     .to('.pull-ner .arm', { rotation: -harderAngle, svgOrigin: '0 0', ...moveShort }, '<')
     .to('.equal .pull-ner .shaft', { attr: { y2: strongerReach - 14 }, ...moveShort }, '>')
     .to('.equal .pull-ner .head', { y: strongerReach, ...moveShort }, '<')
     .to('.equal .rig', { x: lean.x, y: lean.y, ...moveShort }, '<')
-    .to('.equal .model-box', { rotation: tilt, svgOrigin: '0 144', ...moveShort }, '<')
+    .to('.equal .model-box', { rotation: tilt, svgOrigin: `0 ${model.middle}`, ...moveShort }, '<')
     .to('.equal .pulls', { x: pivot.x, y: pivot.y, ...moveShort }, '<')
     .to('.harder-problem, .gama', { opacity: 1, ...enter }, '<0.3')
     .addLabel('step3')
 
-  // If none does: the easier problem. Equal weighting rights itself as the pulls close up
   timeline
     .to('.harder-problem, .gama', { opacity: 0, ...exit })
     .to('.pull-classification .arm', { rotation: easierAngle, svgOrigin: '0 0', ...moveShort }, '<')
@@ -152,12 +102,11 @@ useClickTimeline(root, (timeline) => {
     .to('.equal .pull-ner .shaft', { attr: { y2: shortReach - 14 }, ...moveShort }, '<')
     .to('.equal .pull-ner .head', { y: shortReach, ...moveShort }, '<')
     .to('.equal .rig', { x: 0, y: 0, ...moveShort }, '<')
-    .to('.equal .model-box', { rotation: 0, svgOrigin: '0 144', ...moveShort }, '<')
+    .to('.equal .model-box', { rotation: 0, svgOrigin: `0 ${model.middle}`, ...moveShort }, '<')
     .to('.equal .pulls', { x: 0, y: 0, ...moveShort }, '<')
     .to('.easier-problem, .kurin', { opacity: 1, ...enter }, '>-0.2')
     .addLabel('step4')
 
-  // The two models merge back into one, which makes room for slide 2's benchmark chart
   timeline
     .to('.easier-problem, .kurin, .name-tag', { opacity: 0, ...exit })
     .to('.side', { x: benchmarkX, ...moveLong }, '<')
@@ -184,9 +133,7 @@ useClickTimeline(root, (timeline) => {
         </clipPath>
       </defs>
 
-      <!-- The models sit beneath the charts, so their boxes never cover a chart before they draw in -->
       <g v-for="side in sides" :key="side.kind" class="side" :class="side.kind">
-        <!-- The line and the name stay upright while the model tips -->
         <path class="midline" d="M 0 56 V 390" />
         <text class="tag name-tag" x="0" y="36" text-anchor="middle">{{ side.name }}</text>
 
@@ -197,7 +144,7 @@ useClickTimeline(root, (timeline) => {
           </g>
 
           <g class="pulls">
-            <g v-for="kind in ['classification', 'ner']" :key="kind" class="pull" :class="[`pull-${kind}`, kind]" transform="translate(0 176)">
+            <g v-for="kind in ['classification', 'ner']" :key="kind" class="pull" :class="[`pull-${kind}`, kind]" :transform="`translate(0 ${model.bottom})`">
               <g class="arm">
                 <line class="shaft" x1="0" y1="0" x2="0" :y2="shortReach - 14" />
                 <path class="head" d="M 0 0 l -6 -16 h 12 z" />
@@ -239,12 +186,10 @@ useClickTimeline(root, (timeline) => {
             <rect class="chart-bar single" :x="group.x + (index ? spread : -spread) - barWidth - 2" :y="scoreY(1)" :width="barWidth" :height="transfer.base - scoreY(1)" :fill="`url(#contribution-hatch-${task.kind})`" />
             <rect class="chart-bar" :x="group.x + (index ? spread : -spread) + 2" :y="scoreY(task.share)" :width="barWidth" :height="transfer.base - scoreY(task.share)" />
           </g>
-          <!-- One question mark stands where Taglish's bars will go -->
           <text v-if="!group.tasks.length" class="transfer-text unknown" :x="group.x" :y="(scoreY(1) + transfer.base) / 2 + 16" text-anchor="middle">?</text>
         </g>
 
         <path class="chart-axis" :d="transferAxis" pathLength="1" />
-        <!-- The axis starts near the single-task scores, not at zero -->
         <path class="transfer-text axis-break" :d="slashes" />
       </g>
 
@@ -351,7 +296,6 @@ path {
   color: var(--color-ink);
 }
 
-/* Single-task bars are hatched and outlined in their task's colour, the multi-task bars solid */
 pattern line {
   stroke: currentColor;
   stroke-width: 3;
@@ -398,7 +342,6 @@ pattern line {
   stroke: none;
 }
 
-/* The sources sit below the diagram, in the slide's bottom margin */
 footer {
   position: absolute;
   left: 0;

@@ -2,22 +2,17 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter, exit, moveShort, moveLong } from '../shared/motion'
 
-// The objectives fill in one per click on the left, and each brings back, on the right, a drawing
-// the panel has already seen
 const width = 444
 const mid = width / 2
 
-// Pipelines as slide 4 draws them, with shorter arrows to leave room for a two-row legend: a post,
-// an arrow, the model, and an elbow down to each output's swatch
 interface Pipeline { x: number, name: string, width: number, outputs: string[] }
 
 const singles: Pipeline[] = [
   { x: mid - 80, name: 'Model', width: 116, outputs: ['classification'] },
   { x: mid + 80, name: 'Model', width: 116, outputs: ['ner'] },
 ]
-// The single-task pipelines sit this far down, so their box spans 136 to 200 and each output arrow
-// runs from 204 to its tip at 298
 const singlesTop = 20
 const single = { top: 116 + singlesTop, width: 116, arrowRoot: 184 + singlesTop, arrowTip: 278 + singlesTop }
 const final: Pipeline[] = [
@@ -30,15 +25,11 @@ function outputX(outputs: string[], index: number) {
   return outputs.length === 1 ? 0 : (index === 0 ? -34 : 34)
 }
 
-// Slide 2's multi-task model, its pulls at slide 2's angle, each task named under its tip. Each
-// drawing is centred on the middle of the list, so the model's box spans 124 to 188
 const angle = 60
 const reach = 170
 const box = { top: 124, middle: 156, bottom: 188 }
 const tip = { x: reach * Math.sin((angle * Math.PI) / 180), y: box.bottom + reach * Math.cos((angle * Math.PI) / 180) }
 
-// The same model, small, once for each optimizer, in the order of the optimizer table in Chapter 2.
-// None is picked, because there are no results yet. The last one is centred and wider for its name
 const optimizers = ['Equal', 'Tuned static', 'Random', 'Uncertainty', 'FAMO', 'GradNorm', 'MGDA',
   'GradDrop', 'IMTL', 'PCGrad', 'CAGrad', 'Nash-MTL', 'PCGrad with uncertainty']
 const cell = width / 3
@@ -48,29 +39,16 @@ const copies = optimizers.map((name, index) => {
 })
 const copyReach = 40
 
-// Drawn back to front, so each copy sits on top of the ones after it. When they fold, each column
-// tucks under its first box, leaving three
 const backToFront = copies.map((copy, index) => ({ ...copy, index })).reverse()
 const copyWidth = copies[0].width
 
-// The three boxes left grow into click 4's three models: the final model and the two single-task models
 const finalBoxes = final.map(pipeline => ({ x: pipeline.x - pipeline.width / 2, y: 116, width: pipeline.width, height: 64, rx: 12 }))
 
-// Click 4 draws its pipelines from scratch, so each of their parts can appear on its own
 const parts = (scope: string) => `${scope} text, ${scope} path, ${scope} rect`
 
-// The single-task models become the multi-task model, as the encoder became it after slide 4. Each
-// box is drawn as one half of the model, starting where its single-task model is, and each pull
-// starts as that model's output arrow, measured from the bottom of the model's box
 const halves = [mid - 80, mid + 80].map(x => x - single.width / 2)
 const arms = [-80, 80].map(x => ({ x, y: single.arrowRoot - box.bottom }))
 const arrowLength = single.arrowTip - single.arrowRoot
-
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const moveShort = { duration: 0.5, ease: 'power2.inOut' }
-const moveLong = { duration: 0.7, ease: 'power2.inOut' }
 
 const root = ref<HTMLElement>()
 
@@ -79,11 +57,9 @@ useClickTimeline(root, (timeline) => {
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
   const ink = { color: colour('ink'), ...enter }
 
-  // The objectives wait in a faint grey until their turn
   gsap.set(`.singles, .multi, .copy, .legend, ${parts('.final')}`, { opacity: 0 })
   gsap.set('.item, .item .negative', { color: colour('faint') })
 
-  // The model's parts start as the single-task models' boxes and output arrows, drawn the same way
   gsap.set('.whole, .multi-name, .midline, .pull .label, .copy-0 .optimizer', { opacity: 0 })
   halves.forEach((x, index) => gsap.set(`.half-${index}`, { attr: { x, y: single.top, width: single.width } }))
   arms.forEach(({ x, y }, index) => gsap.set(`.arm-${index}`, { x, y, color: colour('ink'), svgOrigin: '0 0' }))
@@ -95,30 +71,22 @@ useClickTimeline(root, (timeline) => {
     .to('.item-0', ink)
     .to('.singles, .legend', { opacity: 1, ...enter }, '<')
     .addLabel('step1')
-    // The two single-task models become the multi-task model. The model's parts take the place of
-    // their boxes and arrows, and everything else leaves: the posts, the names, the swatches, the legend.
-    // The hand-over comes just after the label, so seeking to step1 does not hide the names
     .set('.singles .model, .singles .arrow', { opacity: 0 }, '+=0.01')
     .set('.multi', { opacity: 1 }, '<')
     .to('.item-1', ink, '<')
     .to('.singles, .legend', { opacity: 0, ...exit }, '<')
-    // The boxes slide in and stretch until they meet as one, each arrow riding under its box
     .to('.half-0', { attr: { x: mid - 128, y: box.top, width: 128 }, ...moveShort })
     .to('.half-1', { attr: { x: mid, y: box.top, width: 128 }, ...moveShort }, '<')
     .to('.arm', { x: 0, y: 0, ...moveShort }, '<')
     .set('.half', { opacity: 0 })
     .set('.whole', { opacity: 1 }, '<')
     .to('.multi-name', { opacity: 1, ...enter }, '<')
-    // The arrows swing out into the pulls and take the task colours, and the tasks are named. The
-    // swing starts before the arrows meet, so they never lie on top of each other
     .to('.arm-0', { rotation: angle, color: colour('classification'), ...moveLong }, '<-0.25')
     .to('.arm-1', { rotation: -angle, color: colour('ner'), ...moveLong }, '<')
     .to('.multi .shaft', { attr: { y2: reach - 14 }, strokeWidth: 3, ...moveLong }, '<')
     .to('.multi .head', { y: reach, scaleX: 1, scaleY: 1, ...moveLong }, '<')
     .to('.midline, .pull .label', { opacity: 1, ...enter }, '>-0.2')
     .addLabel('step2')
-    // The model's name, task names and line leave, and the model becomes the first copy: its box
-    // and pulls take the copy's place and size
     .to('.item-2', ink)
     .to('.item-2 .negative', { color: colour('negative'), ...enter }, '<')
     .to('.multi-name, .midline, .pull .label', { opacity: 0, ...exit }, '<')
@@ -126,21 +94,15 @@ useClickTimeline(root, (timeline) => {
     .to('.arm', { x: copies[0].x - mid, y: copies[0].y + 42 - box.bottom, ...moveShort }, '<')
     .to('.multi .shaft', { attr: { y2: copyReach - 10 }, strokeWidth: 2.5, ...moveShort }, '<')
     .to('.multi .head', { y: copyReach, scaleX: 0.75, scaleY: 0.75, ...moveShort }, '<')
-    // The first copy takes over, drawn the same way, and is named. The other copies appear, one for
-    // each optimizer
     .set('.multi', { opacity: 0 })
     .set('.copy-0', { opacity: 1 }, '<')
     .to('.copy-0 .optimizer', { opacity: 1, ...enter }, '<')
     .to('.copy:not(.copy-0)', { opacity: 1, ...enter, stagger: 0.04 }, '<')
     .addLabel('step3')
-    // The copies fold without picking one, as no results exist yet. Their names and pulls leave, and
-    // each column tucks under its first box
     .to('.item-3', ink)
     .to('.copy .optimizer, .copy .pull', { opacity: 0, ...exit }, '<')
     .to('.copy-box', { attr: { y: copies[0].y + 6 }, ...moveShort })
     .to('.copy-12 .copy-box', { attr: { x: mid - copyWidth / 2, width: copyWidth }, ...moveShort }, '<')
-    // The three boxes left move into place and grow into the three models, which take over. Their
-    // posts, names, arrows and swatches appear, with the tags and legend
     .set(Array.from({ length: copies.length - 3 }, (_, index) => `.copy-${index + 3}`).join(', '), { opacity: 0 })
     .add(finalBoxes.map((attr, index) => gsap.to(`.copy-${index} .copy-box`, { attr, ...moveShort })))
     .set('.copy', { opacity: 0 })
@@ -163,7 +125,6 @@ useClickTimeline(root, (timeline) => {
     </section>
 
     <svg :viewBox="`0 0 ${width} 456`" :width="width" height="456">
-      <!-- Drawn first, so the single-task names stay on top of the boxes it takes over while they fade -->
       <g class="multi">
         <path class="midline" :d="`M ${mid} ${box.top - 56} V ${box.bottom + 210}`" />
         <rect v-for="(_, index) in halves" :key="index" class="model half" :class="`half-${index}`" height="64" rx="12" />
@@ -206,8 +167,6 @@ useClickTimeline(root, (timeline) => {
         <text class="tag single-tag" x="328" y="350" text-anchor="middle">Single-task models</text>
       </g>
 
-      <!-- One row for each task, each row centred under the diagram. Placed by this exact wording,
-           set in Inter at --text-2xs: with its swatch, the first row is 344 wide and the second 314 -->
       <g class="legend">
         <g :transform="`translate(${mid - 172} 0)`">
           <rect class="swatch classification" x="0" y="400" width="14" height="14" rx="3" />

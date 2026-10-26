@@ -21,17 +21,11 @@ COUNTRIES = "https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-10m.json"
 POPULATION = "https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNadj/2020/PHL/phl_ppp_2020_1km_Aggregated_UNadj.tif"
 OUTPUT = Path(__file__).parent.parent / "data" / "luzon-map.json"
 
-# The box, in degrees of longitude and latitude, fills the 540 by 456 area beside the figures.
-# The map also runs 48 further to the right and bottom, into the slide's margins.
 WIDTH, HEIGHT = 540, 456
 WEST, SOUTH, EAST, NORTH = 119.5, 12.45, 126.2, 18.75
 
-# Islands smaller than about 800 square kilometres are too small to read at slide size
 SMALLEST_ISLAND = 2e-5
 
-# Severe Tropical Storm Kristine (Trami), 2024, from IBTrACS (storm 2024293N13141), every 3 hours.
-# It starts past the slide's right edge and stops just off the west coast, since a track only
-# shows where the storm has been.
 TRACK = [
     (127.8, 13.4), (127.4, 13.6), (127.0, 13.8), (126.6, 14.1), (126.2, 14.3), (125.9, 14.6), (125.6, 14.9), (125.2, 15.1), (124.8, 15.4),
     (124.3, 15.7), (123.9, 16.0), (123.5, 16.3), (123.2, 16.6), (122.9, 16.8), (122.6, 17.1),
@@ -39,7 +33,6 @@ TRACK = [
     (119.8, 17.0),
 ]
 
-# One dot for every 50,000 people, and about a quarter of the posts are requests
 PEOPLE_PER_DOT = 50_000
 REQUEST_SHARE = 0.25
 
@@ -53,7 +46,6 @@ def mercator(lon, lat):
     return math.radians(lon), math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
 
 
-# Scale and centre the box on the map, as d3.geoMercator().fitSize does
 left, bottom = mercator(WEST, SOUTH)
 right, top = mercator(EAST, NORTH)
 scale = min(WIDTH / (right - left), HEIGHT / (top - bottom))
@@ -88,7 +80,6 @@ def ring(arcs, indexes):
 
 
 def area(points):
-    # Planar area in square degrees, shrunk by latitude, then in steradians
     lat = math.radians(sum(p[1] for p in points) / len(points))
     twice = sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(points, points[1:] + points[:1]))
     return abs(twice) / 2 * math.cos(lat) * math.radians(1) ** 2
@@ -109,7 +100,6 @@ def path(points, closed):
 
 
 def smooth(points):
-    # Catmull-Rom curve through the points, written as cubic Bézier segments
     p = [project(*point) for point in points]
     p = [p[0], *p, p[-1]]
     segments = [f"M{p[1][0]},{p[1][1]}"]
@@ -131,7 +121,6 @@ def on_land(point):
     return any(inside(point, outer) and not any(inside(point, hole) for hole in holes) for outer, *holes in islands)
 
 
-# Each dot lands in a 1 km population cell chosen in proportion to the people living there
 with tifffile.TiffFile(io.BytesIO(fetch(POPULATION))) as tiff:
     page = tiff.pages[0]
     people = np.clip(page.asarray().astype(float), 0, None)

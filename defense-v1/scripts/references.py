@@ -20,8 +20,6 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent.parent
 OUTPUT = Path(__file__).parent.parent / "data" / "references.json"
 
-# The works cited in the presentation, by their keys in bibliography.bib. Update this list when a
-# citation is added to or removed from the slides or the script
 PRESENTATION_KEYS = [
     "ali2026humaidner",
     "bundnis2025worldriskreport",
@@ -53,8 +51,6 @@ def formatted_entries(keys: list[str]) -> list[str]:
     ).stdout
     Path(file.name).unlink()
 
-    # Each entry is a csl-entry div. Its links are turned into plain text, since the slide is
-    # read from a screen and not clicked
     entries = re.findall(r'<div id="ref-[^"]+" class="csl-entry"[^>]*>\s*(.*?)\s*</div>', output, re.S)
     entries = [re.sub(r"<a [^>]*>(.*?)</a>", r"\1", entry, flags=re.S) for entry in entries]
     return [re.sub(r"\s+", " ", entry).strip() for entry in entries]
@@ -67,7 +63,6 @@ def main() -> None:
         raise SystemExit(f"Pandoc formatted {len(entries)} entries for {len(keys)} cited works")
     OUTPUT.write_text(json.dumps(entries, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Wrote {len(entries)} references to {OUTPUT}")
-    # A plain text preview of the first entry, to check the formatting by eye
     print(html.unescape(re.sub(r"<[^>]+>", "", entries[0])))
 
 

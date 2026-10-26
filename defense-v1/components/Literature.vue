@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ref } from 'vue'
-import { useClickTimeline } from '../composables/useClickTimeline'
+import { addStep, useClickTimeline } from '../composables/useClickTimeline'
+import { enter, exit } from '../shared/motion'
 
-// The closest study from each area. Prinz inks what each did, then Kyle swaps that column for what
-// each left open and what our study does about it
 const studies = [
   {
     area: 'Multi-task disaster models',
@@ -29,10 +28,6 @@ const studies = [
   },
 ]
 
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-
 const root = ref<HTMLElement>()
 
 useClickTimeline(root, (timeline) => {
@@ -40,29 +35,24 @@ useClickTimeline(root, (timeline) => {
   const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
   const ink = { color: colour('ink'), ...enter }
 
-  // Every cell waits in a faint grey until its turn, and Kyle's columns wait hidden
   gsap.set('.cell', { color: colour('faint') })
   gsap.set('.kyle', { opacity: 0 })
 
   timeline.addLabel('step0')
   studies.forEach((_, index) => {
-    timeline
-      .to(`.study-${index} .name-cell, .study-${index} .did`, ink)
-      .addLabel(`step${index + 1}`)
+    timeline.to(`.study-${index} .name-cell, .study-${index} .did`, ink)
+    addStep(timeline)
   })
 
-  // "What it did" leaves, and "Left open" and "Our study" take its place in grey
   timeline
     .to('.prinz', { opacity: 0, ...exit })
     .to('.kyle', { opacity: 1, ...enter })
-    .addLabel(`step${studies.length + 1}`)
+  addStep(timeline)
 
-  // Kyle inks each gap, then our study's answer to it
   studies.forEach((_, index) => {
     for (const column of ['open', 'ours']) {
-      timeline
-        .to(`.study-${index} .${column}`, ink)
-        .addLabel(`step${studies.length + 2 + index * 2 + (column === 'ours' ? 1 : 0)}`)
+      timeline.to(`.study-${index} .${column}`, ink)
+      addStep(timeline)
     }
   })
 })
@@ -72,7 +62,6 @@ useClickTimeline(root, (timeline) => {
   <div ref="root" class="literature">
     <div class="row heading">
       <span>Study</span>
-      <!-- Prinz's column and Kyle's two share one place, so the rows never move -->
       <div class="swap">
         <span class="prinz">What it did</span>
         <div class="kyle pair">

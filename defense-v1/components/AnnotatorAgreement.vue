@@ -2,26 +2,14 @@
 import gsap from 'gsap'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
+import { enter, exit, draw, moveLong, pop } from '../shared/motion'
 
-// The same motion tokens as the other slides
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
-const draw = { duration: 0.5, ease: 'power2.out' }
-const moveLong = { duration: 0.7, ease: 'power2.inOut' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
-
-// Two annotators, each with a copy of the same batch. A label is a category chip at the start
-// of a post and a mark under each entity. Illustration only
 const annotators = [{ x: 200, name: 'Annotator 1' }, { x: 684, name: 'Annotator 2' }]
 const card = { width: 240, height: 176, top: 128 }
 const posts = [[[70, 40], [124, 52]], [[70, 60]], [[96, 44], [150, 30]], [[70, 36], [116, 56]]]
 
-// The annotators then move aside to make room for the chart, as the model does on slide 4
 const aside = { x: -40, y: 90, scale: 0.56 }
 
-// Agreement on a 0 to 1 scale. The targets come from the script, Cohen's kappa for the
-// categories and F1 for the entities. The scores are an illustration: a batch that meets
-// both targets, then one that falls short on the entities
 const chart = { base: 320, top: 60 }
 const y = (value: number) => chart.base - (chart.base - chart.top) * value
 const bars = [
@@ -33,7 +21,8 @@ const score = (value: number) => `.${Math.round(value * 100)}`
 const root = ref<SVGSVGElement>()
 
 useClickTimeline(root, (timeline) => {
-  const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  const css = getComputedStyle(root.value!)
+  const colour = (name: string) => css.getPropertyValue(`--color-${name}`).trim()
 
   gsap.set('.compare, .chart, .bar-group > *:not(.bar), .second, .guidelines', { opacity: 0 })
   gsap.set('.mark', { scaleX: 0, transformOrigin: '0% 50%' })
@@ -42,13 +31,11 @@ useClickTimeline(root, (timeline) => {
 
   timeline
     .addLabel('step0')
-    // Both annotators label the batch, and the two sets of labels are compared
-    .to('.chip', { fill: token('--color-classification'), ...enter, stagger: 0.05 })
+    .to('.chip', { fill: colour('classification'), ...enter, stagger: 0.05 })
     .to('.mark', { scaleX: 1, ...draw, stagger: 0.04 }, '<0.1')
     .to('.compare', { opacity: 1, ...enter }, '>-0.1')
     .addLabel('step1')
 
-    // The annotators move aside and the first batch's agreement rises past both targets
     .to('.compare', { opacity: 0, ...exit })
     .to('.scene', { x: aside.x, y: aside.y, scale: aside.scale, svgOrigin: '0 0', ...moveLong }, '<')
     .to('.chart, .target, .target-text, .name, .measure', { opacity: 1, ...enter }, '>-0.2')
@@ -57,15 +44,13 @@ useClickTimeline(root, (timeline) => {
     .to('.first.mark-check', { scale: 1, ...pop, stagger: 0.1 }, '<')
     .addLabel('step2')
 
-    // The next batch. The entities fall below their target
     .to('.first', { opacity: 0, ...exit })
     .to('.bar', { attr: { y: (index: number) => y(bars[index].second), height: (index: number) => chart.base - y(bars[index].second) }, ...draw }, '<')
-    .to('.bar.failed', { fill: token('--color-negative'), ...draw }, '<')
+    .to('.bar.failed', { fill: colour('negative'), ...draw }, '<')
     .to('.second', { opacity: 1, ...enter }, '>-0.1')
     .fromTo('.second.mark-check', { scale: 0.4 }, { scale: 1, ...pop }, '<')
     .addLabel('step3')
 
-    // Before the next batch, the labeling guidelines are revised
     .to('.scene', { opacity: 0, ...exit })
     .to('.guidelines', { opacity: 1, ...enter })
     .fromTo('.pencil', { x: -40, y: -60 }, { x: 0, y: 0, ...moveLong }, '<')
@@ -75,7 +60,6 @@ useClickTimeline(root, (timeline) => {
 
 <template>
   <svg ref="root" viewBox="0 0 884 384" width="884" height="384">
-    <!-- Two annotators and the same batch, in the middle until the chart arrives -->
     <g class="scene">
       <g v-for="person in annotators" :key="person.name">
         <circle class="person" :cx="person.x" cy="30" r="14" />
@@ -96,7 +80,6 @@ useClickTimeline(root, (timeline) => {
       </g>
     </g>
 
-    <!-- Before the next batch, the guidelines are revised -->
     <g class="guidelines">
       <text class="tag" x="0" y="84">Before the next batch</text>
       <rect class="card" x="40" y="110" width="140" height="176" rx="8" />
@@ -111,7 +94,6 @@ useClickTimeline(root, (timeline) => {
       <text class="measure-text" x="110" y="342" text-anchor="middle">are revised</text>
     </g>
 
-    <!-- Agreement after each batch, against its target -->
     <g class="chart">
       <text class="tag first" x="470" y="14">Batch 1</text>
       <text class="tag second" x="470" y="14">Batch 2</text>
@@ -129,7 +111,6 @@ useClickTimeline(root, (timeline) => {
         <path class="tick" d="M -6 0 L -1.5 5 L 6.5 -5" />
       </g>
 
-      <!-- On the second batch a failed score sits above its target line, so it stays readable -->
       <text class="score second" :class="{ failed: bar.failed }" :x="bar.x" :y="(bar.failed ? y(bar.target) : y(bar.second)) - 34" text-anchor="middle">{{ score(bar.second) }}</text>
       <g class="mark-check second" :transform="`translate(${bar.x} ${(bar.failed ? y(bar.target) : y(bar.second)) - 72})`">
         <circle :class="bar.failed ? 'fail' : 'pass'" r="13" />
@@ -252,7 +233,7 @@ useClickTimeline(root, (timeline) => {
 }
 
 .pass {
-  fill: #15803d;
+  fill: var(--color-positive);
 }
 
 .fail {

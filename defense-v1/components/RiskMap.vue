@@ -3,25 +3,18 @@ import gsap from 'gsap'
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
 import { ref } from 'vue'
 import { useClickTimeline } from '../composables/useClickTimeline'
-// Built by scripts/luzon_map.py. The posts are an illustration placed by population, not real posts
 import map from '../data/luzon-map.json'
+import { enter, exit, pop } from '../shared/motion'
 
 gsap.registerPlugin(MotionPathPlugin)
 
 const posts = map.posts.map(([x, y, request]) => ({ x, y, request: request === 1 }))
 const requests = posts.filter(post => post.request)
 
-// Northern hemisphere tropical cyclone symbol: a solid centre with two arms trailing clockwise
 const arm = 'M -7 0 C -7 -11 5 -17 17 -15 C 8 -12 3 -8 0 -7 Z'
 
-// The same motion tokens as slide 2, plus a slower one for the storm crossing the whole map
-// and a quick overshoot for each post popping up
-const enter = { duration: 0.3, ease: 'power1.out' }
-const exit = { duration: 0.2, ease: 'power1.in' }
 const travel = { duration: 1.2, ease: 'power1.inOut' }
-const pop = { duration: 0.25, ease: 'back.out(3)' }
 
-// Posts popped by time t grow with t³, so a few arrive one by one before the map floods
 const flood = (progress: number) => progress ** (1 / 3)
 
 const root = ref<HTMLElement>()
@@ -41,7 +34,6 @@ useClickTimeline(root, (timeline) => {
     .to('.storm, .track, .casing', { opacity: 1, ...enter })
     .to('.track, .casing', { strokeDashoffset: 0, ...travel }, '<')
     .to('.storm', { motionPath: { path: map.track }, ...travel }, '<')
-    // Counterclockwise, as typhoons turn north of the equator, and slowing to a stop on arrival
     .to('.spin', { rotation: -720, svgOrigin: '0 0', duration: travel.duration, ease: 'power2.out' }, '<')
     .addLabel('step3')
     .to('.posts .post', { scale: 1, ...pop, stagger: { amount: 2, from: 'random', ease: flood } })
@@ -123,7 +115,6 @@ useClickTimeline(root, (timeline) => {
   height: 456px;
 }
 
-/* The map runs into the slide's right and bottom margins, so the land ends at the slide's edge */
 svg {
   width: calc(100% + var(--margin-x));
   height: calc(100% + var(--margin-bottom));
@@ -205,7 +196,6 @@ svg {
   fill: var(--color-muted);
 }
 
-/* The sources sit below the map, in the slide's bottom margin */
 footer {
   position: absolute;
   left: 0;
