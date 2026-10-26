@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Map, Marker, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
+import { Map, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 // Vite moves the map library when it bundles it, so the library cannot find its worker beside itself
 import worker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
@@ -39,8 +39,9 @@ const most = Math.max(...summary.map(row => row.count))
 const view: [[number, number], [number, number]] = [[121.074, 14.612], [121.136, 14.684]]
 const saved: [[number, number], [number, number]] = [[data.bounds[0][1], data.bounds[0][0]], [data.bounds[1][1], data.bounds[1][0]]]
 
-// The post a staff member has opened, in Concepcion Dos
+// The post a staff member has opened, a request in Concepcion Dos
 const selected: [number, number] = [121.12082, 14.64059]
+const selectedCategory = 'Requests or urgent needs'
 
 setWorkerUrl(worker)
 
@@ -102,11 +103,23 @@ onMounted(async () => {
       },
     })
 
-    // The opened post is marked with the map's standard pin, and its card opens below it
-    new Marker({ color: token('pin') })
-      .setLngLat(selected)
-      .addTo(map!)
-    new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 8, maxWidth: '250px' })
+    // The opened post stays a dot of its category's colour, drawn larger with a surface ring and a
+    // soft halo of the same colour, and its card opens below it
+    const own = token(slot(selectedCategory))
+    map!.addSource('selected', { type: 'geojson', data: { type: 'Point', coordinates: selected } })
+    map!.addLayer({
+      id: 'selected-halo',
+      type: 'circle',
+      source: 'selected',
+      paint: { 'circle-radius': 13, 'circle-color': own, 'circle-opacity': 0.25 },
+    })
+    map!.addLayer({
+      id: 'selected',
+      type: 'circle',
+      source: 'selected',
+      paint: { 'circle-radius': 7, 'circle-color': own, 'circle-stroke-color': token('surface'), 'circle-stroke-width': 2 },
+    })
+    new Popup({ closeButton: false, closeOnClick: false, anchor: 'top', offset: 16, maxWidth: '250px' })
       .setLngLat(selected)
       .setDOMContent(card.value!)
       .addTo(map!)
@@ -131,7 +144,7 @@ onUnmounted(() => {
     <div class="hidden">
       <div ref="card" class="card">
         <p>Need ng tubig at pagkain dito sa Brgy. Concepcion Dos, Marikina. Stranded kami sa 2nd floor</p>
-        <span class="category"><i :style="{ background: swatch('Requests or urgent needs') }" />Requests or urgent needs</span>
+        <span class="category"><i :style="{ background: swatch(selectedCategory) }" />{{ selectedCategory }}</span>
       </div>
     </div>
 
@@ -165,7 +178,6 @@ onUnmounted(() => {
   --app-text: #1f2328;
   --app-text-muted: #5c6670;
   --app-track: #e6e9ed;
-  --app-pin: #1f2328;
   --app-series-1: #2a78d6;
   --app-series-2: #eb6834;
   --app-series-3: #1baf7a;
@@ -207,14 +219,23 @@ p {
   line-height: inherit;
 }
 
-/* A category's colour sits in a swatch beside its name, and the name stays in the text colour */
+/* A category's colour sits in a swatch beside its name, centred on the name's first line even when
+   the name wraps, and the name stays in the text colour */
+.category,
+.label {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 6px;
+  --size: 8px;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  /* The letters sit slightly above the middle of their line, so the swatch rises by as much */
+  margin-top: calc((1.4em - var(--size)) / 2 - 0.075em);
   border-radius: 50%;
-  vertical-align: 1px;
 }
 
 .category {
