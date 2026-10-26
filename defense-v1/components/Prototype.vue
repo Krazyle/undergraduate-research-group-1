@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Map, Popup, setWorkerUrl } from 'maplibre-gl'
+import { Map, NavigationControl, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 // Vite moves the map library when it bundles it, so the library cannot find its worker beside itself
 import worker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
@@ -26,13 +26,12 @@ const other = summary.pop()!
 summary.sort((a, b) => b.count - a.count).push(other)
 const most = Math.max(...summary.map(row => row.count))
 
-// The map frames Marikina itself, inside the larger area whose tiles are saved
+// The map opens on Marikina itself and can be moved only within the area whose tiles are saved
 const view: [[number, number], [number, number]] = [[121.074, 14.612], [121.136, 14.684]]
+const saved: [[number, number], [number, number]] = [[data.bounds[0][1], data.bounds[0][0]], [data.bounds[1][1], data.bounds[1][0]]]
 
-// The post a staff member has opened, in Concepcion Dos, with its entities highlighted
+// The post a staff member has opened, in Concepcion Dos
 const selected: [number, number] = [121.12082, 14.64059]
-type Part = string | { text: string, type: string }
-const parts: Part[] = [{ text: 'Need ng tubig at pagkain', type: 'REQUEST' }, ' dito sa ', { text: 'Brgy. Concepcion Dos', type: 'LOCATION' }, ', ', { text: 'Marikina', type: 'LOCATION' }, '. Stranded kami sa 2nd floor']
 
 setWorkerUrl(worker)
 
@@ -53,10 +52,18 @@ onMounted(async () => {
     container: container.value!,
     style,
     bounds: view,
-    // The slide is a still screen, so the map does not move under the presenter's keys or mouse
-    interactive: false,
+    maxBounds: saved,
+    // The saved tiles stop at zoom 13, and the map draws them larger up to street level
+    maxZoom: 16,
+    // The arrow keys stay with Slidev for changing slides, and a city map has no need to turn or tilt
+    keyboard: false,
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false,
     attributionControl: { compact: false },
   })
+  map.touchZoomRotate.disableRotation()
+  map.addControl(new NavigationControl({ showCompass: false }), 'top-right')
 
   map.on('load', () => {
     map!.addSource('posts', {
@@ -113,15 +120,8 @@ onUnmounted(() => {
     <!-- The opened post, which the map moves into its popup -->
     <div class="hidden">
       <div ref="card" class="card">
-        <p>
-          <template v-for="(part, index) in parts" :key="index">
-            <mark v-if="typeof part !== 'string'" :title="part.type">{{ part.text }}</mark>
-            <template v-else>
-              {{ part }}
-            </template>
-          </template>
-        </p>
-        <span class="category">Requests or urgent needs<small>▾</small></span>
+        <p>Need ng tubig at pagkain dito sa Brgy. Concepcion Dos, Marikina. Stranded kami sa 2nd floor</p>
+        <span class="category">Requests or urgent needs</span>
       </div>
     </div>
 
@@ -177,24 +177,10 @@ p {
   line-height: inherit;
 }
 
-mark {
-  padding: 0 2px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--color-ner) 18%, transparent);
-  color: inherit;
-}
-
 .category {
-  justify-self: start;
-  padding: 2px 8px;
-  border-radius: 6px;
   font-size: 12px;
-  background: var(--color-classification);
-  color: var(--color-surface);
-}
-
-.category small {
-  margin-left: 4px;
+  font-weight: 600;
+  color: var(--color-classification);
 }
 
 aside {
