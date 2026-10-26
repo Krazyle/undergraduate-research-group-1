@@ -115,7 +115,7 @@ useClickTimeline(root, (timeline) => {
   settle(benchmarkReach, moveLong)
   timeline
     .set('.advanced', { opacity: 0 })
-    .to('.benchmark .chart-axis', { strokeDashoffset: 0, ...draw }, '<0.5')
+    .to('.benchmark .chart-axis', { strokeDashoffset: 0, ...draw }, '>')
     .to('.benchmark-text', { opacity: 1, ...enter }, '<0.2')
     .to('.benchmark .chart-bar.loss', { scaleY: 1, ...draw, stagger: 0.03 }, '<')
     .to('.benchmark .chart-bar.cost', { scaleY: 1, ...draw, stagger: 0.03 }, '<0.2')
